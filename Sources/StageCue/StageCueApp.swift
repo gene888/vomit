@@ -371,6 +371,7 @@ struct MainView: View {
                         Spacer()
                         Text("Manual fade duration")
                         TextField("Seconds", value: $state.project.manualFadeSeconds, format: .number.precision(.fractionLength(1)))
+                            .finishEditingOnCommit()
                             .frame(width: 52)
 
                         Text("sec")
@@ -524,7 +525,7 @@ struct CueInspector: View {
     }
     @ViewBuilder private func cueControls(_ current: Cue) -> some View {
         // Dedicated bindings update the value-type cue in its indexed slot.
-        TextField("Cue name", text: bind(\.title))
+        TextField("Cue name", text: bind(\.title)).finishEditingOnCommit()
         HStack {
             Text(current.filePath.isEmpty ? "No media assigned" : URL(fileURLWithPath: current.filePath).lastPathComponent)
                 .lineLimit(1).font(.caption)
@@ -552,12 +553,12 @@ struct CueInspector: View {
         Toggle("Auto fade in on play", isOn: bind(\.autoFadeIn))
         HStack {
             Text("In (sec)")
-            TextField("Fade in", value: bind(\.fadeInSeconds), format: .number).frame(width: 65)
+            TextField("Fade in", value: bind(\.fadeInSeconds), format: .number).finishEditingOnCommit().frame(width: 65)
         }
         Toggle("Auto fade out at end / configured Stop", isOn: bind(\.autoFadeOut))
         HStack {
             Text("Out (sec)")
-            TextField("Fade out", value: bind(\.fadeOutSeconds), format: .number).frame(width: 65)
+            TextField("Fade out", value: bind(\.fadeOutSeconds), format: .number).finishEditingOnCommit().frame(width: 65)
         }
         Picker("Fade curve", selection: bind(\.curve)) {
             ForEach(FadeCurve.allCases) { curve in Text(curve.rawValue).tag(curve) }
@@ -566,8 +567,8 @@ struct CueInspector: View {
             Picker("Transition", selection: bind(\.transition)) {
                 ForEach(VisualTransition.allCases) { transition in Text(transition.rawValue).tag(transition) }
             }
-            HStack { Text("Fade in (sec)"); TextField("Visual fade in", value: bind(\.videoFadeIn), format: .number).frame(width: 65) }
-            HStack { Text("Fade out (sec)"); TextField("Visual fade out", value: bind(\.videoFadeOut), format: .number).frame(width: 65) }
+            HStack { Text("Fade in (sec)"); TextField("Visual fade in", value: bind(\.videoFadeIn), format: .number).finishEditingOnCommit().frame(width: 65) }
+            HStack { Text("Fade out (sec)"); TextField("Visual fade out", value: bind(\.videoFadeOut), format: .number).finishEditingOnCommit().frame(width: 65) }
             if current.kind == .video {
                 Toggle("Hold last frame when finished", isOn: bind(\.holdLastFrame))
                     .disabled(current.loop)
@@ -736,4 +737,32 @@ private struct RenameClickBoundary: NSViewRepresentable {
     }
     func updateNSView(_ view: BoundaryView, context: Context) { view.onOutsideClick = onOutsideClick }
     static func dismantleNSView(_ view: BoundaryView, coordinator: ()) { view.onOutsideClick = nil }
+}
+
+/// End the field-editor session while allowing the clicked control to act normally.
+private struct FinishEditingOnCommit: ViewModifier {
+    @FocusState private var focused: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .focused($focused)
+            .onSubmit { finish() }
+            .background {
+                if focused { RenameClickBoundary(onOutsideClick: finish) }
+            }
+    }
+
+    private func finish() {
+        guard focused else { return }
+        // AppKit ends editing synchronously so numeric bindings commit before an
+        // outside click changes the selected pad or starts a transport action.
+        if let window = NSApp.keyWindow { window.makeFirstResponder(nil) }
+        focused = false
+    }
+}
+
+private extension View {
+    func finishEditingOnCommit() -> some View {
+        modifier(FinishEditingOnCommit())
+    }
 }
