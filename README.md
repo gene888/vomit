@@ -64,3 +64,5 @@ Codable value models feed ShowState (UI, project I/O) and a MainActor SoundEngin
 Fade envelopes use a common-mode 120 Hz control timer in live playback; offline tests drive the same envelope calculations using rendered sample time. Fades are control-rate, not sample accurate. The real output graph uses the system-selected output device; there is no device selector in the app.
 
 See `Docs/VALIDATION.md` for evidence, hardware checks and remaining features. The local Git baseline preserves the original extraction. Development commits use an explicitly local tooling identity, not an inferred personal email. No commits have been pushed to GitHub.
+
+Option-click any clip, bus or master gain slider to reset it to 0.0 dB. Normal dragging and keyboard adjustment remain available.

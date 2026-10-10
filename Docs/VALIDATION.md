@@ -69,3 +69,7 @@ An isolated UI harness displayed the actual pad/drop code, but the UI automation
 ## Longer audio follow-up
 
 Raised the per-clip decoded PCM limit to 512 MiB and the active-plus-reserved limit to 1 GiB. An 80 MiB decoded stereo fixture now passes inspection and full decoding; a 540 MiB fixture is rejected before buffer allocation. Release build and all 36 native tests pass. MP3 compressed file size does not determine decoded memory use. At 48 kHz stereo float PCM, the per-clip limit permits approximately 23 minutes. Full-buffer decoding remains in use, so longer files take more time and memory to load.
+
+## Option-click slider reset
+
+Clip, six bus and master gains now use a shared native NSSlider wrapper. Option-click resets to exactly 0.0 dB before mouse tracking starts, through the existing settings binding. Release build passed. In an isolated native UI window using the production slider, Option-click changed -12.0 dB to 0.0 dB; an ordinary click changed the level to -27.0 dB, and another Option-click restored 0.0 dB. The user show was not modified.

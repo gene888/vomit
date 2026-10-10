@@ -248,7 +248,7 @@ struct MainView: View {
                         ForEach(0..<6, id: \.self) { index in
                             VStack(alignment: .leading) {
                                 Text(busNames[index]).font(.caption.bold())
-                                Slider(value: $state.project.busDB[index], in: -60...6)
+                                GainSlider(value: $state.project.busDB[index])
                                     .onChange(of: state.project.busDB[index]) { _, _ in
                                         state.sound.applyMix(state.project)
                                     }
@@ -258,7 +258,7 @@ struct MainView: View {
                     }
                     HStack {
                         Text("MASTER").bold()
-                        Slider(value: $state.project.masterDB, in: -60...6)
+                        GainSlider(value: $state.project.masterDB)
                             .onChange(of: state.project.masterDB) { _, _ in
                                 state.sound.applyMix(state.project)
                             }
@@ -378,7 +378,7 @@ struct CueInspector: View {
             Spacer()
             Text(String(format: "%.1f dB", current.gainDB)).monospacedDigit()
         }
-        Slider(value: bind(\.gainDB), in: -60...6)
+        GainSlider(value: bind(\.gainDB))
         Picker("Bus", selection: bind(\.bus)) {
             ForEach(0..<6, id: \.self) { index in Text(["Music", "Ambience", "Effects", "Voice", "Stingers", "Special"][index]).tag(index) }
         }
@@ -429,5 +429,47 @@ struct CueInspector: View {
         if panel.runModal() == .OK, let url = panel.url {
             state.assignMedia([url], to: index)
         }
+    }
+}
+
+/// Native tracking preserves dragging and keyboard control. Consume Option-click
+/// before tracking starts so the click position cannot overwrite the reset value.
+struct GainSlider: NSViewRepresentable {
+    @Binding var value: Double
+
+    final class ResettableSlider: NSSlider {
+        override func mouseDown(with event: NSEvent) {
+            if event.modifierFlags.contains(.option) {
+                doubleValue = 0
+                sendAction(action, to: target)
+                return
+            }
+            super.mouseDown(with: event)
+        }
+    }
+
+    final class Coordinator: NSObject {
+        var binding: Binding<Double>
+        init(_ binding: Binding<Double>) { self.binding = binding }
+        @objc func changed(_ sender: NSSlider) { binding.wrappedValue = sender.doubleValue }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator($value) }
+    func makeNSView(context: Context) -> ResettableSlider {
+        let slider = ResettableSlider()
+        slider.minValue = -60
+        slider.maxValue = 6
+        slider.isContinuous = true
+        slider.target = context.coordinator
+        slider.action = #selector(Coordinator.changed(_:))
+        slider.toolTip = "Option-click to reset to 0.0 dB"
+        slider.setAccessibilityLabel("Gain in decibels")
+        slider.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return slider
+    }
+    func updateNSView(_ slider: ResettableSlider, context: Context) {
+        context.coordinator.binding = $value
+        slider.doubleValue = value
+        slider.isEnabled = context.environment.isEnabled
     }
 }
