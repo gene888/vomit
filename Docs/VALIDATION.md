@@ -73,3 +73,7 @@ Raised the per-clip decoded PCM limit to 512 MiB and the active-plus-reserved li
 ## Option-click slider reset
 
 Clip, six bus and master gains now use a shared native NSSlider wrapper. Option-click resets to exactly 0.0 dB before mouse tracking starts, through the existing settings binding. Release build passed. In an isolated native UI window using the production slider, Option-click changed -12.0 dB to 0.0 dB; an ordinary click changed the level to -27.0 dB, and another Option-click restored 0.0 dB. The user show was not modified.
+
+## Click-to-edit project title
+
+The title normally displays as a non-focusable button. Clicking creates and focuses an editor with a draft; Return/focus loss commits, Escape cancels, and empty names retain the previous title. A local mouse observer ends renaming on outside clicks without consuming transport/pad actions. Native isolated UI verified typing/Backspace cannot alter the displayed title, click focuses editing, Return commits, moving to another text field commits, and Escape preserves the prior title. The automation tool could not issue coordinate clicks, so the mouse-only outside-button observer remains a hands-on check. Release build passed with no Swift compiler warnings; also corrected the prior gain slider coordinator actor annotation.

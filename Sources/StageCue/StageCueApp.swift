@@ -216,8 +216,7 @@ struct MainView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                TextField("Show name", text: $state.project.title)
-                    .font(.title2.bold()).textFieldStyle(.plain)
+                ProjectTitle(title: $state.project.title)
 
                 Spacer()
                 Button("Open") { state.open() }
@@ -448,7 +447,7 @@ struct GainSlider: NSViewRepresentable {
         }
     }
 
-    final class Coordinator: NSObject {
+    @MainActor final class Coordinator: NSObject {
         var binding: Binding<Double>
         init(_ binding: Binding<Double>) { self.binding = binding }
         @objc func changed(_ sender: NSSlider) { binding.wrappedValue = sender.doubleValue }
@@ -472,4 +471,88 @@ struct GainSlider: NSViewRepresentable {
         slider.doubleValue = value
         slider.isEnabled = context.environment.isEnabled
     }
+}
+
+/// Keep the title out of the responder chain until renaming is explicitly requested.
+struct ProjectTitle: View {
+    @Binding var title: String
+    @State private var editing = false
+    @State private var draft = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        Group {
+            if editing {
+                TextField("Show name", text: $draft)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focused)
+                    .onSubmit { finish() }
+                    .onExitCommand { editing = false; focused = false }
+                    .onAppear { DispatchQueue.main.async { focused = true } }
+                    .onChange(of: focused) { _, hasFocus in
+                        if !hasFocus && editing { finish() }
+                    }
+            } else {
+                Button {
+                    draft = title
+                    editing = true
+                } label: {
+                    Text(title.isEmpty ? "Untitled Show" : title)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .focusable(false)
+                .help("Click to rename the project")
+                .accessibilityLabel("Project name: \(title). Click to rename")
+            }
+        }
+        .font(.title2.bold())
+        .background {
+            if editing { RenameClickBoundary(onOutsideClick: finish) }
+        }
+        .onChange(of: title) { _, _ in
+            // Opening another project must discard any unfinished rename.
+            if editing { editing = false; focused = false }
+        }
+    }
+
+    private func finish() {
+        guard editing else { return }
+        editing = false
+        focused = false
+        let name = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !name.isEmpty { title = name }
+    }
+}
+
+/// Observe outside clicks without swallowing pad/transport/button actions.
+private struct RenameClickBoundary: NSViewRepresentable {
+    let onOutsideClick: () -> Void
+    final class BoundaryView: NSView {
+        var onOutsideClick: (() -> Void)?
+        private var monitor: Any?
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor { NSEvent.removeMonitor(monitor); self.monitor = nil }
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+                guard let self, let window = self.window else { return event }
+                if event.window !== window || !self.bounds.contains(self.convert(event.locationInWindow, from: nil)) {
+                    self.onOutsideClick?()
+                }
+                return event
+            }
+        }
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+        isolated deinit { if let monitor { NSEvent.removeMonitor(monitor) } }
+    }
+    func makeNSView(context: Context) -> BoundaryView {
+        let view = BoundaryView()
+        view.onOutsideClick = onOutsideClick
+        return view
+    }
+    func updateNSView(_ view: BoundaryView, context: Context) { view.onOutsideClick = onOutsideClick }
+    static func dismantleNSView(_ view: BoundaryView, coordinator: ()) { view.onOutsideClick = nil }
 }

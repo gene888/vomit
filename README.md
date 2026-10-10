@@ -66,3 +66,5 @@ Fade envelopes use a common-mode 120 Hz control timer in live playback; offline 
 See `Docs/VALIDATION.md` for evidence, hardware checks and remaining features. The local Git baseline preserves the original extraction. Development commits use an explicitly local tooling identity, not an inferred personal email. No commits have been pushed to GitHub.
 
 Option-click any clip, bus or master gain slider to reset it to 0.0 dB. Normal dragging and keyboard adjustment remain available.
+
+Click the project name to rename it. Return or leaving the field commits the name; Escape cancels. Empty names keep the previous title. The displayed name does not accept typing until clicked.
