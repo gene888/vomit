@@ -38,6 +38,33 @@ struct AudioTests {
         expectTrue(engine.errors.isEmpty, engine.errors.joined(separator: "\n"))
         expectEqual(engine.active, Set(cues.map(\.id)))
     }
+    @Test @MainActor func fadesDuringLoadApplyAfterDecode() async throws {
+        let engine = SoundEngine(offline: true); defer { engine.shutdown() }
+        let cue = Cue(filePath: try fixture().path, gainDB: 0, loop: true)
+        engine.play(cue)
+        engine.fadeToDB(cue.id, decibels: -18, seconds: 0)
+        await engine.waitForLoads()
+        expectEqual(engine.playingLevels[cue.id]!, amplitude(-18), accuracy: 0.0001)
+    }
+    @Test @MainActor func individualPauseAndArbitraryFadePreserveAudioContinuity() async throws {
+        let engine = SoundEngine(offline: true); defer { engine.shutdown() }
+        let a = Cue(filePath: try fixture().path, gainDB: 0, loop: true, curve: .linear)
+        let b = Cue(filePath: a.filePath, gainDB: -6, bus: 1, loop: true)
+        engine.play(a); engine.play(b); await engine.waitForLoads()
+        engine.fadeToDB(a.id, decibels: -20, seconds: 1)
+        for _ in 0..<10 { _ = try engine.render(frames: 1024) }
+        let before = engine.playingLevels[a.id]!
+        engine.pause(a.id)
+        for _ in 0..<20 { _ = try engine.render(frames: 1024) }
+        expectEqual(engine.playingLevels[a.id]!, before)
+        expectTrue(engine.active.contains(b.id))
+        engine.resume(a.id)
+        engine.fadeToDB(a.id, decibels: -6, seconds: 0.5)
+        expectEqual(engine.playingLevels[a.id]!, before)
+        for _ in 0..<25 { _ = try engine.render(frames: 1024) }
+        expectEqual(engine.playingLevels[a.id]!, amplitude(-6), accuracy: 0.0001)
+        expectEqual(engine.active.count, 2)
+    }
     @Test @MainActor func testSimultaneousCuesClipBusAndMasterGain() async throws {
         let engine = SoundEngine(offline: true); defer { engine.shutdown() }
         let path = try fixture().path

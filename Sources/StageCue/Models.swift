@@ -19,7 +19,7 @@ func amplitude(_ decibels: Double) -> Float {
 }
 
 enum CueKind: String, Codable, CaseIterable, Identifiable, Sendable {
-    case audio = "Audio", video = "Video", image = "Image"
+    case audio = "Audio", video = "Video", image = "Image", group = "Group"
     var id: String { rawValue }
 }
 enum VisualTransition: String, Codable, CaseIterable, Identifiable, Sendable {
@@ -47,6 +47,7 @@ struct Cue: Identifiable, Codable, Equatable, Sendable {
     var videoFadeOut: Double = 1
     var soundtrackDB: Double = -6
     var holdLastFrame = false
+    var groupID: UUID?
 
     mutating func normalize() {
         gainDB = bounded(gainDB, -60...6, fallback: -6)
@@ -63,7 +64,7 @@ struct Cue: Identifiable, Codable, Equatable, Sendable {
 extension Cue {
     enum CodingKeys: String, CodingKey {
         case id, title, filePath, gainDB, bus, mode, loop, autoFadeIn, fadeInSeconds
-        case autoFadeOut, fadeOutSeconds, curve, tint, kind, transition, videoFadeIn, videoFadeOut, soundtrackDB, holdLastFrame
+        case autoFadeOut, fadeOutSeconds, curve, tint, kind, transition, videoFadeIn, videoFadeOut, soundtrackDB, holdLastFrame, groupID
     }
     init(from decoder: Decoder) throws {
         self.init()
@@ -86,13 +87,15 @@ extension Cue {
         videoFadeIn = try c.decodeIfPresent(Double.self, forKey: .videoFadeIn) ?? videoFadeIn
         videoFadeOut = try c.decodeIfPresent(Double.self, forKey: .videoFadeOut) ?? videoFadeOut
         soundtrackDB = try c.decodeIfPresent(Double.self, forKey: .soundtrackDB) ?? soundtrackDB
+        groupID = try c.decodeIfPresent(UUID.self, forKey: .groupID)
         holdLastFrame = try c.decodeIfPresent(Bool.self, forKey: .holdLastFrame) ?? false
     }
 }
 
 struct SoundProject: Codable, Equatable, Sendable {
-    static let migrationNotice = "Project upgraded from schema 1 to 2"
-    var schemaVersion = 2
+    static let migrationNotice = "Project upgraded to schema 3"
+    var schemaVersion = 3
+    var groups: [CueGroup] = []
     var title = "Untitled Show"
     var backgroundPath = ""
     var cues: [Cue?] = Array(repeating: nil, count: 32)
@@ -111,8 +114,8 @@ struct SoundProject: Codable, Equatable, Sendable {
 
     @discardableResult mutating func normalize() -> [String] {
         var notes: [String] = []
-        if schemaVersion == 1 { notes.append(Self.migrationNotice) }
-        schemaVersion = 2
+        if schemaVersion < 3 { notes.append(Self.migrationNotice) }
+        schemaVersion = 3
         if cues.count != 32 { notes.append("Pad count adjusted to 32") }
         cues = Array(cues.prefix(32))
         cues += Array(repeating: nil, count: 32 - cues.count)
@@ -146,19 +149,26 @@ struct SoundProject: Codable, Equatable, Sendable {
             if cue != original { notes.append("Pad \(i + 1): invalid or unsupported settings repaired") }
             cues[i] = cue
         }
+        groups = Array(groups.prefix(256))
+        var groupIDs: Set<UUID> = []
+        for i in groups.indices {
+            if !groupIDs.insert(groups[i].id).inserted { groups[i].id = UUID(); notes.append("Duplicate group ID repaired") }
+            groups[i].normalize()
+        }
         return notes
     }
 }
 
 extension SoundProject {
-    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath }
+    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups }
     init(from decoder: Decoder) throws {
         self.init()
         let c = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
-        guard (1...2).contains(schemaVersion) else {
+        guard (1...3).contains(schemaVersion) else {
             throw DecodingError.dataCorruptedError(forKey: .schemaVersion, in: c, debugDescription: "Unsupported project version")
         }
+        groups = try c.decodeIfPresent([CueGroup].self, forKey: .groups) ?? []
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? title
         backgroundPath = try c.decodeIfPresent(String.self, forKey: .backgroundPath) ?? ""
         cues = try c.decodeIfPresent([Cue?].self, forKey: .cues) ?? cues

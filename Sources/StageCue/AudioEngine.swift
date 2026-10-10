@@ -52,6 +52,8 @@ actor MediaLoader {
 /// Live fades use a common-mode control timer; offline tests drive the same envelopes from sample time.
 @MainActor final class SoundEngine: ObservableObject {
     @Published private(set) var active: Set<UUID> = []
+    @Published private(set) var paused: Set<UUID> = []
+    @Published private(set) var failed: Set<UUID> = []
     @Published private(set) var loading: Set<UUID> = []
     @Published private(set) var errors: [String] = []
     @Published private(set) var playingLevels: [UUID: Float] = [:]
@@ -72,6 +74,7 @@ actor MediaLoader {
     private let maximumActiveBytes: Int
     private var currentMix = SoundProject()
     private var retainedBytes = 0
+    private var requestedFades: [UUID: (Float, Double, Bool, Bool)] = [:]
     private var reservations: [UUID: Int] = [:]
 
     private final class Voice {
@@ -81,7 +84,8 @@ actor MediaLoader {
         let boost = AVAudioUnitEQ(numberOfBands: 0)
         let cue: Cue
         let media: LoadedMedia
-        let started: Double
+        var started: Double
+        var pausedAt: Double?
         var level: Float = 0
         var fade: FadeEnvelope?
         var tailStarted = false
@@ -164,6 +168,7 @@ actor MediaLoader {
             configuredStop(cue.id); return
         }
         stop(cue.id)
+        failed.remove(cue.id)
         let token = UUID()
         loading.insert(cue.id)
         let task = Task { [weak self, loader] in
@@ -185,7 +190,7 @@ actor MediaLoader {
                 self.pending.removeValue(forKey: cue.id)
                 self.reservations.removeValue(forKey: cue.id)
                 self.loading.remove(cue.id)
-                if !(error is CancellationError) { self.report("\(cue.title): \(error.localizedDescription)") }
+                if !(error is CancellationError) { self.failed.insert(cue.id); self.report("\(cue.title): \(error.localizedDescription)") }
             }
         }
         pending[cue.id] = (token, task)
@@ -227,11 +232,39 @@ actor MediaLoader {
             }
         }
         voice.player.play()
+        if paused.contains(cue.id) { voice.pausedAt = clock; voice.player.pause() }
         if cue.autoFadeIn {
             let length = AutomaticFades(cue: cue, duration: media.duration).fadeIn
             voice.fade = FadeEnvelope(initial: 0, target: goal, started: clock, duration: length,
                                       curve: cue.curve, stopWhenDone: false)
         }
+        if let fade = requestedFades.removeValue(forKey: cue.id) {
+            setFade(cue.id, to: fade.0, seconds: fade.1, stopWhenDone: fade.2, manual: fade.3)
+        }
+    }
+
+    func pause(_ id: UUID) {
+        guard voices[id] != nil || pending[id] != nil else { return }
+        paused.insert(id)
+        guard let voice = voices[id], voice.pausedAt == nil else { return }
+        update()
+        voice.pausedAt = clock
+        voice.player.pause()
+    }
+    func resume(_ id: UUID) {
+        paused.remove(id)
+        guard let voice = voices[id], let at = voice.pausedAt else { return }
+        let interval = max(0, clock - at)
+        voice.started += interval
+        if let fade = voice.fade {
+            voice.fade = FadeEnvelope(initial: fade.initial, target: fade.target, started: fade.started + interval,
+                                      duration: fade.duration, curve: fade.curve, stopWhenDone: fade.stopWhenDone)
+        }
+        voice.pausedAt = nil
+        voice.player.play()
+    }
+    func fadeToDB(_ id: UUID, decibels: Double, seconds: Double) {
+        setFade(id, to: amplitude(decibels), seconds: seconds, stopWhenDone: false, manual: true)
     }
 
     func fadeIn(_ id: UUID, seconds: Double) {
@@ -251,6 +284,8 @@ actor MediaLoader {
         pending.removeValue(forKey: id)?.1.cancel()
         reservations.removeValue(forKey: id)
         loading.remove(id)
+        paused.remove(id)
+        requestedFades.removeValue(forKey: id)
         detach(id)
     }
     func stopAll() {
@@ -274,6 +309,8 @@ actor MediaLoader {
     }
 
     private func setFade(_ id: UUID, to target: Float, seconds: Double, stopWhenDone: Bool, manual: Bool) {
+        if voices[id] == nil, pending[id] != nil { requestedFades[id] = (target, seconds, stopWhenDone, manual); return }
+        if paused.contains(id) { resume(id) }
         update()
         guard let voice = voices[id] else { return }
         if manual { voice.manualOverride = true }
@@ -292,7 +329,7 @@ actor MediaLoader {
     private func update() {
         let now = clock
         for id in Array(voices.keys) {
-            guard let voice = voices[id] else { continue }
+            guard let voice = voices[id], voice.pausedAt == nil else { continue }
             let elapsed: Double
             if offline { elapsed = max(0, now - voice.started) }
             else if let renderTime = voice.player.lastRenderTime, let playerTime = voice.player.playerTime(forNodeTime: renderTime) {
@@ -333,6 +370,7 @@ actor MediaLoader {
         engine.detach(voice.boost)
         retainedBytes -= voice.media.bytes
         active.remove(id)
+        paused.remove(id)
         playingLevels.removeValue(forKey: id)
     }
 

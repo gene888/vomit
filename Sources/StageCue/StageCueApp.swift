@@ -15,6 +15,9 @@ import Combine
     @Published var checking = false
     let sound = SoundEngine()
     let video = VideoEngine()
+    let scheduler = ShowScheduler()
+    private var schedulerChanges: AnyCancellable?
+    @Published var editingGroups = false
     lazy var output = VideoOutputController(engine: video)
     private let visualLoader = VisualMediaLoader()
     private var videoChanges: AnyCancellable?
@@ -43,6 +46,9 @@ import Combine
                 message = "Autosave could not be opened. Original preserved; open a project or explicitly Save to replace it. \(error.localizedDescription)"
             }
         }
+        scheduler.driver = self
+        scheduler.groupLookup = { [weak self] id in self?.project.groups.first { $0.id == id } }
+        schedulerChanges = scheduler.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
         sound.applyMix(project)
         video.setBackground(project.backgroundPath)
         videoChanges = Publishers.Merge3(
@@ -70,7 +76,7 @@ import Combine
                 guard let self else { return }
                 self.autosaveTask?.cancel()
                 if self.recoveredAutosave { try? ProjectStore.save(self.project, to: self.autosaveURL) }
-                self.sound.shutdown(); self.video.shutdown(); self.output.close()
+                self.scheduler.cancelAll(); self.sound.shutdown(); self.video.shutdown(); self.output.close()
             }
         }
     }
@@ -82,7 +88,7 @@ import Combine
     }
     static var defaultURL: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("StageCue", isDirectory: true).appendingPathComponent("autosave-v0.2.json")
+            .appendingPathComponent("StageCue", isDirectory: true).appendingPathComponent("autosave-v0.3.json")
     }
     private func scheduleAutosave() {
         guard recoveredAutosave else { return }
@@ -141,7 +147,7 @@ import Combine
                 let migrated = notes.contains(SoundProject.migrationNotice)
                 saveURL = migrated ? nil : url
                 sound.applyMix(project)
-                message = migrated ? "Audio project opened. Export a new 0.2 copy to preserve the original. " + notes.joined(separator: "; ") : notes.isEmpty ? "Project opened" : notes.joined(separator: "; ")
+                message = migrated ? "Older project opened. Export a new 0.3 copy to preserve the original. " + notes.joined(separator: "; ") : notes.isEmpty ? "Project opened" : notes.joined(separator: "; ")
                 // Opening never rewrites the imported document. Only explicit Save/Export does.
             } catch { message = "Open failed: \(error.localizedDescription)" }
         }
@@ -239,25 +245,42 @@ import Combine
     func trigger(_ index: Int) {
         guard project.cues.indices.contains(index), let cue = project.cues[index] else { return }
         selected = index
-        if cue.kind == .audio { sound.play(cue) } else { video.play(cue) }
+        if cue.kind == .group {
+            guard let id = cue.groupID, let group = project.groups.first(where: { $0.id == id }) else { message = "Missing cue group"; return }
+            _ = scheduler.launch(group)
+        } else {
+            scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
+            if cue.kind == .audio { sound.play(cue) } else { video.play(cue) }
+        }
     }
     func stopCue(_ cue: Cue) {
+        if cue.kind == .group {
+            for run in scheduler.activeRuns where run.definition.id == cue.groupID { scheduler.stop(run.id) }
+            return
+        }
+        scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
         if cue.kind == .audio { sound.stop(cue.id) } else { video.stopCue(cue.id) }
     }
     func fadeUp(_ cue: Cue) {
+        if cue.kind == .group { message = "Use the group Pause/Resume controls"; return }
+        scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
         if cue.kind == .audio { sound.fadeIn(cue.id, seconds: project.manualFadeSeconds) }
         else if video.currentCue?.id == cue.id { video.fade(to: 1, seconds: project.manualFadeSeconds) }
     }
     func fadeDown(_ cue: Cue) {
+        if cue.kind == .group { message = "Use the group Pause/Resume controls"; return }
+        scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
         if cue.kind == .audio { sound.fadeToSilence(cue.id, seconds: project.manualFadeSeconds) }
         else if video.currentCue?.id == cue.id { video.fade(to: 0, seconds: project.manualFadeSeconds) }
     }
     func fadeStop(_ cue: Cue) {
+        if cue.kind == .group { stopCue(cue); return }
+        scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
         if cue.kind == .audio { sound.fadeOutAndStop(cue.id, seconds: project.manualFadeSeconds) }
         else { video.stopCue(cue.id, seconds: project.manualFadeSeconds) }
     }
-    func stopAll() { sound.stopAll(); video.stop() }
-    func fadeAll() { sound.fadeAll(seconds: project.manualFadeSeconds); video.stop(seconds: project.manualFadeSeconds) }
+    func stopAll() { scheduler.cancelAll(); sound.stopAll(); video.stop() }
+    func fadeAll() { scheduler.cancelAll(); sound.fadeAll(seconds: project.manualFadeSeconds); video.stop(seconds: project.manualFadeSeconds) }
     func check() {
         guard !checking else { return }
         checking = true
@@ -268,7 +291,7 @@ import Combine
             message = "Checking audio…"
             preflightItems = await sound.preflight(audioProject)
             for (index, cue) in snapshot.cues.enumerated() {
-                guard let cue, cue.kind != .audio else { continue }
+                guard let cue, cue.kind == .video || cue.kind == .image else { continue }
                 message = "Checking pad \(index + 1): \(cue.title)…"
                 do { _ = try await visualLoader.inspect(cue.filePath, kind: cue.kind) }
                 catch { preflightItems.append("Pad \(index + 1): \(error.localizedDescription)") }
@@ -349,6 +372,7 @@ struct MainView: View {
                 ProjectTitle(title: $state.project.title)
 
                 Spacer()
+                Button("Cue Groups") { state.editingGroups = true }
                 Button("Open") { state.open() }
                 Button("Save") { state.save() }
                 Button("Export") { state.export() }
@@ -380,10 +404,10 @@ struct MainView: View {
                         ForEach(0..<6, id: \.self) { index in
                             VStack(alignment: .leading) {
                                 Text(busNames[index]).font(.caption.bold())
-                                GainSlider(value: $state.project.busDB[index])
-                                    .onChange(of: state.project.busDB[index]) { _, _ in
-                                        state.sound.applyMix(state.project)
-                                    }
+                                GainSlider(value: Binding(get: { state.project.busDB[index] }, set: {
+                                    state.scheduler.manualOverride("bus:\(index)")
+                                    state.project.busDB[index] = $0; state.sound.applyMix(state.project)
+                                }))
                                 Text(String(format: "%.1f dB", state.project.busDB[index])).font(.caption.monospacedDigit())
                             }.frame(maxWidth: .infinity)
                         }
@@ -402,11 +426,11 @@ struct MainView: View {
                 ScrollView { CueInspector().frame(width: 280) }.frame(width: 300)
             }
             Divider()
-            VideoControls(video: state.video, output: state.output, project: $state.project)
+            VideoControls(video: state.video, output: state.output, project: $state.project, onManualControl: { state.scheduler.manualOverride("video") })
             HStack {
                 Text(state.message).font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Text("StageCue 0.2 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.3 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -419,6 +443,7 @@ struct MainView: View {
             }
         }
         .padding(16)
+        .sheet(isPresented: $state.editingGroups) { GroupEditor().environmentObject(state) }
         .alert("Preflight", isPresented: $showPreflight) {
             Button("OK") {}
         } message: {
@@ -435,7 +460,7 @@ struct Pad: View {
     let index: Int
     var body: some View {
         let cue = state.project.cues[index]
-        let running = cue.map { state.sound.active.contains($0.id) || state.video.activeIDs.contains($0.id) } ?? false
+        let running = cue.map { item in state.sound.active.contains(item.id) || state.video.activeIDs.contains(item.id) || state.scheduler.activeRuns.contains { $0.definition.id == item.groupID } } ?? false
         VStack(spacing: 5) {
             Button {
                 state.selected = index
@@ -512,6 +537,14 @@ struct CueInspector: View {
             }
             Text("Swap preserves both cues. Shortcuts stay with pad positions.")
                 .font(.caption).foregroundStyle(.secondary)
+            Picker("Assign group", selection: Binding(get: { state.selectedCue?.groupID }, set: { id in
+                if let id, let group = state.project.groups.first(where: { $0.id == id }) {
+                    state.setCue(Cue(title: group.title, kind: .group, groupID: id))
+                }
+            })) {
+                Text("Media cue / none").tag(Optional<UUID>.none)
+                ForEach(state.project.groups) { Text($0.title).tag(Optional($0.id)) }
+            }
             if let cue = state.project.cues[state.selected] {
                 cueControls(cue)
             } else {
@@ -526,6 +559,16 @@ struct CueInspector: View {
     @ViewBuilder private func cueControls(_ current: Cue) -> some View {
         // Dedicated bindings update the value-type cue in its indexed slot.
         TextField("Cue name", text: bind(\.title)).finishEditingOnCommit()
+        if current.kind == .group {
+            Text("Group settings are edited in Cue Groups.").font(.caption)
+            ForEach(state.scheduler.activeRuns.filter { $0.definition.id == current.groupID }) { run in
+                HStack {
+                    Text(run.state.rawValue)
+                    Button(run.state == .paused ? "Resume" : "Pause") { run.state == .paused ? state.scheduler.resume(run.id) : state.scheduler.pause(run.id) }
+                    Button("Stop") { state.scheduler.stop(run.id) }
+                }
+            }
+        } else {
         HStack {
             Text(current.filePath.isEmpty ? "No media assigned" : URL(fileURLWithPath: current.filePath).lastPathComponent)
                 .lineLimit(1).font(.caption)
@@ -576,14 +619,16 @@ struct CueInspector: View {
                 HStack { Text("Soundtrack"); Spacer(); Text(String(format: "%.1f dB", current.soundtrackDB)) }
                 Slider(value: bind(\.soundtrackDB), in: -60...0)
                 Button(state.video.paused ? "Resume Video" : "Pause Video") {
+                    state.scheduler.manualOverride("video")
                     if state.video.currentCue?.id == current.id { state.video.paused ? state.video.resume() : state.video.pause() }
                 }
             }
         }
+        }
         Divider()
         Button("Stop using cue's fade setting") {
             if current.kind == .audio { state.sound.configuredStop(current.id) }
-            else { state.video.stopCue(current.id, seconds: current.videoFadeOut) }
+            else { state.scheduler.manualOverride("video"); state.video.stopCue(current.id, seconds: current.videoFadeOut) }
         }
         Button("Clear Pad", role: .destructive) {
             state.stopCue(current)
@@ -600,6 +645,14 @@ struct CueInspector: View {
             guard state.project.cues.indices.contains(index), var cue = state.project.cues[index] else { return }
             cue[keyPath: key] = newValue
             cue.normalize()
+            if key == \Cue.gainDB {
+                state.scheduler.manualOverride("audio:\(cue.id)")
+                state.sound.fadeToDB(cue.id, decibels: cue.gainDB, seconds: 0)
+            }
+            if key == \Cue.soundtrackDB {
+                state.scheduler.manualOverride("video")
+                if state.video.currentCue?.id == cue.id { state.video.setSoundtrackDB(cue.soundtrackDB) }
+            }
             state.project.cues[index] = cue
         })
     }
@@ -761,7 +814,7 @@ private struct FinishEditingOnCommit: ViewModifier {
     }
 }
 
-private extension View {
+extension View {
     func finishEditingOnCommit() -> some View {
         modifier(FinishEditingOnCommit())
     }

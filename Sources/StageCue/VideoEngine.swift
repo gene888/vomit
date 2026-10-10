@@ -76,6 +76,8 @@ struct VisualDissolve: Equatable {
     @Published private(set) var loadingCueID: UUID?
     @Published private(set) var error = ""
     @Published private(set) var paused = false
+    private(set) var failedCueID: UUID?
+    private var pauseWhenReady = false
     @Published var blackout = false
     @Published private(set) var frontFrame: CGImage?
     @Published private(set) var backFrame: CGImage?
@@ -140,6 +142,7 @@ struct VisualDissolve: Equatable {
         let token = request
         var cue = original; cue.normalize()
         loading = true; loadingCueID = cue.id; error = ""
+        failedCueID = nil; pauseWhenReady = false
         loadTask = Task { [weak self, loader] in
             do {
                 let image = try await loader.inspect(cue.filePath, kind: cue.kind)
@@ -185,11 +188,12 @@ struct VisualDissolve: Equatable {
                 self.activeIDs.insert(cue.id)
                 self.loading = false; self.loadingCueID = nil
                 self.tick()
+                if self.pauseWhenReady { self.pause() }
             } catch {
                 guard let self, self.request == token else { return }
                 for index in self.slots.indices where index != self.current && index != self.outgoing { self.slots[index].clear() }
                 self.loading = false; self.loadingCueID = nil
-                if !(error is CancellationError) { self.error = "\(cue.title): \(error.localizedDescription)" }
+                if !(error is CancellationError) { self.failedCueID = cue.id; self.error = "\(cue.title): \(error.localizedDescription)" }
             }
         }
     }
@@ -243,16 +247,24 @@ struct VisualDissolve: Equatable {
         outgoing = nil; dissolve = nil; backFrame = nil; frontOpacity = 1
     }
     func pause() {
+        pauseWhenReady = true
         guard current != nil, !paused else { return }
         paused = true; pausedAt = CACurrentMediaTime()
         for slot in slots { slot.player.pause() }
     }
     func resume() {
+        pauseWhenReady = false
         guard paused else { return }
         let interval = CACurrentMediaTime() - (pausedAt ?? CACurrentMediaTime())
         dissolve?.start += interval; manualFade?.start += interval
         paused = false; pausedAt = nil
         for index in [current, outgoing].compactMap({ $0 }) where slots[index].cue?.kind == .video && !slots[index].seekInProgress && !slots[index].holdingEnd { slots[index].player.play() }
+    }
+    func setSoundtrackDB(_ decibels: Double) {
+        guard let current else { return }
+        slots[current].cue?.soundtrackDB = bounded(decibels, -60...0, fallback: -6)
+        manualFade = nil; stopAfterFade = false
+        tick()
     }
     func fade(to target: Double, seconds: Double, stop: Bool = false) {
         resume()

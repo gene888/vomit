@@ -45,7 +45,7 @@ struct VideoTests {
     @Test func schemaMigratesAudioAndRoundTripsVisualSettings() throws {
         var old = try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":1,\"cues\":[{\"title\":\"Audio\"}]}".utf8))
         old.normalize()
-        expectEqual(old.schemaVersion, 2); expectEqual(old.cues[0]?.kind, .audio)
+        expectEqual(old.schemaVersion, 3); expectEqual(old.cues[0]?.kind, .audio)
         expectEqual(old.cues[0]?.holdLastFrame, false)
         old.cues[31] = Cue(title: "Video", filePath: "/show/movie.mov", loop: true, kind: .video, transition: .cut, videoFadeIn: 2, videoFadeOut: 4, soundtrackDB: -18, holdLastFrame: true)
         old.backgroundPath = "/show/background.png"
@@ -53,7 +53,7 @@ struct VideoTests {
         try ProjectStore.save(old, to: url)
         let copy = try ProjectStore.load(from: url).0
         expectEqual(copy, old)
-        expectThrows(try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":3}".utf8)))
+        expectThrows(try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":4}".utf8)))
     }
     @Test func dissolveCalculationsAndVisualNormalization() {
         let fade = VisualDissolve(start: 10, duration: 2, from: 0, to: 1)

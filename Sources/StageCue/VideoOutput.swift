@@ -142,6 +142,7 @@ struct VideoControls: View {
     @ObservedObject var video: VideoEngine
     @ObservedObject var output: VideoOutputController
     @Binding var project: SoundProject
+    var onManualControl: () -> Void = {}
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VideoPreview(engine: video).frame(width: 224, height: 126).clipShape(RoundedRectangle(cornerRadius: 5))
@@ -150,9 +151,9 @@ struct VideoControls: View {
                     Text("VIDEO").font(.headline)
                     Text(video.currentCue?.title ?? "No visual cue").lineLimit(1)
                     if video.loading { ProgressView().controlSize(.small) }
-                    Button(video.paused ? "Resume" : "Pause") { video.paused ? video.resume() : video.pause() }
-                    Button("Stop Video") { video.stop() }
-                    Toggle("Blackout", isOn: $video.blackout).toggleStyle(.button)
+                    Button(video.paused ? "Resume" : "Pause") { onManualControl(); video.paused ? video.resume() : video.pause() }
+                    Button("Stop Video") { onManualControl(); video.stop() }
+                    Toggle("Blackout", isOn: Binding(get: { video.blackout }, set: { onManualControl(); video.blackout = $0 })).toggleStyle(.button)
                 }
                 HStack {
                     Picker("Output display", selection: $output.selectedDisplay) {
