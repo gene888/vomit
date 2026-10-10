@@ -97,3 +97,7 @@ Soundtracks use AVPlayer volume (-60…0 dB) and the macOS default audio output.
 Version 1 audio projects remain loadable. They migrate in memory to schema 2. Export a new 0.2 copy; opening a v1 project deliberately does not set it as the Save destination, protecting its original file. Schema 2 files cannot be opened by 0.1. Autosave uses `autosave-v0.2.json`, separate from the audio version's `autosave.json`. The local annotated v0.1 tag preserves the audio code; 0.2 development is on stagecue-v0.2. Keep the 0.1 app and project copies for rollback.
 
 Architecture and current validation: Docs/VIDEO_ARCHITECTURE.md and Docs/VIDEO_VALIDATION.md. Physical projector/interface acceptance remains required.
+
+### Hold a video's final frame
+
+In a video pad's settings, enable Hold last frame when finished, then trigger the cue. At natural completion the soundtrack ends and the final video sample remains visible. Triggering another visual cue can cut/crossfade from this held frame; manual stop/fade-out-stop still clears it. The option is saved with the project, defaults off for existing cues, applies on the next trigger, and is disabled while Loop is enabled. Pause/resume does not restart an already finished held cue.

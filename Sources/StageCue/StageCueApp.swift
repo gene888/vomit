@@ -569,6 +569,9 @@ struct CueInspector: View {
             HStack { Text("Fade in (sec)"); TextField("Visual fade in", value: bind(\.videoFadeIn), format: .number).frame(width: 65) }
             HStack { Text("Fade out (sec)"); TextField("Visual fade out", value: bind(\.videoFadeOut), format: .number).frame(width: 65) }
             if current.kind == .video {
+                Toggle("Hold last frame when finished", isOn: bind(\.holdLastFrame))
+                    .disabled(current.loop)
+                    .help("For non-looping video: keep the final frame until replaced or stopped. Applies on the next trigger.")
                 HStack { Text("Soundtrack"); Spacer(); Text(String(format: "%.1f dB", current.soundtrackDB)) }
                 Slider(value: bind(\.soundtrackDB), in: -60...0)
                 Button(state.video.paused ? "Resume Video" : "Pause Video") {

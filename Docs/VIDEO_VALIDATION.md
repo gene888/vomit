@@ -6,7 +6,7 @@ Remote main was inspected at 5ae4a12 with no existing v0.1 tag. Created local an
 
 ## Automated validation
 
-Release Xcode build and ad-hoc signature verification pass. SwiftPM native validation passes **50 tests in seven suites**, exit 0. All 41 prior audio/settings/persistence/layout/drop regressions pass. New tests use generated local H.264 MOV/MP4, PNG and JPEG fixtures.
+Release Xcode build and ad-hoc signature verification pass. SwiftPM native validation passes **51 tests in seven suites**, exit 0. All 41 prior audio/settings/persistence/layout/drop regressions pass. New tests use generated local H.264 MOV/MP4, PNG and JPEG fixtures.
 
 - Schema 1 audio migration, schema 2 complete settings/background persistence, and rejection of future schemas.
 - Dissolve endpoints/midpoint and finite/clamped visual settings.
@@ -34,3 +34,7 @@ Launched an isolated copy of the production UI with a separate fixture autosave.
 ## Deliberate limitations
 
 One visual program with two transition slots, 30 fps shared SDR frame rendering, native codec support, 4096 pixels per video axis; 32 megapixel image input downsampled to at most 4096 pixels. Rotation metadata is applied. No HDR pipeline, gapless looping, timeline/scrubbing, portable media collection, frame-accurate synchronization, or video soundtrack AVAudioEngine-bus routing. Crossfade timing uses the incoming cue; final-frame fade happens after movie end. Blackout masks picture only. Background remains after stop unless cleared or blacked out. Output device choice is runtime-only and does not auto-present on launch. No soundboard page system exists; output lifetime is independent of pad layout/selection. No recording or streaming.
+
+## Final-frame hold follow-up
+
+Added a persisted per-video holdLastFrame option, default false for older projects. Loop takes precedence. Natural completion pauses/seeks inside the final sample boundary; the held frame remains an active visual source until replaced or explicitly stopped. Resume excludes completed held players. The new native test encodes a distinct red final frame after blue frames, verifies its decoded pixel color after playback ends, and checks blackout retention, crossfade retirement and fade-out-stop cleanup. Release build/signature and 51 tests in seven suites pass.

@@ -90,11 +90,12 @@ struct VisualDissolve: Equatable {
         var cue: Cue?
         var endObserver: NSObjectProtocol?
         var seekInProgress = false
+        var holdingEnd = false
         func clear() {
             if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
             endObserver = nil
             player.pause(); player.replaceCurrentItem(with: nil)
-            output = nil; frame = nil; cue = nil; seekInProgress = false
+            output = nil; frame = nil; cue = nil; seekInProgress = false; holdingEnd = false
         }
         deinit { if let endObserver { NotificationCenter.default.removeObserver(endObserver) } }
     }
@@ -215,6 +216,23 @@ struct VisualDissolve: Equatable {
                     if finished && !self.paused { self.slots[index].player.play() }
                 }
             }
+        } else if cue.holdLastFrame {
+            slot.holdingEnd = true
+            slot.player.pause()
+            // Seek just inside the end to retain the final decoded sample rather
+            // than an empty frame at the exclusive duration boundary.
+            let end = item.duration
+            if end.isNumeric, end.seconds > 0 {
+                let lastSample = CMTimeMaximum(.zero, CMTimeSubtract(end, CMTime(value: 1, timescale: 6000)))
+                slot.player.seek(to: lastSample, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] finished in
+                    Task { @MainActor in
+                        guard let self, finished, self.slots[index].player.currentItem === item,
+                              self.slots[index].holdingEnd else { return }
+                        self.readFrame(self.slots[index])
+                        self.tick()
+                    }
+                }
+            }
         } else if index == current { stop(seconds: cue.videoFadeOut) }
     }
     private func retireOutgoing() {
@@ -234,7 +252,7 @@ struct VisualDissolve: Equatable {
         let interval = CACurrentMediaTime() - (pausedAt ?? CACurrentMediaTime())
         dissolve?.start += interval; manualFade?.start += interval
         paused = false; pausedAt = nil
-        for index in [current, outgoing].compactMap({ $0 }) where slots[index].cue?.kind == .video && !slots[index].seekInProgress { slots[index].player.play() }
+        for index in [current, outgoing].compactMap({ $0 }) where slots[index].cue?.kind == .video && !slots[index].seekInProgress && !slots[index].holdingEnd { slots[index].player.play() }
     }
     func fade(to target: Double, seconds: Double, stop: Bool = false) {
         resume()

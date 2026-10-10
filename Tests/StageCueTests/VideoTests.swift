@@ -17,7 +17,7 @@ struct VideoTests {
         expectTrue(CGImageDestinationFinalize(destination))
         return url
     }
-    private func movie(_ name: String, mp4: Bool = false) async throws -> URL {
+    private func movie(_ name: String, mp4: Bool = false, finalFrameRed: Bool = false) async throws -> URL {
         let url = files.directory.appendingPathComponent(name).appendingPathExtension(mp4 ? "mp4" : "mov")
         let writer = try AVAssetWriter(outputURL: url, fileType: mp4 ? .mp4 : .mov)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: [AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 64, AVVideoHeightKey: 48])
@@ -34,7 +34,7 @@ struct VideoTests {
             }
             var pixel: CVPixelBuffer?
             expectEqual(CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &pixel), kCVReturnSuccess)
-            context.render(CIImage(color: CIColor(red: 0.2, green: 0.4, blue: 0.8)).cropped(to: CGRect(x: 0, y: 0, width: 64, height: 48)), to: pixel!)
+            context.render(CIImage(color: finalFrameRed && frame == 59 ? .red : CIColor(red: 0.2, green: 0.4, blue: 0.8)).cropped(to: CGRect(x: 0, y: 0, width: 64, height: 48)), to: pixel!)
             expectTrue(adaptor.append(pixel!, withPresentationTime: CMTime(value: Int64(frame), timescale: 30)))
         }
         input.markAsFinished()
@@ -46,7 +46,8 @@ struct VideoTests {
         var old = try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":1,\"cues\":[{\"title\":\"Audio\"}]}".utf8))
         old.normalize()
         expectEqual(old.schemaVersion, 2); expectEqual(old.cues[0]?.kind, .audio)
-        old.cues[31] = Cue(title: "Video", filePath: "/show/movie.mov", loop: true, kind: .video, transition: .cut, videoFadeIn: 2, videoFadeOut: 4, soundtrackDB: -18)
+        expectEqual(old.cues[0]?.holdLastFrame, false)
+        old.cues[31] = Cue(title: "Video", filePath: "/show/movie.mov", loop: true, kind: .video, transition: .cut, videoFadeIn: 2, videoFadeOut: 4, soundtrackDB: -18, holdLastFrame: true)
         old.backgroundPath = "/show/background.png"
         let url = files.directory.appendingPathComponent("show.json")
         try ProjectStore.save(old, to: url)
@@ -184,6 +185,44 @@ struct VideoTests {
         expectFalse(state.checking)
         expectTrue(state.preflightItems.isEmpty, state.preflightItems.joined(separator: "; "))
         expectTrue(state.video.activeIDs.contains(state.project.cues[1]!.id))
+    }
+
+    @Test @MainActor func heldFinalFrameSurvivesEndBlackoutAndCanCrossfadeOrStop() async throws {
+        let url = try await movie("HoldEnd", finalFrameRed: true)
+        let video = VideoEngine(); defer { video.shutdown() }
+        let cue = Cue(filePath: url.path, kind: .video, transition: .cut, holdLastFrame: true)
+        video.play(cue); await video.waitForLoad()
+        expectTrue(video.error.isEmpty, video.error)
+        try await Task.sleep(for: .seconds(2.3))
+        expectEqual(video.currentCue?.id, cue.id)
+        expectTrue(video.frontFrame != nil)
+        expectTrue(video.activeIDs.contains(cue.id))
+        expectEqual(video.retainedPlayerItems, 1)
+        expectTrue(video.time > 1.9)
+        if let frame = video.frontFrame {
+            var pixel = [UInt8](repeating: 0, count: 4)
+            pixel.withUnsafeMutableBytes { bytes in
+                let context = CGContext(data: bytes.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                    space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+                context.draw(frame, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+            }
+            expectTrue(pixel[0] > 200 && pixel[2] < 80, "Held picture must be the red final frame, not an earlier blue frame")
+        }
+        video.blackout = true; video.blackout = false
+        expectTrue(video.frontFrame != nil)
+        video.pause(); video.resume()
+        let next = Cue(filePath: try image("Next", color: .blue).path, kind: .image, videoFadeIn: 1)
+        video.play(next); await video.waitForLoad()
+        expectTrue(video.backFrame != nil)
+        expectTrue(video.activeIDs.contains(cue.id))
+        video.tick(now: CACurrentMediaTime() + 2)
+        expectEqual(video.activeIDs, Set([next.id]))
+        expectEqual(video.retainedPlayerItems, 0)
+        video.play(cue); await video.waitForLoad()
+        try await Task.sleep(for: .seconds(2.3))
+        video.stop(seconds: 1); video.tick(now: CACurrentMediaTime() + 2)
+        expectTrue(video.frontFrame == nil); expectTrue(video.activeIDs.isEmpty)
+        expectEqual(video.retainedPlayerItems, 0)
     }
 
 }

@@ -46,6 +46,7 @@ struct Cue: Identifiable, Codable, Equatable, Sendable {
     var videoFadeIn: Double = 1
     var videoFadeOut: Double = 1
     var soundtrackDB: Double = -6
+    var holdLastFrame = false
 
     mutating func normalize() {
         gainDB = bounded(gainDB, -60...6, fallback: -6)
@@ -62,7 +63,7 @@ struct Cue: Identifiable, Codable, Equatable, Sendable {
 extension Cue {
     enum CodingKeys: String, CodingKey {
         case id, title, filePath, gainDB, bus, mode, loop, autoFadeIn, fadeInSeconds
-        case autoFadeOut, fadeOutSeconds, curve, tint, kind, transition, videoFadeIn, videoFadeOut, soundtrackDB
+        case autoFadeOut, fadeOutSeconds, curve, tint, kind, transition, videoFadeIn, videoFadeOut, soundtrackDB, holdLastFrame
     }
     init(from decoder: Decoder) throws {
         self.init()
@@ -85,6 +86,7 @@ extension Cue {
         videoFadeIn = try c.decodeIfPresent(Double.self, forKey: .videoFadeIn) ?? videoFadeIn
         videoFadeOut = try c.decodeIfPresent(Double.self, forKey: .videoFadeOut) ?? videoFadeOut
         soundtrackDB = try c.decodeIfPresent(Double.self, forKey: .soundtrackDB) ?? soundtrackDB
+        holdLastFrame = try c.decodeIfPresent(Bool.self, forKey: .holdLastFrame) ?? false
     }
 }
 
