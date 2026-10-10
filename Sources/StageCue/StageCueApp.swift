@@ -16,6 +16,9 @@ import Combine
     let sound = SoundEngine()
     let video = VideoEngine()
     let scheduler = ShowScheduler()
+    lazy var sequence = SequenceEngine(scheduler: scheduler)
+    private var sequenceChanges: AnyCancellable?
+    @Published var editingSequences = false
     private var schedulerChanges: AnyCancellable?
     @Published var editingGroups = false
     lazy var output = VideoOutputController(engine: video)
@@ -46,6 +49,17 @@ import Combine
                 message = "Autosave could not be opened. Original preserved; open a project or explicitly Save to replace it. \(error.localizedDescription)"
             }
         }
+        sequence.resolveStep = { [weak self] step in
+            guard let self else { throw MediaIssue(message: "Project closed") }; return try self.sequenceGroup(for: step)
+        }
+        sequence.validateFollow = { [weak self] step in try self?.validateSequenceFollow(step) }
+        scheduler.onAdvance = { [weak self] id in
+            Task { @MainActor [weak self] in
+                guard let self, let status = self.scheduler.state(of: id), status != .stopped, status != .error else { return }
+                self.sequence.advanceFromGroup(id)
+            }
+        }
+        sequenceChanges = sequence.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
         scheduler.driver = self
         scheduler.groupLookup = { [weak self] id in self?.project.groups.first { $0.id == id } }
         schedulerChanges = scheduler.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
@@ -76,7 +90,7 @@ import Combine
                 guard let self else { return }
                 self.autosaveTask?.cancel()
                 if self.recoveredAutosave { try? ProjectStore.save(self.project, to: self.autosaveURL) }
-                self.scheduler.cancelAll(); self.sound.shutdown(); self.video.shutdown(); self.output.close()
+                self.sequence.emergencyCancel(); self.scheduler.cancelAll(); self.sound.shutdown(); self.video.shutdown(); self.output.close()
             }
         }
     }
@@ -279,8 +293,8 @@ import Combine
         if cue.kind == .audio { sound.fadeOutAndStop(cue.id, seconds: project.manualFadeSeconds) }
         else { video.stopCue(cue.id, seconds: project.manualFadeSeconds) }
     }
-    func stopAll() { scheduler.cancelAll(); sound.stopAll(); video.stop() }
-    func fadeAll() { scheduler.cancelAll(); sound.fadeAll(seconds: project.manualFadeSeconds); video.stop(seconds: project.manualFadeSeconds) }
+    func stopAll() { sequence.emergencyCancel(); scheduler.cancelAll(); sound.stopAll(); video.stop() }
+    func fadeAll() { sequence.emergencyCancel(); scheduler.cancelAll(); sound.fadeAll(seconds: project.manualFadeSeconds); video.stop(seconds: project.manualFadeSeconds) }
     func check() {
         guard !checking else { return }
         checking = true
@@ -372,6 +386,7 @@ struct MainView: View {
                 ProjectTitle(title: $state.project.title)
 
                 Spacer()
+                Button("Sequences") { state.editingSequences = true }
                 Button("Cue Groups") { state.editingGroups = true }
                 Button("Open") { state.open() }
                 Button("Save") { state.save() }
@@ -443,6 +458,7 @@ struct MainView: View {
             }
         }
         .padding(16)
+        .sheet(isPresented: $state.editingSequences) { SequenceEditor().environmentObject(state) }
         .sheet(isPresented: $state.editingGroups) { GroupEditor().environmentObject(state) }
         .alert("Preflight", isPresented: $showPreflight) {
             Button("OK") {}

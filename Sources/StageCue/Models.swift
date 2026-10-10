@@ -96,6 +96,7 @@ struct SoundProject: Codable, Equatable, Sendable {
     static let migrationNotice = "Project upgraded to schema 3"
     var schemaVersion = 3
     var groups: [CueGroup] = []
+    var sequences: [CueSequence] = []
     var title = "Untitled Show"
     var backgroundPath = ""
     var cues: [Cue?] = Array(repeating: nil, count: 32)
@@ -155,12 +156,18 @@ struct SoundProject: Codable, Equatable, Sendable {
             if !groupIDs.insert(groups[i].id).inserted { groups[i].id = UUID(); notes.append("Duplicate group ID repaired") }
             groups[i].normalize()
         }
+        sequences = Array(sequences.prefix(256))
+        var sequenceIDs: Set<UUID> = []
+        for i in sequences.indices {
+            if !sequenceIDs.insert(sequences[i].id).inserted { sequences[i].id = UUID(); notes.append("Duplicate sequence ID repaired") }
+            sequences[i].normalize()
+        }
         return notes
     }
 }
 
 extension SoundProject {
-    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups }
+    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups, sequences }
     init(from decoder: Decoder) throws {
         self.init()
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -168,6 +175,7 @@ extension SoundProject {
         guard (1...3).contains(schemaVersion) else {
             throw DecodingError.dataCorruptedError(forKey: .schemaVersion, in: c, debugDescription: "Unsupported project version")
         }
+        sequences = try c.decodeIfPresent([CueSequence].self, forKey: .sequences) ?? []
         groups = try c.decodeIfPresent([CueGroup].self, forKey: .groups) ?? []
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? title
         backgroundPath = try c.decodeIfPresent(String.self, forKey: .backgroundPath) ?? ""

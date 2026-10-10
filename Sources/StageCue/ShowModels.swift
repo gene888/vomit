@@ -68,3 +68,40 @@ struct ScheduledGroupAction: Equatable, Sendable {
         }.sorted { $0.offset == $1.offset ? $0.ordinal < $1.ordinal : $0.offset < $1.offset }
     }
 }
+
+enum AdvanceMode: String, Codable, CaseIterable, Identifiable, Sendable {
+    case manual = "Manual", timed = "Timed", follow = "Follow"
+    var id: String { rawValue }
+}
+enum SequenceTarget: String, Codable, CaseIterable, Identifiable, Sendable {
+    case cue = "Cue", group = "Group"
+    var id: String { rawValue }
+}
+struct SequenceStep: Codable, Equatable, Identifiable, Sendable {
+    var id = UUID()
+    var title = "New step"
+    var target: SequenceTarget = .cue
+    var cueID: UUID?
+    var groupID: UUID?
+    var advancement: AdvanceMode = .manual
+    var delay: Double = 1
+    // Explicit completion for loops/stills/held pictures/non-completing groups.
+    // It advances the sequence without terminating the media.
+    var completionAfter: Double = 0
+    mutating func normalize() {
+        delay = bounded(delay, 0...86400, fallback: 1)
+        completionAfter = bounded(completionAfter, 0...86400, fallback: 0)
+    }
+}
+struct CueSequence: Codable, Equatable, Identifiable, Sendable {
+    var id = UUID()
+    var title = "New Sequence"
+    var steps: [SequenceStep] = []
+    mutating func normalize() {
+        steps = Array(steps.prefix(1024)); var seen: Set<UUID> = []
+        for i in steps.indices {
+            if !seen.insert(steps[i].id).inserted { steps[i].id = UUID() }
+            steps[i].normalize()
+        }
+    }
+}

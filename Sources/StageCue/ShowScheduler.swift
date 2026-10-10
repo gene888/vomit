@@ -38,7 +38,7 @@ struct GroupExecution: Identifiable {
     @Published private(set) var runs: [GroupExecution] = []
     weak var driver: (any ShowPlaybackDriver)?
     var groupLookup: (UUID) -> CueGroup? = { _ in nil }
-    var onAdvance: () -> Void = {}
+    var onAdvance: (UUID) -> Void = { _ in }
     private let now: () -> Double
     private let automatic: Bool
     private var wake: Task<Void, Never>?
@@ -136,7 +136,10 @@ struct GroupExecution: Identifiable {
                     runs[i].children.append((child, action.survivesTermination))
                     continue
                 }
-                if action.kind == .advance { onAdvance(); continue }
+                if action.kind == .advance {
+                    if manualVersions["sequence", default: 0] == runs[i].manualVersions["sequence", default: 0] { onAdvance(id) }
+                    continue
+                }
                 guard let driver else { throw MediaIssue(message: "Playback driver unavailable") }
                 if let resource = try driver.resource(for: action),
                    manualVersions[resource, default: 0] != runs[i].manualVersions[resource, default: 0] { continue }
