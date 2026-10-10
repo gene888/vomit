@@ -18,6 +18,15 @@ func amplitude(_ decibels: Double) -> Float {
     Float(pow(10, bounded(decibels, -60...6, fallback: 0) / 20))
 }
 
+enum CueKind: String, Codable, CaseIterable, Identifiable, Sendable {
+    case audio = "Audio", video = "Video", image = "Image"
+    var id: String { rawValue }
+}
+enum VisualTransition: String, Codable, CaseIterable, Identifiable, Sendable {
+    case cut = "Cut", crossfade = "Crossfade"
+    var id: String { rawValue }
+}
+
 struct Cue: Identifiable, Codable, Equatable, Sendable {
     var id = UUID()
     var title = "Untitled"
@@ -32,12 +41,20 @@ struct Cue: Identifiable, Codable, Equatable, Sendable {
     var fadeOutSeconds: Double = 2
     var curve: FadeCurve = .smooth
     var tint = "blue"
+    var kind: CueKind = .audio
+    var transition: VisualTransition = .crossfade
+    var videoFadeIn: Double = 1
+    var videoFadeOut: Double = 1
+    var soundtrackDB: Double = -6
 
     mutating func normalize() {
         gainDB = bounded(gainDB, -60...6, fallback: -6)
         bus = min(5, max(0, bus))
         fadeInSeconds = bounded(fadeInSeconds, 0...3600, fallback: 2)
         fadeOutSeconds = bounded(fadeOutSeconds, 0...3600, fallback: 2)
+        videoFadeIn = bounded(videoFadeIn, 0...3600, fallback: 1)
+        videoFadeOut = bounded(videoFadeOut, 0...3600, fallback: 1)
+        soundtrackDB = bounded(soundtrackDB, -60...0, fallback: -6)
         if mode == .hold { mode = .oneShot }
     }
 }
@@ -45,7 +62,7 @@ struct Cue: Identifiable, Codable, Equatable, Sendable {
 extension Cue {
     enum CodingKeys: String, CodingKey {
         case id, title, filePath, gainDB, bus, mode, loop, autoFadeIn, fadeInSeconds
-        case autoFadeOut, fadeOutSeconds, curve, tint
+        case autoFadeOut, fadeOutSeconds, curve, tint, kind, transition, videoFadeIn, videoFadeOut, soundtrackDB
     }
     init(from decoder: Decoder) throws {
         self.init()
@@ -63,12 +80,18 @@ extension Cue {
         fadeOutSeconds = try c.decodeIfPresent(Double.self, forKey: .fadeOutSeconds) ?? fadeOutSeconds
         curve = try c.decodeIfPresent(FadeCurve.self, forKey: .curve) ?? curve
         tint = try c.decodeIfPresent(String.self, forKey: .tint) ?? tint
+        kind = try c.decodeIfPresent(CueKind.self, forKey: .kind) ?? .audio
+        transition = try c.decodeIfPresent(VisualTransition.self, forKey: .transition) ?? transition
+        videoFadeIn = try c.decodeIfPresent(Double.self, forKey: .videoFadeIn) ?? videoFadeIn
+        videoFadeOut = try c.decodeIfPresent(Double.self, forKey: .videoFadeOut) ?? videoFadeOut
+        soundtrackDB = try c.decodeIfPresent(Double.self, forKey: .soundtrackDB) ?? soundtrackDB
     }
 }
 
 struct SoundProject: Codable, Equatable, Sendable {
-    var schemaVersion = 1
+    var schemaVersion = 2
     var title = "Untitled Show"
+    var backgroundPath = ""
     var cues: [Cue?] = Array(repeating: nil, count: 32)
     var busDB: [Double] = Array(repeating: 0, count: 6)
     var masterDB: Double = 0
@@ -85,6 +108,7 @@ struct SoundProject: Codable, Equatable, Sendable {
 
     @discardableResult mutating func normalize() -> [String] {
         var notes: [String] = []
+        schemaVersion = 2
         if cues.count != 32 { notes.append("Pad count adjusted to 32") }
         cues = Array(cues.prefix(32))
         cues += Array(repeating: nil, count: 32 - cues.count)
@@ -123,15 +147,16 @@ struct SoundProject: Codable, Equatable, Sendable {
 }
 
 extension SoundProject {
-    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys }
+    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath }
     init(from decoder: Decoder) throws {
         self.init()
         let c = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
-        guard schemaVersion == 1 else {
+        guard (1...2).contains(schemaVersion) else {
             throw DecodingError.dataCorruptedError(forKey: .schemaVersion, in: c, debugDescription: "Unsupported project version")
         }
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? title
+        backgroundPath = try c.decodeIfPresent(String.self, forKey: .backgroundPath) ?? ""
         cues = try c.decodeIfPresent([Cue?].self, forKey: .cues) ?? cues
         busDB = try c.decodeIfPresent([Double].self, forKey: .busDB) ?? busDB
         masterDB = try c.decodeIfPresent(Double.self, forKey: .masterDB) ?? masterDB

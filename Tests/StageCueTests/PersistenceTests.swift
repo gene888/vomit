@@ -36,7 +36,7 @@ struct PersistenceTests {
     }
     @Test func testCorruptAndFutureProjectsRejectedWithoutRewriting() throws {
         let url = try temporary().appendingPathComponent("show.json")
-        for text in ["not JSON", "{\"schemaVersion\":2}", "{\"cues\":[{\"mode\":\"FutureMode\"}]}", "{\"busDB\":\"wrong type\"}"] {
+        for text in ["not JSON", "{\"schemaVersion\":999}", "{\"cues\":[{\"mode\":\"FutureMode\"}]}", "{\"busDB\":\"wrong type\"}"] {
             let bytes = Data(text.utf8)
             try bytes.write(to: url)
             expectThrows(try ProjectStore.load(from: url))
