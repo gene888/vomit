@@ -2,6 +2,10 @@
 
 Native, local macOS audio/video soundboard: SwiftUI, AVAudioEngine, AVPlayer and Core Audio. Apple Silicon only; macOS 14 or newer. No cloud services, third-party runtime dependencies, recording or streaming.
 
+For setup, playback controls, Cue Groups, Sequences, Show Mode, keyboard shortcuts and troubleshooting, see the complete [Operator Manual](Docs/OPERATOR_MANUAL.md).
+
+The manual is also available as a [printable PDF](Docs/StageCue-0.3-Operator-Manual.pdf) and an [editable Word document](Docs/StageCue-0.3-Operator-Manual.docx).
+
 ## Build and run
 
 Use Xcode 26 or newer (Swift 6.2+). Validated with Xcode 26.6, build 17F113, on 9 October 2026. The deployment target remains macOS 14, but runtime compatibility with macOS 14 has not been tested on a separate machine.
