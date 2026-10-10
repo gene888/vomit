@@ -138,9 +138,10 @@ import Combine
                 mediaAssignments.removeAll()
                 recoveredAutosave = true
                 project = decoded
-                saveURL = url
+                let migrated = notes.contains(SoundProject.migrationNotice)
+                saveURL = migrated ? nil : url
                 sound.applyMix(project)
-                message = notes.isEmpty ? "Project opened" : notes.joined(separator: "; ")
+                message = migrated ? "Audio project opened. Export a new 0.2 copy to preserve the original. " + notes.joined(separator: "; ") : notes.isEmpty ? "Project opened" : notes.joined(separator: "; ")
                 // Opening never rewrites the imported document. Only explicit Save/Export does.
             } catch { message = "Open failed: \(error.localizedDescription)" }
         }
@@ -264,9 +265,11 @@ import Combine
         Task {
             var audioProject = snapshot
             audioProject.cues = snapshot.cues.map { $0?.kind == .audio ? $0 : nil }
+            message = "Checking audio…"
             preflightItems = await sound.preflight(audioProject)
             for (index, cue) in snapshot.cues.enumerated() {
                 guard let cue, cue.kind != .audio else { continue }
+                message = "Checking pad \(index + 1): \(cue.title)…"
                 do { _ = try await visualLoader.inspect(cue.filePath, kind: cue.kind) }
                 catch { preflightItems.append("Pad \(index + 1): \(error.localizedDescription)") }
             }
@@ -276,7 +279,7 @@ import Combine
             }
             if project != snapshot { preflightItems.append("Project changed during preflight; run it again") }
             checking = false
-            message = preflightItems.isEmpty ? "Preflight passed: media decoded and engine running" : "Preflight: \(preflightItems.count) issue(s)"
+            message = preflightItems.isEmpty ? "Preflight passed: media validated and engine running" : "Preflight: \(preflightItems.count) issue(s)"
         }
     }
 }
@@ -354,12 +357,13 @@ struct MainView: View {
                 Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
             }
             HStack(alignment: .top, spacing: 14) {
-                ScrollView {
                 VStack(spacing: 9) {
+                    ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 8), spacing: 9) {
                         ForEach(0..<32, id: \.self) { index in
                             Pad(index: index)
                         }
+                    }
                     }
                     Divider()
                     HStack(spacing: 10) {
@@ -393,7 +397,6 @@ struct MainView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                }
                 Divider()
                 ScrollView { CueInspector().frame(width: 280) }.frame(width: 300)
             }
@@ -445,7 +448,7 @@ struct Pad: View {
                         }
                         Spacer()
                         if running { Image(systemName: "waveform").foregroundStyle(.green) }
-                        else if cue.map({ state.sound.loading.contains($0.id) }) == true { ProgressView().controlSize(.mini) }
+                        else if cue.map({ state.sound.loading.contains($0.id) || state.video.loadingCueID == $0.id }) == true { ProgressView().controlSize(.mini) }
                     }
                     Spacer()
                     Text(cue?.title ?? "+ Assign")
@@ -469,11 +472,11 @@ struct Pad: View {
                 state.assignMedia(urls, to: index)
             } isTargeted: { dropTargeted = $0 }
             HStack(spacing: 2) {
-                Button("Edit") { state.selected = index }.help("Select settings without triggering audio")
+                Button("Edit") { state.selected = index }.help("Select settings without triggering playback")
                 Button("▲") { if let cue { state.fadeUp(cue) } }
-                    .help("Manual fade in to configured clip level")
+                    .help("Manual fade up to configured level")
                 Button("▼") { if let cue { state.fadeDown(cue) } }
-                    .help("Fade to silence, keep playback running")
+                    .help("Fade to silence/black, keep playback running")
                 Button("■") { if let cue { state.fadeStop(cue) } }
                     .help("Fade out and stop")
                 Button("✕") { if let cue { state.stopCue(cue) } }.help("Immediate stop")

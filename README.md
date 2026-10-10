@@ -1,6 +1,6 @@
-# StageCue 0.1
+# StageCue 0.2
 
-Native, local macOS audio soundboard: SwiftUI, AVAudioEngine and Core Audio through Apple's audio engine. Apple Silicon only; macOS 14 or newer. No cloud services or third-party runtime dependencies. Video is outside version 0.1.
+Native, local macOS audio/video soundboard: SwiftUI, AVAudioEngine, AVPlayer and Core Audio. Apple Silicon only; macOS 14 or newer. No cloud services, third-party runtime dependencies, recording or streaming.
 
 ## Build and run
 
@@ -55,7 +55,7 @@ Autosave is debounced and stored at `~/Library/Application Support/StageCue/auto
 
 Malformed/future-version JSON is rejected. Older projects without the version field or optional settings are accepted; pad/bus counts and invalid settings are repaired, duplicate cue IDs replaced, and legacy unsupported Hold modes converted to One-shot. A corrupt autosave is not overwritten by ordinary edits or quitting; open a valid project or explicitly Save to resume normal saving. Errors are shown in the app. Shutdown makes a final synchronous autosave attempt because the process may exit before queued asynchronous work completes; an I/O failure during termination cannot be surfaced in a closed window.
 
-Media references remain absolute paths. Projects save references, not copied audio. Moved/missing media is reported; use Browse to relink it. Only nonempty mono/stereo files decodable by AVAudioFile are supported. Each decoded clip is capped at 512 MiB; active voices plus reserved loads are capped at 1 GiB. This accounts for decoded PCM, not total process memory: the loader, preflight, framework nodes and temporary canceled work use additional memory. The loader serializes decoding. No buffers are cached; first-trigger decoding has latency. Long clips must be shortened or converted until streaming/preloading is implemented.
+Media references remain absolute paths. Projects save references, not copied audio. Moved/missing media is reported; use Browse to relink it. Audio cues support nonempty mono/stereo files decodable by AVAudioFile. Each decoded clip is capped at 512 MiB; active voices plus reserved loads are capped at 1 GiB. This accounts for decoded PCM, not total process memory: the loader, preflight, framework nodes and temporary canceled work use additional memory. The loader serializes decoding. No buffers are cached; first-trigger decoding has latency. Long clips must be shortened or converted until streaming/preloading is implemented.
 
 ## Architecture
 
@@ -83,3 +83,17 @@ Fades use the show manual fade duration. These commands affect only the selected
 Click Edit beneath any pad. In Pad Settings, choose a Trigger shortcut: Option plus a letter or digit, or None. Keys used by other pads are omitted; X is reserved for stop. Each project saves its own assignments. Shortcuts are shown on the pads and in the Performance menu. All 32 pads can have distinct shortcuts. Configured Option shortcuts take priority over typing special characters in StageCue name fields; they are suspended while file dialogs/sheets are open. Held-key repeats are ignored.
 
 To reorder, select a pad with Edit, choose a destination in Move to, then click Swap. An occupied destination swaps both cues; an empty destination moves the cue. Titles, media references, IDs and playback/fade settings are preserved. Active playback continues. The moved cue remains selected. Shortcuts belong to positions and stay in place when cues move. Pending file assignments on the two affected positions are canceled to prevent stale drops from replacing a swapped cue. Undo is not yet available; swapping the same positions again reverses the move.
+
+## Version 0.2 visual cues
+
+Drag MOV/MP4 or PNG/JPEG onto a pad, or use Browse. The cue type is detected from the media. Audio remains independently playable on the original six buses. Only one visual program is presented at a time; two players overlap for transitions. Choose Cut or Crossfade and visual fade durations in Pad Settings. Crossfade uses the incoming cue's fade-in duration; a cut ignores that duration. Video one-shots hold the final frame while their configured fade-out completes; looping seeks back to the beginning and is not guaranteed gapless. Still images remain until replaced/stopped.
+
+Pause/Resume affects visual playback and transition clocks. Selected-pad Option shortcuts apply to audio or visual cues. Fade down retains playback; fade out/stop retires it. Blackout instantly masks the picture in preview and output; soundtrack and independent audio continue. Stop Video affects only the visual program; STOP ALL / Command-period also stop audio. Optional background PNG/JPEG appears when the program is empty or fades away. Blackout covers the background too.
+
+Connect a separate display in extended desktop mode. Keep StageCue on the operator display, click Refresh, choose Output display and Show Output. The borderless presentation covers that display without taking keyboard focus. Close Output closes only the window, not playback. Playback is owned by ShowState and persists through selection/reordering/grid scrolling. Disconnecting the presentation display closes its window and reports the problem instead of moving it onto the operator screen. Reconnect, Refresh and Show Output explicitly. Presentation prevents idle display sleep while its window is open.
+
+Soundtracks use AVPlayer volume (-60…0 dB) and the macOS default audio output. Select the external hardware interface in macOS before the show. They do not pass through the six audio buses or the audio master. Settings changes take effect on the next trigger. Blackout does not mute audio. Native decoding supports only codecs available on this Mac; MOV/MP4 is a container guarantee, not support for every possible codec. Video dimensions are limited to 4096 pixels per axis; PNG/JPEG to 32 megapixels with a 4096-pixel decode thumbnail. Shared output targets 30 fps SDR with aspect-fit letterboxing; HDR and frame-accurate/gapless output are not claimed.
+
+Version 1 audio projects remain loadable. They migrate in memory to schema 2. Export a new 0.2 copy; opening a v1 project deliberately does not set it as the Save destination, protecting its original file. Schema 2 files cannot be opened by 0.1. Autosave uses `autosave-v0.2.json`, separate from the audio version's `autosave.json`. The local annotated v0.1 tag preserves the audio code; 0.2 development is on stagecue-v0.2. Keep the 0.1 app and project copies for rollback.
+
+Architecture and current validation: Docs/VIDEO_ARCHITECTURE.md and Docs/VIDEO_VALIDATION.md. Physical projector/interface acceptance remains required.

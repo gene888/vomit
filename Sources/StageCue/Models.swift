@@ -89,6 +89,7 @@ extension Cue {
 }
 
 struct SoundProject: Codable, Equatable, Sendable {
+    static let migrationNotice = "Project upgraded from schema 1 to 2"
     var schemaVersion = 2
     var title = "Untitled Show"
     var backgroundPath = ""
@@ -108,6 +109,7 @@ struct SoundProject: Codable, Equatable, Sendable {
 
     @discardableResult mutating func normalize() -> [String] {
         var notes: [String] = []
+        if schemaVersion == 1 { notes.append(Self.migrationNotice) }
         schemaVersion = 2
         if cues.count != 32 { notes.append("Pad count adjusted to 32") }
         cues = Array(cues.prefix(32))

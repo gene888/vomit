@@ -34,6 +34,11 @@ actor VisualMediaLoader {
             return image
         }
         let asset = AVURLAsset(url: url)
+        let watchdog = Task {
+            try await Task.sleep(for: .seconds(10))
+            asset.cancelLoading()
+        }
+        defer { watchdog.cancel() }
         guard try await asset.load(.isPlayable), !(try await asset.loadTracks(withMediaType: .video)).isEmpty else {
             throw MediaIssue(message: "No playable video track")
         }
@@ -68,6 +73,7 @@ struct VisualDissolve: Equatable {
 @MainActor final class VideoEngine: ObservableObject {
     @Published private(set) var activeIDs: Set<UUID> = []
     @Published private(set) var loading = false
+    @Published private(set) var loadingCueID: UUID?
     @Published private(set) var error = ""
     @Published private(set) var paused = false
     @Published var blackout = false
@@ -125,12 +131,14 @@ struct VisualDissolve: Equatable {
     func clearError() { error = "" }
     func play(_ original: Cue) {
         guard original.kind != .audio else { return }
+        if original.mode == .toggle, loadingCueID == original.id { stopCue(original.id); return }
         if original.mode == .toggle, activeIDs.contains(original.id) { stop(seconds: original.videoFadeOut); return }
         loadTask?.cancel()
+        for index in slots.indices where index != current && index != outgoing { slots[index].clear() }
         request = UUID()
         let token = request
         var cue = original; cue.normalize()
-        loading = true; error = ""
+        loading = true; loadingCueID = cue.id; error = ""
         loadTask = Task { [weak self, loader] in
             do {
                 let image = try await loader.inspect(cue.filePath, kind: cue.kind)
@@ -174,12 +182,12 @@ struct VisualDissolve: Equatable {
                 let seconds = cue.transition == .cut ? 0 : cue.videoFadeIn
                 self.dissolve = VisualDissolve(start: CACurrentMediaTime(), duration: seconds, from: 0, to: 1)
                 self.activeIDs.insert(cue.id)
-                self.loading = false
+                self.loading = false; self.loadingCueID = nil
                 self.tick()
             } catch {
                 guard let self, self.request == token else { return }
                 for index in self.slots.indices where index != self.current && index != self.outgoing { self.slots[index].clear() }
-                self.loading = false
+                self.loading = false; self.loadingCueID = nil
                 if !(error is CancellationError) { self.error = "\(cue.title): \(error.localizedDescription)" }
             }
         }
@@ -235,7 +243,7 @@ struct VisualDissolve: Equatable {
         tick()
     }
     func stop(seconds: Double = 0) {
-        loadTask?.cancel(); request = UUID(); loading = false
+        loadTask?.cancel(); request = UUID(); loading = false; loadingCueID = nil
         if seconds > 0 && current != nil { fade(to: 0, seconds: seconds, stop: true) }
         else { clearPlayback() }
     }
@@ -246,6 +254,10 @@ struct VisualDissolve: Equatable {
         paused = false; pausedAt = nil; stopAfterFade = false
     }
     func stopCue(_ id: UUID, seconds: Double = 0) {
+        if loadingCueID == id {
+            loadTask?.cancel(); request = UUID(); loading = false; loadingCueID = nil
+            for index in slots.indices where index != current && index != outgoing { slots[index].clear() }
+        }
         if currentCue?.id == id { stop(seconds: seconds) }
         else if let outgoing, slots[outgoing].cue?.id == id { retireOutgoing() }
     }
@@ -292,6 +304,7 @@ struct VisualDissolve: Equatable {
             }
         }
     }
+    func waitForBackground() async { await backgroundTask?.value }
     func shutdown() {
         stop(); backgroundTask?.cancel(); backgroundRequest = UUID()
         timer?.invalidate(); timer = nil; background = nil

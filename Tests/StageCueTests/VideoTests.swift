@@ -153,4 +153,37 @@ struct VideoTests {
         video.stop(); expectTrue(video.frontFrame == nil); expectTrue(video.backFrame == nil)
     }
 
+    @Test @MainActor func backgroundAndPendingCueStopDoNotInterruptCurrentVisual() async throws {
+        let video = VideoEngine(); defer { video.shutdown() }
+        let path = try image("Background", color: .blue).path
+        video.setBackground(path); await video.waitForBackground()
+        expectTrue(video.background != nil)
+        let current = Cue(filePath: path, kind: .image, transition: .cut)
+        video.play(current); await video.waitForLoad()
+        let pending = Cue(filePath: path, mode: .toggle, kind: .image)
+        video.play(pending); expectEqual(video.loadingCueID, pending.id)
+        video.stopCue(pending.id); await video.waitForLoad()
+        expectEqual(video.currentCue?.id, current.id); expectFalse(video.loading)
+        video.play(pending); video.play(pending); await video.waitForLoad()
+        expectEqual(video.currentCue?.id, current.id)
+        video.setBackground(""); await video.waitForBackground()
+        expectTrue(video.background == nil)
+    }
+
+    @Test @MainActor func mixedPreflightCompletesWhileMovieIsPlaying() async throws {
+        let state = ShowState(autosaveURL: files.directory.appendingPathComponent("preflight.json"))
+        defer { state.sound.shutdown(); state.video.shutdown() }
+        state.project.cues[0] = Cue(filePath: try image("Preflight", color: .red).path, kind: .image)
+        state.project.cues[1] = Cue(filePath: try await movie("PreflightMovie").path, loop: true, kind: .video)
+        state.trigger(1); await state.video.waitForLoad()
+        state.check()
+        for _ in 0..<1500 {
+            if !state.checking { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        expectFalse(state.checking)
+        expectTrue(state.preflightItems.isEmpty, state.preflightItems.joined(separator: "; "))
+        expectTrue(state.video.activeIDs.contains(state.project.cues[1]!.id))
+    }
+
 }

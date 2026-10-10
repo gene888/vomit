@@ -80,6 +80,7 @@ enum OutputDisplayPolicy {
     private var screenObserver: NSObjectProtocol?
     private var operatorObserver: NSObjectProtocol?
     private var outputDisplay: UInt32?
+    private var presentationActivity: NSObjectProtocol?
     init(engine: VideoEngine) {
         self.engine = engine
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
@@ -122,14 +123,17 @@ enum OutputDisplayPolicy {
         output.ignoresMouseEvents = true
         output.setFrame(screen.frame, display: true); output.orderFrontRegardless()
         window = output; outputDisplay = selectedDisplay; showing = true; message = ""
+        presentationActivity = ProcessInfo.processInfo.beginActivity(options: [.userInitiated, .idleDisplaySleepDisabled], reason: "StageCue projector presentation")
     }
     func close() {
+        if let presentationActivity { ProcessInfo.processInfo.endActivity(presentationActivity); self.presentationActivity = nil }
         window?.orderOut(nil); window?.close(); window = nil
         outputDisplay = nil; showing = false
     }
     isolated deinit {
         if let screenObserver { NotificationCenter.default.removeObserver(screenObserver) }
         if let operatorObserver { NotificationCenter.default.removeObserver(operatorObserver) }
+        if let presentationActivity { ProcessInfo.processInfo.endActivity(presentationActivity) }
         window?.close()
     }
 }

@@ -16,3 +16,12 @@
 - Preserve existing cue settings and reject invalid media without interrupting its playback.
 - Highlight drop targets, share validation with Browse, and cancel stale assignments.
 - Release build passes; all 36 tests pass. Automated native drag gestures were unavailable in the UI tool.
+
+## 0.2 development
+
+- Tagged the validated audio baseline v0.1 locally and isolated video work on stagecue-v0.2.
+- Added schema-2 audio/video/image cues with version-1 migration and separate protected autosave.
+- Added dual-player MOV/MP4 playback, PNG/JPEG stills, cuts/crossfades, looping, pause/resume, fade-to-black and stop.
+- Added preview, blackout, optional background and persistent borderless external output with disconnect safeguards.
+- Extended pads, shortcuts, preflight and media assignment without changing the audio engine.
+- 50 native tests pass; hardware acceptance requirements documented.
