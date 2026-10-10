@@ -23,7 +23,7 @@ enum CueKind: String, Codable, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
 }
 enum VisualTransition: String, Codable, CaseIterable, Identifiable, Sendable {
-    case cut = "Cut", crossfade = "Crossfade"
+    case cut = "Cut", crossfade = "Crossfade", fade = "Fade from black"
     var id: String { rawValue }
 }
 
@@ -97,6 +97,9 @@ struct SoundProject: Codable, Equatable, Sendable {
     var schemaVersion = 3
     var groups: [CueGroup] = []
     var sequences: [CueSequence] = []
+    var additionalPages: [SoundboardPage] = []
+    var show = ShowConfiguration()
+    var allCues: [Cue] { (cues + additionalPages.flatMap(\.cues)).compactMap { $0 } }
     var title = "Untitled Show"
     var backgroundPath = ""
     var cues: [Cue?] = Array(repeating: nil, count: 32)
@@ -162,12 +165,27 @@ struct SoundProject: Codable, Equatable, Sendable {
             if !sequenceIDs.insert(sequences[i].id).inserted { sequences[i].id = UUID(); notes.append("Duplicate sequence ID repaired") }
             sequences[i].normalize()
         }
+        additionalPages = Array(additionalPages.prefix(31))
+        var pageIDs: Set<UUID> = []
+        for i in additionalPages.indices {
+            if !pageIDs.insert(additionalPages[i].id).inserted { additionalPages[i].id = UUID() }
+            var page = SoundProject()
+            page.cues = additionalPages[i].cues; page.padKeys = additionalPages[i].padKeys
+            page.normalize()
+            additionalPages[i].cues = page.cues; additionalPages[i].padKeys = page.padKeys
+            for j in additionalPages[i].cues.indices {
+                guard var cue = additionalPages[i].cues[j] else { continue }
+                if !seen.insert(cue.id).inserted { cue.id = UUID(); notes.append("Duplicate page cue ID repaired") }
+                additionalPages[i].cues[j] = cue
+            }
+        }
+        show.normalize()
         return notes
     }
 }
 
 extension SoundProject {
-    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups, sequences }
+    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups, sequences, additionalPages, show }
     init(from decoder: Decoder) throws {
         self.init()
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -175,6 +193,8 @@ extension SoundProject {
         guard (1...3).contains(schemaVersion) else {
             throw DecodingError.dataCorruptedError(forKey: .schemaVersion, in: c, debugDescription: "Unsupported project version")
         }
+        additionalPages = try c.decodeIfPresent([SoundboardPage].self, forKey: .additionalPages) ?? []
+        show = try c.decodeIfPresent(ShowConfiguration.self, forKey: .show) ?? ShowConfiguration()
         sequences = try c.decodeIfPresent([CueSequence].self, forKey: .sequences) ?? []
         groups = try c.decodeIfPresent([CueGroup].self, forKey: .groups) ?? []
         title = try c.decodeIfPresent(String.self, forKey: .title) ?? title

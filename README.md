@@ -1,4 +1,4 @@
-# StageCue 0.2
+# StageCue 0.3
 
 Native, local macOS audio/video soundboard: SwiftUI, AVAudioEngine, AVPlayer and Core Audio. Apple Silicon only; macOS 14 or newer. No cloud services, third-party runtime dependencies, recording or streaming.
 
@@ -63,7 +63,7 @@ Codable value models feed ShowState (UI, project I/O) and a MainActor SoundEngin
 
 Fade envelopes use a common-mode 120 Hz control timer in live playback; offline tests drive the same envelope calculations using rendered sample time. Fades are control-rate, not sample accurate. The real output graph uses the system-selected output device; there is no device selector in the app.
 
-See `Docs/VALIDATION.md` for evidence, hardware checks and remaining features. The local Git baseline preserves the original extraction. Development commits use an explicitly local tooling identity, not an inferred personal email. No commits have been pushed to GitHub.
+See `Docs/VALIDATION.md` for evidence, hardware checks and remaining features. The local Git baseline preserves the original extraction. Development commits use an explicitly local tooling identity, not an inferred personal email. The validated 0.1/0.2 milestones are on GitHub; 0.3 work is committed locally until explicitly published.
 
 Option-click any clip, bus or master gain slider to reset it to 0.0 dB. Normal dragging and keyboard adjustment remain available.
 
@@ -94,10 +94,16 @@ Connect a separate display in extended desktop mode. Keep StageCue on the operat
 
 Soundtracks use AVPlayer volume (-60…0 dB) and the macOS default audio output. Select the external hardware interface in macOS before the show. They do not pass through the six audio buses or the audio master. Settings changes take effect on the next trigger. Blackout does not mute audio. Native decoding supports only codecs available on this Mac; MOV/MP4 is a container guarantee, not support for every possible codec. Video dimensions are limited to 4096 pixels per axis; PNG/JPEG to 32 megapixels with a 4096-pixel decode thumbnail. Shared output targets 30 fps SDR with aspect-fit letterboxing; HDR and frame-accurate/gapless output are not claimed.
 
-Version 1 audio projects remain loadable. They migrate in memory to schema 2. Export a new 0.2 copy; opening a v1 project deliberately does not set it as the Save destination, protecting its original file. Schema 2 files cannot be opened by 0.1. Autosave uses `autosave-v0.2.json`, separate from the audio version's `autosave.json`. The local annotated v0.1 tag preserves the audio code; 0.2 development is on stagecue-v0.2. Keep the 0.1 app and project copies for rollback.
+In Version 0.2, Version 1 audio projects migrated in memory to schema 2. Version 0.3 imports both formats into schema 3; follow the Show Control guide below. Export a new 0.2 copy; opening a v1 project deliberately does not set it as the Save destination, protecting its original file. Schema 2 files cannot be opened by 0.1. Autosave uses `autosave-v0.2.json`, separate from the audio version's `autosave.json`. The local annotated v0.1 tag preserves the audio code; 0.2 development is on stagecue-v0.2. Keep the 0.1 app and project copies for rollback.
 
 Architecture and current validation: Docs/VIDEO_ARCHITECTURE.md and Docs/VIDEO_VALIDATION.md. Physical projector/interface acceptance remains required.
 
 ### Hold a video's final frame
 
 In a video pad's settings, enable Hold last frame when finished, then trigger the cue. At natural completion the soundtrack ends and the final video sample remains visible. Triggering another visual cue can cut/crossfade from this held frame; manual stop/fade-out-stop still clears it. The option is saved with the project, defaults off for existing cues, applies on the next trigger, and is disabled while Loop is enabled. Pause/resume does not restart an already finished held cue.
+
+## Version 0.3 Show Control
+
+Cue Groups, Cue Sequences and optional Show Mode extend the existing soundboard. Original audio/video projects migrate to schema 3 in memory; Export a new copy. Autosave is separate (autosave-v0.3.json). Development uses feature/show-control-0.3; local v0.2 preserves the prior working app.
+
+Start with [Show Control operator guide](Docs/SHOW_CONTROL.md), [architecture](Docs/SHOW_CONTROL_ARCHITECTURE.md) and [validation](Docs/SHOW_CONTROL_VALIDATION.md). The earlier sections describe the 0.1/0.2 workflows retained in 0.3.

@@ -14,6 +14,7 @@ import Combine
     let scheduler: ShowScheduler
     var resolveStep: (SequenceStep) throws -> CueGroup = { _ in throw MediaIssue(message: "No project") }
     var validateFollow: (SequenceStep) throws -> Void = { _ in }
+    private var manualSnapshot: [String: Int]?
     private var launched: [UUID] = []
     private var currentRun: UUID?
     private var started: Double?
@@ -34,9 +35,10 @@ import Combine
     var currentStep: SequenceStep? { guard let definition, definition.steps.indices.contains(current) else { return nil }; return definition.steps[current] }
     var nextStep: SequenceStep? { guard let definition, definition.steps.indices.contains(next) else { return nil }; return definition.steps[next] }
     func select(_ sequence: CueSequence) {
-        stop(); var safe = sequence; safe.normalize(); definition = safe; current = -1; next = 0; stepStates = [:]; error = ""; state = .ready; elapsed = 0; started = nil
+        stop(); manualSnapshot = nil; var safe = sequence; safe.normalize(); definition = safe; current = -1; next = 0; stepStates = [:]; error = ""; state = .ready; elapsed = 0; started = nil
     }
-    func go() {
+    func unload() { stop(); definition = nil; current = -1; next = 0; stepStates = [:]; started = nil; elapsed = 0; error = ""; state = .ready; manualSnapshot = nil }
+    func go(manual: Bool = false) {
         guard state != .paused, let definition else { return }
         if state == .error { return } // Fix/reset deliberately; never advance silently through errors.
         guard definition.steps.indices.contains(next) else {
@@ -48,7 +50,10 @@ import Combine
         do {
             if step.advancement == .follow { try validateFollow(step) }
             let group = try resolveStep(step)
-            guard let id = scheduler.launch(group) else { throw MediaIssue(message: "Execution limit reached") }
+            if manual || manualSnapshot == nil { manualSnapshot = scheduler.resourceVersions }
+            guard let id = scheduler.launch(group, manualSnapshot: manualSnapshot) else { throw MediaIssue(message: "Execution limit reached") }
+            if let previous = currentRun { scheduler.protectedRunIDs.remove(previous) }
+            scheduler.protectedRunIDs.insert(id)
             currentRun = id; launched.append(id)
             started = started ?? now(); stepStarted = now()
             state = .running; stepStates[step.id] = .running; error = ""
@@ -79,17 +84,19 @@ import Combine
     func stop() {
         generation = UUID(); wake?.cancel(); wake = nil
         for id in launched { scheduler.stop(id, mode: .immediate) }
+        if let currentRun { scheduler.protectedRunIDs.remove(currentRun) }
         launched = []; currentRun = nil; countdown = nil
         if let currentStep { stepStates[currentStep.id] = .stopped }
         state = .stopped
     }
     func emergencyCancel() {
         generation = UUID(); wake?.cancel(); wake = nil
+        if let currentRun { scheduler.protectedRunIDs.remove(currentRun) }
         launched = []; currentRun = nil; countdown = nil; state = .stopped
         if let currentStep { stepStates[currentStep.id] = .stopped }
     }
     func reset() {
-        stop(); current = -1; next = 0; stepStates = [:]; elapsed = 0; started = nil; error = ""; state = .ready
+        stop(); current = -1; next = 0; stepStates = [:]; elapsed = 0; started = nil; error = ""; state = .ready; manualSnapshot = nil
     }
     /// Skip the upcoming row without playing it. Existing playback remains alone.
     func skip() {
@@ -101,6 +108,7 @@ import Combine
         guard definition != nil else { return }
         if let id = currentRun { scheduler.stop(id, mode: .schedulesOnly) }
         generation = UUID(); wake?.cancel(); wake = nil
+        if let currentRun { scheduler.protectedRunIDs.remove(currentRun) }
         next = max(0, current - 1); current = -1; currentRun = nil; countdown = nil; state = .ready
     }
     func tick() {
@@ -166,7 +174,7 @@ extension ShowState {
                 if !group.automaticCompletion { return true }
                 for action in group.actions where action.enabled {
                     if action.kind == .triggerGroup, try persistent(action.groupID) { return true }
-                    if [.play, .cut, .crossfade].contains(action.kind) {
+                    if [.play, .cut, .crossfade, .fadeVisual].contains(action.kind) {
                         let cue = try referencedCue(action.cueID)
                         let plan = ScheduledGroupAction.plan(group)
                         let played = plan.first { $0.action.id == action.id }

@@ -42,6 +42,17 @@ struct VideoTests {
         if let error = writer.error { throw error }
         return url
     }
+    @Test @MainActor func queuedVisualFadeAndFadeFromBlackSurviveReadiness() async throws {
+        let video = VideoEngine(); defer { video.shutdown() }
+        let first = Cue(filePath: try image("Old", color: .red).path, kind: .image, transition: .cut)
+        video.play(first); await video.waitForLoad()
+        let next = Cue(filePath: try image("New", color: .blue).path, kind: .image, transition: .fade, videoFadeIn: 2)
+        video.play(next); video.fadeCue(next.id, to: 0.25, seconds: 0)
+        await video.waitForLoad()
+        expectEqual(video.currentCue?.id, next.id); expectEqual(video.level, 0.25)
+        expectEqual(video.activeIDs, Set([next.id])); expectTrue(video.backFrame == nil)
+        video.stop(); expectTrue(video.frontFrame == nil)
+    }
     @Test func schemaMigratesAudioAndRoundTripsVisualSettings() throws {
         var old = try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":1,\"cues\":[{\"title\":\"Audio\"}]}".utf8))
         old.normalize()

@@ -95,6 +95,7 @@ actor MediaLoader {
         }
     }
     private var voices: [UUID: Voice] = [:]
+    var onConfigurationChange: () -> Void = {}
     var isRunning: Bool { engine.isRunning }
     var voiceCount: Int { voices.count }
     var attachedNodeCount: Int { engine.attachedNodes.count }
@@ -303,6 +304,7 @@ actor MediaLoader {
         engine.stop()
     }
     func handleConfigurationChange() {
+        onConfigurationChange()
         stopAll()
         engine.stop()
         report("Audio device configuration changed. Cues stopped; check your output and retrigger explicitly.")

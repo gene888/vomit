@@ -33,3 +33,29 @@ Load for GO snapshots the definition and stops the previously loaded sequence's 
 Pause freezes sequence clocks, launched groups and their owned media. Resume preserves delays. Stop cancels sequence advancement and stops only its owned group instances. GO after Stop continues with the next row; Reset stops and prepares row one. Skip next marks the upcoming row skipped without playing it. Back cancels the current group's remaining schedule, lets its media continue, and prepares the previous row for GO. Skip/Back never automatically trigger a cue or stop unrelated playback. Reset deliberately stops sequence-owned playback; manually taken-over playback is outside its ownership.
 
 A missing reference or loading failure sets Error and requires Reset/reload after correction. Edits apply when Load for GO is used again. The last row's completion marks the sequence Completed; lingering media remains available until Stop/Reset/STOP ALL. Advance sequence actions from a previous sequence row are ignored after a newer row takes over; standalone groups may advance the loaded sequence.
+
+## Show Mode and soundboard pages (0.3C)
+
+Choose Show Mode in the header, select a saved sequence, and use GO. Reload / Reset explicitly loads the latest definition and stops the old sequence's owned media. The dark view displays numbered rows, type icons, Ready/Running/Paused/Completed/Error states, current/next cues, elapsed time, timed/explicit Follow countdowns, and each running or errored group with its next scheduled event. Natural Follow has no countdown because completion depends on playback. Switching back to Soundboard keeps the execution running.
+
+The Soundboard Page selector switches between 32-pad pages. New Page creates an empty page; edit its name beside the selector. Up to 32 pages are supported. Original schema 1/2 pads become Main. Shortcuts belong to positions on each page. Groups/sequences can reference cues on any page by ID, regardless of the displayed page. A Change page action uses zero for Main, one for the second page, and so on. Page changes cancel pending file assignments to protect against a drop arriving on the wrong page; active playback continues. There is no page deletion/undo UI yet.
+
+Open Shortcuts in Show Mode or Configure Show Shortcuts in the Performance menu. Choose one key per command; show commands use Command + Option. They work in both modes, including when a text field has focus. Ordinary Option pad shortcuts remain unchanged. Repeats are suppressed. Show/pad shortcuts are suspended in modal dialogs and editor sheets; Command-period emergency stop remains active even there. These are application shortcuts, not global macOS shortcuts.
+
+Default commands:
+
+| Command | Shortcut |
+|---|---|
+| GO | Command-Option-G |
+| Pause / Resume | Command-Option-P |
+| Stop sequence | Command-Option-S |
+| Skip next | Command-Option-] |
+| Previous (prepare for GO) | Command-Option-[ |
+| Emergency Stop All | Command-Option-period, and invariant Command-period |
+| Video Blackout | Command-Option-B |
+
+Cut immediately replaces the visual after readiness. Fade to visual fades the incoming visual from black/background and retires the outgoing visual; Crossfade overlaps the two. A fade commanded during loading applies when the new visual/audio is ready. Individual video soundtrack level overrides remain distinct from picture-opacity fades.
+
+Manual overrides carry into delayed child groups and later automatic sequence steps. A new explicit pad/group trigger or manual GO authorizes automation again from the current override state. Preflight checks all pages and missing show references/cyclic group triggers in addition to media. Audio device configuration changes cancel show automation before the original engine stops; retrigger deliberately after checking the route.
+
+Limits: at most 256 group definitions, 512 actions per group, 256 sequences, 1,024 steps per sequence, 128 live group instances and 32 trigger nesting levels. Terminal execution history is bounded; current Follow state and errored instances that still own playback are retained. JSON remains bounded to 2 MiB. Groups are snapshots at launch; sequences are snapshots at load. Navigation and timed advancement do not automatically stop media from previous rows. Sleep/suspension and heavy main-thread stalls are unsuitable during a live show: elapsed continuous-clock deadlines become due when execution resumes. Preloading, sample-synchronized starts and a long-soak profiling pass are recommended future improvements.

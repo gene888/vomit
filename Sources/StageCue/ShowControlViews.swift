@@ -72,9 +72,9 @@ struct GroupEditor: View {
                 if action.kind.needsCue {
                     Picker("Cue", selection: $state.project.groups[i].actions[j].cueID) {
                         Text("Select cue").tag(Optional<UUID>.none)
-                        ForEach(state.project.cues.compactMap { $0 }.filter { $0.kind != .group }) { Text($0.title + " (" + $0.kind.rawValue + ")").tag(Optional($0.id)) }
+                        ForEach(state.project.allCues.filter { $0.kind != .group }) { Text($0.title + " (" + $0.kind.rawValue + ")").tag(Optional($0.id)) }
                     }
-                    if let id = action.cueID, !state.project.cues.compactMap({ $0 }).contains(where: { $0.id == id }) { Text("Missing cue").foregroundStyle(.red) }
+                    if let id = action.cueID, !state.project.allCues.contains(where: { $0.id == id }) { Text("Missing cue").foregroundStyle(.red) }
                 }
                 if action.kind == .triggerGroup {
                     Picker("Group", selection: $state.project.groups[i].actions[j].groupID) {
@@ -138,7 +138,7 @@ struct SequenceEditor: View {
                                     if step.target == .cue {
                                         Picker("Cue", selection: $state.project.sequences[i].steps[j].cueID) {
                                             Text("Select cue").tag(Optional<UUID>.none)
-                                            ForEach(state.project.cues.compactMap { $0 }.filter { $0.kind != .group }) { Text($0.title).tag(Optional($0.id)) }
+                                            ForEach(state.project.allCues.filter { $0.kind != .group }) { Text($0.title).tag(Optional($0.id)) }
                                         }
                                     } else {
                                         Picker("Group", selection: $state.project.sequences[i].steps[j].groupID) {
@@ -167,16 +167,16 @@ struct SequenceEditor: View {
                     }
                     HStack {
                         Button("Add step") { state.project.sequences[i].steps.append(SequenceStep()) }
-                        Button("Load for GO") { state.sequence.select(state.project.sequences[i]) }
+                        Button("Load for GO") { state.loadSequence(state.project.sequences[i].id) }
                         Spacer(); Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
                     }
                 } else { Text("Create a sequence and add media cues or groups."); Button("Done") { dismiss() } }
                 HStack {
-                    Button("GO") { state.sequence.go() }.buttonStyle(.borderedProminent)
-                    Button(state.sequence.state == .paused ? "Resume" : "Pause") { state.sequence.state == .paused ? state.sequence.resume() : state.sequence.pause() }
-                    Button("Stop") { state.sequence.stop() }
-                    Button("Skip next") { state.sequence.skip() }
-                    Button("Back") { state.sequence.back() }
+                    Button("GO") { state.performShowCommand(.go) }.buttonStyle(.borderedProminent)
+                    Button(state.sequence.state == .paused ? "Resume" : "Pause") { state.performShowCommand(.pause) }
+                    Button("Stop") { state.performShowCommand(.stop) }
+                    Button("Skip next") { state.performShowCommand(.next) }
+                    Button("Back") { state.performShowCommand(.previous) }
                     Button("Reset") { state.sequence.reset() }
                 }
                 Text("\(state.sequence.state.rawValue) • Current: \(state.sequence.currentStep?.title ?? "—") • Next: \(state.sequence.nextStep?.title ?? "End")").font(.caption)
@@ -185,4 +185,109 @@ struct SequenceEditor: View {
         }.padding(20).frame(width: 1050, height: 680)
     }
     private var index: Int? { state.project.sequences.firstIndex { $0.id == selected } }
+}
+
+struct ShowPerformanceView: View {
+    @EnvironmentObject var state: ShowState
+    var body: some View {
+        HStack(alignment: .top, spacing: 20) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Picker("Sequence", selection: Binding(get: { state.project.show.sequenceID }, set: { state.loadSequence($0) })) {
+                        Text("Select sequence").tag(Optional<UUID>.none)
+                        ForEach(state.project.sequences) { Text($0.title).tag(Optional($0.id)) }
+                    }
+                    Button("Reload / Reset") { state.loadSequence(state.project.show.sequenceID) }
+                    Button("Shortcuts") { state.editingShowKeys = true }
+                }
+                ScrollViewReader { proxy in
+                    List {
+                        if let definition = state.sequence.definition {
+                            ForEach(Array(definition.steps.enumerated()), id: \.element.id) { i, step in
+                                HStack(spacing: 12) {
+                                    Text(String(format: "%02d", i + 1)).font(.title3.monospaced()).frame(width: 42)
+                                    Image(systemName: step.target == .group ? "square.stack.3d.up" : cueIcon(step))
+                                    Text(step.title).font(.title3).lineLimit(2)
+                                    Spacer()
+                                    Text(state.sequence.stepStates[step.id]?.rawValue ?? "Ready").font(.callout)
+                                    Text(step.advancement.rawValue).font(.caption).foregroundStyle(.secondary)
+                                }.padding(8)
+                                    .listRowBackground(i == state.sequence.current ? Color.indigo.opacity(0.5) : Color.clear)
+                                    .id(step.id)
+                            }
+                        } else { Text("Prepare a sequence using the Sequences editor, then select it above.") }
+                    }
+                    .onChange(of: state.sequence.current) { _, _ in
+                        if let id = state.sequence.currentStep?.id { proxy.scrollTo(id, anchor: .center) }
+                    }
+                }
+            }.frame(maxWidth: .infinity)
+            VStack(alignment: .leading, spacing: 16) {
+                Text(state.sequence.state.rawValue.uppercased()).font(.headline).foregroundStyle(state.sequence.state == .error ? .red : .secondary)
+                Text("CURRENT").font(.caption).foregroundStyle(.secondary)
+                Text(state.sequence.currentStep?.title ?? "Ready for first cue").font(.title2.bold())
+                Text("NEXT").font(.caption).foregroundStyle(.secondary)
+                Text(state.sequence.nextStep?.title ?? "End of sequence").font(.title3)
+                Button { state.performShowCommand(.go) } label: {
+                    Text("GO").font(.system(size: 40, weight: .bold))
+                        .frame(maxWidth: .infinity, minHeight: 72)
+                }
+                    .buttonStyle(.borderedProminent).controlSize(.large).tint(.green)
+                    .disabled(state.sequence.definition == nil || state.sequence.state == .paused || state.sequence.state == .error)
+                HStack {
+                    Button(state.sequence.state == .paused ? "Resume" : "Pause") { state.performShowCommand(.pause) }
+                    Button("Stop") { state.performShowCommand(.stop) }.tint(.red)
+                }
+                HStack {
+                    Button("Skip next") { state.performShowCommand(.next) }
+                    Button("Back") { state.performShowCommand(.previous) }
+                    Button("Reset") { state.scheduler.manualOverride("sequence"); state.sequence.reset() }
+                }
+                Text("Elapsed " + time(state.sequence.elapsed)).monospacedDigit()
+                if let remaining = state.sequence.countdown { Text("Next GO in " + time(remaining)).font(.title3.monospacedDigit()).foregroundStyle(.yellow) }
+                if !state.sequence.error.isEmpty { Text(state.sequence.error).foregroundStyle(.red) }
+                Divider(); Text("RUNNING GROUPS").font(.caption.bold())
+                ScrollView {
+                    ForEach(state.scheduler.runs.filter { [.running, .paused, .error].contains($0.state) }) { run in
+                        VStack(alignment: .leading) {
+                            Text(run.definition.title).bold()
+                            Text(run.state.rawValue + " • " + time(run.elapsed)).font(.caption.monospacedDigit())
+                            if let remaining = run.nextEvent { Text("Next action in " + time(remaining)).font(.caption).foregroundStyle(.yellow) }
+                            if !run.error.isEmpty { Text(run.error).font(.caption).foregroundStyle(.red) }
+                            HStack {
+                                Button(run.state == .paused ? "Resume" : "Pause") { run.state == .paused ? state.scheduler.resume(run.id) : state.scheduler.pause(run.id) }
+                                Button("Stop") { state.scheduler.stop(run.id) }
+                            }
+                        }.frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 10)
+                    }
+                }
+            }.frame(width: 320)
+        }.padding(14).background(Color(white: 0.07)).preferredColorScheme(.dark)
+    }
+    private func time(_ value: Double) -> String { String(format: "%02d:%04.1f", Int(max(0, value)) / 60, max(0, value).truncatingRemainder(dividingBy: 60)) }
+    private func cueIcon(_ step: SequenceStep) -> String {
+        switch state.project.allCues.first(where: { $0.id == step.cueID })?.kind {
+        case .video: return "film"; case .image: return "photo"; default: return "waveform"
+        }
+    }
+}
+
+struct ShowKeyEditor: View {
+    @EnvironmentObject var state: ShowState
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Show Control Shortcuts").font(.title2.bold())
+            Text("Command + Option + chosen key. Available in both modes. Command-period always remains Emergency Stop All.").font(.callout)
+            ForEach(ShowCommand.allCases) { command in
+                Picker(command.rawValue, selection: Binding(get: { state.project.show.keys[command.rawValue] ?? "" }, set: { state.setShowKey($0, command: command) })) {
+                    Text("None").tag("")
+                    ForEach(ShowConfiguration.availableKeys.filter { key in
+                        key == state.project.show.keys[command.rawValue] || !state.project.show.keys.contains(where: { $0.value == key })
+                    }, id: \.self) { Text("⌘⌥" + $0.uppercased()).tag($0) }
+                }
+            }
+            Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+        }.padding(24).frame(width: 520)
+    }
 }

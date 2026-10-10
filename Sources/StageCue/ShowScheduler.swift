@@ -37,6 +37,7 @@ struct GroupExecution: Identifiable {
 @MainActor final class ShowScheduler: ObservableObject {
     @Published private(set) var runs: [GroupExecution] = []
     weak var driver: (any ShowPlaybackDriver)?
+    var protectedRunIDs: Set<UUID> = []
     var groupLookup: (UUID) -> CueGroup? = { _ in nil }
     var onAdvance: (UUID) -> Void = { _ in }
     private let now: () -> Double
@@ -47,8 +48,8 @@ struct GroupExecution: Identifiable {
     private var manualVersions: [String: Int] = [:]
     private var leases: [String: UUID] = [:]
     private var ticking = false
+    private var cancelingAll = false
     private let clock = ContinuousClock()
-    private let origin = ContinuousClock.now
 
     init(automatic: Bool = true, now: (() -> Double)? = nil) {
         self.automatic = automatic
@@ -56,16 +57,20 @@ struct GroupExecution: Identifiable {
         self.now = now ?? { let d = origin.duration(to: .now).components; return Double(d.seconds) + Double(d.attoseconds) / 1e18 }
     }
     isolated deinit { wake?.cancel() }
+    var resourceVersions: [String: Int] { manualVersions }
     var activeRuns: [GroupExecution] { runs.filter { $0.state == .running || $0.state == .paused } }
-    @discardableResult func launch(_ group: CueGroup, ancestry: [UUID] = []) -> UUID? {
-        guard !ancestry.contains(group.id), ancestry.count < 32, activeRuns.count < 128 else { return nil }
+    @discardableResult func launch(_ group: CueGroup, ancestry: [UUID] = [], manualSnapshot: [String: Int]? = nil) -> UUID? {
+        guard !ancestry.contains(group.id), ancestry.count < 32, runs.filter { [.running, .paused].contains($0.state) || $0.state == .error && $0.owned.contains { driver?.status($0) != .completed } }.count < 128 else { return nil }
         // Keep a bounded history without evicting active instances.
-        if runs.count >= 512 { runs.removeAll { $0.state != .running && $0.state != .paused } }
+        if runs.count >= 512 { runs.removeAll { run in
+            run.state != .running && run.state != .paused && !protectedRunIDs.contains(run.id) &&
+                run.owned.allSatisfy { driver?.status($0) == .completed || leases[$0.resource] != run.id }
+        } }
         var safe = group; safe.normalize()
         let id = UUID(); nextOrdinal += 1
         runs.append(GroupExecution(id: id, definition: safe, ordinal: nextOrdinal,
                                    pending: ScheduledGroupAction.plan(safe), started: now(),
-                                   ancestry: ancestry + [safe.id], manualVersions: manualVersions))
+                                   ancestry: ancestry + [safe.id], manualVersions: manualSnapshot ?? manualVersions))
         if !ticking { tick() }
         return id
     }
@@ -80,7 +85,7 @@ struct GroupExecution: Identifiable {
         runs[index].state = .stopped; runs[index].pending = []; runs[index].nextEvent = nil
         for media in run.owned where leases[media.resource] == id {
             if !media.survives && behavior != .schedulesOnly { driver?.stop(media, fade: behavior == .fade ? run.definition.stopFade : 0) }
-            else if run.state == .paused { driver?.resume(media) }
+            else if run.state == .paused && !cancelingAll { driver?.resume(media) }
             leases.removeValue(forKey: media.resource)
         }
         runs[index].owned = []
@@ -103,11 +108,13 @@ struct GroupExecution: Identifiable {
         tick()
     }
     func cancelAll() {
+        cancelingAll = true
+        defer { cancelingAll = false }
         generation = UUID(); wake?.cancel(); wake = nil
         for id in runs.filter({ [.running, .paused, .error].contains($0.state) }).map(\.id) { stop(id, mode: .schedulesOnly) }
         leases.removeAll()
     }
-    func reset() { cancelAll(); runs.removeAll(); manualVersions.removeAll() }
+    func reset() { cancelAll(); runs.removeAll(); protectedRunIDs.removeAll(); manualVersions.removeAll() }
     func state(of id: UUID) -> ExecutionState? { runs.first { $0.id == id }?.state }
     func tick() {
         guard !ticking else { return }
@@ -132,7 +139,7 @@ struct GroupExecution: Identifiable {
                 if action.kind == .wait { continue }
                 if action.kind == .triggerGroup {
                     guard let target = action.groupID, let group = groupLookup(target),
-                          let child = launch(group, ancestry: runs[i].ancestry) else { throw MediaIssue(message: "Missing group, cyclic trigger or execution limit") }
+                          let child = launch(group, ancestry: runs[i].ancestry, manualSnapshot: runs[i].manualVersions) else { throw MediaIssue(message: "Missing group, cyclic trigger or execution limit") }
                     runs[i].children.append((child, action.survivesTermination))
                     continue
                 }
@@ -156,6 +163,10 @@ struct GroupExecution: Identifiable {
             }
         }
         for i in runs.indices where runs[i].state == .running {
+            if let childError = runs[i].children.compactMap({ child in runs.first { $0.id == child.0 && $0.state == .error }?.error }).first {
+                runs[i].state = .error; runs[i].error = "Child group: " + childError; runs[i].pending = []
+                continue
+            }
             runs[i].nextEvent = runs[i].pending.first.map { max(0, $0.offset - runs[i].elapsed) }
             for media in runs[i].owned {
                 if case .failed(let error) = driver?.status(media) { runs[i].state = .error; runs[i].error = error; runs[i].pending = []; break }
@@ -186,7 +197,7 @@ struct GroupExecution: Identifiable {
 
 extension ShowState: ShowPlaybackDriver {
     func referencedCue(_ id: UUID?) throws -> Cue {
-        guard let id, let cue = project.cues.compactMap({ $0 }).first(where: { $0.id == id }), cue.kind != .group else {
+        guard let id, let cue = project.allCues.first(where: { $0.id == id }), cue.kind != .group else {
             throw MediaIssue(message: "Missing media cue reference")
         }
         return cue
@@ -208,15 +219,19 @@ extension ShowState: ShowPlaybackDriver {
             project.busDB[action.bus] = action.levelDB; sound.applyMix(project); return nil
         }
         if action.kind == .blackout { video.blackout = action.blackout; return nil }
-        if action.kind == .page { throw MediaIssue(message: "Soundboard pages will be available in milestone 0.3C") }
+        if action.kind == .page {
+            guard (0...project.additionalPages.count).contains(action.page) else { throw MediaIssue(message: "Missing soundboard page") }
+            changePage(action.page, manual: false); return nil
+        }
         var cue = try referencedCue(action.cueID)
         let audio = cue.kind == .audio
         switch action.kind {
-        case .play, .cut, .crossfade:
+        case .play, .cut, .crossfade, .fadeVisual:
             guard action.kind == .play || !audio else { throw MediaIssue(message: "Cut/crossfade requires video or image") }
             cue.mode = .oneShot // Automation starts explicitly rather than toggling existing playback.
             if action.overrideLevel { cue.gainDB = action.levelDB; cue.soundtrackDB = min(0, action.levelDB) }
             if action.overrideFade { cue.autoFadeIn = true; cue.fadeInSeconds = action.duration; cue.videoFadeIn = action.duration }
+            if action.kind == .fadeVisual { cue.transition = .fade; cue.videoFadeIn = action.duration }
             if action.kind == .cut { cue.transition = .cut }
             if action.kind == .crossfade { cue.transition = .crossfade; cue.videoFadeIn = action.duration }
             if audio { sound.play(cue) } else { video.play(cue) }
@@ -229,10 +244,10 @@ extension ShowState: ShowPlaybackDriver {
             if audio { sound.resume(cue.id) } else if video.currentCue?.id == cue.id || video.loadingCueID == cue.id { video.resume() }
         case .fade:
             if audio { sound.fadeToDB(cue.id, decibels: action.levelDB, seconds: action.duration) }
-            else if video.currentCue?.id == cue.id { video.fade(to: Double(amplitude(min(0, action.levelDB))), seconds: action.duration) }
+            else { video.fadeCue(cue.id, to: Double(amplitude(min(0, action.levelDB))), seconds: action.duration) }
         case .silence:
             if audio { sound.fadeToSilence(cue.id, seconds: action.duration) }
-            else if video.currentCue?.id == cue.id { video.fade(to: 0, seconds: action.duration) }
+            else { video.fadeCue(cue.id, to: 0, seconds: action.duration) }
         case .fadeStop:
             if audio { sound.fadeOutAndStop(cue.id, seconds: action.duration) } else { video.stopCue(cue.id, seconds: action.duration) }
         default: break

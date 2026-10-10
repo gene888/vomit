@@ -78,6 +78,7 @@ struct VisualDissolve: Equatable {
     @Published private(set) var paused = false
     private(set) var failedCueID: UUID?
     private var pauseWhenReady = false
+    private var readyFade: (UUID, Double, Double)?
     @Published var blackout = false
     @Published private(set) var frontFrame: CGImage?
     @Published private(set) var backFrame: CGImage?
@@ -142,7 +143,7 @@ struct VisualDissolve: Equatable {
         let token = request
         var cue = original; cue.normalize()
         loading = true; loadingCueID = cue.id; error = ""
-        failedCueID = nil; pauseWhenReady = false
+        failedCueID = nil; pauseWhenReady = false; readyFade = nil
         loadTask = Task { [weak self, loader] in
             do {
                 let image = try await loader.inspect(cue.filePath, kind: cue.kind)
@@ -181,6 +182,7 @@ struct VisualDissolve: Equatable {
                 guard self.request == token else { slot.clear(); return }
                 self.outgoing = self.current
                 self.current = incoming
+                if cue.transition == .fade { self.retireOutgoing() }
                 self.paused = false; self.pausedAt = nil
                 self.level = 1; self.manualFade = nil; self.stopAfterFade = false
                 let seconds = cue.transition == .cut ? 0 : cue.videoFadeIn
@@ -188,6 +190,7 @@ struct VisualDissolve: Equatable {
                 self.activeIDs.insert(cue.id)
                 self.loading = false; self.loadingCueID = nil
                 self.tick()
+                if let fade = self.readyFade, fade.0 == cue.id { self.readyFade = nil; self.fade(to: fade.1, seconds: fade.2) }
                 if self.pauseWhenReady { self.pause() }
             } catch {
                 guard let self, self.request == token else { return }
@@ -260,6 +263,10 @@ struct VisualDissolve: Equatable {
         paused = false; pausedAt = nil
         for index in [current, outgoing].compactMap({ $0 }) where slots[index].cue?.kind == .video && !slots[index].seekInProgress && !slots[index].holdingEnd { slots[index].player.play() }
     }
+    func fadeCue(_ id: UUID, to target: Double, seconds: Double) {
+        if loadingCueID == id { readyFade = (id, target, seconds); pauseWhenReady = false }
+        else if currentCue?.id == id { fade(to: target, seconds: seconds) }
+    }
     func setSoundtrackDB(_ decibels: Double) {
         guard let current else { return }
         slots[current].cue?.soundtrackDB = bounded(decibels, -60...0, fallback: -6)
@@ -273,6 +280,7 @@ struct VisualDissolve: Equatable {
         tick()
     }
     func stop(seconds: Double = 0) {
+        readyFade = nil
         loadTask?.cancel(); request = UUID(); loading = false; loadingCueID = nil
         if seconds > 0 && current != nil { fade(to: 0, seconds: seconds, stop: true) }
         else { clearPlayback() }
@@ -285,7 +293,8 @@ struct VisualDissolve: Equatable {
     }
     func stopCue(_ id: UUID, seconds: Double = 0) {
         if loadingCueID == id {
-            loadTask?.cancel(); request = UUID(); loading = false; loadingCueID = nil
+            readyFade = nil
+        loadTask?.cancel(); request = UUID(); loading = false; loadingCueID = nil
             for index in slots.indices where index != current && index != outgoing { slots[index].clear() }
         }
         if currentCue?.id == id { stop(seconds: seconds) }
@@ -302,6 +311,7 @@ struct VisualDissolve: Equatable {
         }
         if let current {
             if let item = slots[current].player.currentItem, item.status == .failed {
+                failedCueID = slots[current].cue?.id
                 let message = "Video playback failed: \(item.error?.localizedDescription ?? "Decoder error")"
                 if error != message { error = message }
                 slots[current].player.pause()

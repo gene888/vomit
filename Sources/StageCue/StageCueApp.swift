@@ -5,10 +5,31 @@ import Combine
 
 @MainActor final class ShowState: ObservableObject {
     @Published var project = SoundProject() { didSet { scheduleAutosave() } }
+    @Published private(set) var page = 0
+    var pads: [Cue?] {
+        get { page == 0 ? project.cues : project.additionalPages[page - 1].cues }
+        set { if page == 0 { project.cues = newValue } else { project.additionalPages[page - 1].cues = newValue } }
+    }
+    var padKeys: [String] {
+        get { page == 0 ? project.padKeys : project.additionalPages[page - 1].padKeys }
+        set { if page == 0 { project.padKeys = newValue } else { project.additionalPages[page - 1].padKeys = newValue } }
+    }
+    func changePage(_ index: Int, manual: Bool = true) {
+        guard (0...project.additionalPages.count).contains(index) else { message = "Missing soundboard page"; return }
+        if manual { scheduler.manualOverride("page") }
+        for request in mediaAssignments.values { request.1.cancel() }; mediaAssignments.removeAll()
+        page = index; selected = 0
+    }
+    func addPage() {
+        guard project.additionalPages.count < 31 else { message = "Maximum 32 pages"; return }
+        project.additionalPages.append(SoundboardPage(title: "Page \(project.additionalPages.count + 2)"))
+        changePage(project.additionalPages.count)
+    }
+    @Published var editingShowKeys = false
     @Published var selected = 0
     var selectedCue: Cue? {
-        guard project.cues.indices.contains(selected) else { return nil }
-        return project.cues[selected]
+        guard pads.indices.contains(selected) else { return nil }
+        return pads[selected]
     }
     @Published var message = ""
     @Published var preflightItems: [String] = []
@@ -55,14 +76,17 @@ import Combine
         sequence.validateFollow = { [weak self] step in try self?.validateSequenceFollow(step) }
         scheduler.onAdvance = { [weak self] id in
             Task { @MainActor [weak self] in
-                guard let self, let status = self.scheduler.state(of: id), status != .stopped, status != .error else { return }
+                guard let self, let run = self.scheduler.runs.first(where: { $0.id == id }), run.state != .stopped, run.state != .error,
+                      self.scheduler.resourceVersions["sequence", default: 0] == run.manualVersions["sequence", default: 0] else { return }
                 self.sequence.advanceFromGroup(id)
             }
         }
         sequenceChanges = sequence.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
+        sound.onConfigurationChange = { [weak self] in self?.sequence.emergencyCancel(); self?.scheduler.cancelAll() }
         scheduler.driver = self
         scheduler.groupLookup = { [weak self] id in self?.project.groups.first { $0.id == id } }
         schedulerChanges = scheduler.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
+        if let id = project.show.sequenceID, let item = project.sequences.first(where: { $0.id == id }) { sequence.select(item) }
         sound.applyMix(project)
         video.setBackground(project.backgroundPath)
         videoChanges = Publishers.Merge3(
@@ -74,10 +98,14 @@ import Combine
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             let handled = MainActor.assumeIsolated {
                 let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-                guard flags.contains(.option), !flags.contains(.command), !flags.contains(.control),
-                      NSApp.modalWindow == nil, let window = event.window,
-                      window == NSApp.keyWindow, window.sheetParent == nil, window.attachedSheet == nil,
-                      let key = event.charactersIgnoringModifiers?.lowercased(), let self else { return false }
+                guard let key = event.charactersIgnoringModifiers?.lowercased(), let self else { return false }
+                if flags == [.command], key == "." {
+                    if !event.isARepeat { self.stopAll() }; return true
+                }
+                guard NSApp.modalWindow == nil, let window = event.window,
+                      window == NSApp.keyWindow, window.sheetParent == nil, window.attachedSheet == nil else { return false }
+                if flags == [.command, .option] { return self.performShowKey(key, execute: !event.isARepeat) }
+                guard flags.contains(.option), !flags.contains(.command), !flags.contains(.control) else { return false }
                 // Ignore held-key repeats once a recognized command has been handled.
                 return self.performPadKey(key, shift: flags.contains(.shift), execute: !event.isARepeat)
             }
@@ -157,7 +185,11 @@ import Combine
                 for request in mediaAssignments.values { request.1.cancel() }
                 mediaAssignments.removeAll()
                 recoveredAutosave = true
+                page = 0
+                scheduler.reset()
+                sequence.unload()
                 project = decoded
+                if let id = project.show.sequenceID, let item = project.sequences.first(where: { $0.id == id }) { sequence.select(item) }
                 let migrated = notes.contains(SoundProject.migrationNotice)
                 saveURL = migrated ? nil : url
                 sound.applyMix(project)
@@ -167,10 +199,10 @@ import Combine
         }
     }
     func setCue(_ cue: Cue?) {
-        guard project.cues.indices.contains(selected) else { return }
+        guard pads.indices.contains(selected) else { return }
         mediaAssignments.removeValue(forKey: selected)?.1.cancel()
-        if let old = project.cues[selected] { stopCue(old) }
-        project.cues[selected] = cue
+        if let old = pads[selected] { stopCue(old) }
+        pads[selected] = cue
     }
     @discardableResult func performPadKey(_ key: String, shift: Bool = false, execute: Bool = true) -> Bool {
         if key == "x" {
@@ -188,38 +220,63 @@ import Combine
             }
             return true
         }
-        guard !key.isEmpty, let index = project.padKeys.firstIndex(of: key) else { return false }
+        guard !key.isEmpty, let index = padKeys.firstIndex(of: key) else { return false }
         if execute { trigger(index) }
         return true
     }
+    @discardableResult func performShowKey(_ key: String, execute: Bool = true) -> Bool {
+        guard !key.isEmpty, let command = ShowCommand.allCases.first(where: { project.show.keys[$0.rawValue] == key }) else { return false }
+        if execute { performShowCommand(command) }
+        return true
+    }
+    func performShowCommand(_ command: ShowCommand) {
+        switch command {
+        case .go: scheduler.manualOverride("sequence"); sequence.go(manual: true)
+        case .pause: scheduler.manualOverride("sequence"); sequence.state == .paused ? sequence.resume() : sequence.pause()
+        case .stop: scheduler.manualOverride("sequence"); sequence.stop()
+        case .next: scheduler.manualOverride("sequence"); sequence.skip()
+        case .previous: scheduler.manualOverride("sequence"); sequence.back()
+        case .emergency: stopAll()
+        case .blackout: scheduler.manualOverride("video"); video.blackout.toggle()
+        }
+    }
+    func loadSequence(_ id: UUID?) {
+        guard let id, let item = project.sequences.first(where: { $0.id == id }) else { return }
+        project.show.sequenceID = id; sequence.select(item)
+    }
+    func setShowKey(_ key: String, command: ShowCommand) {
+        guard key.isEmpty || ShowConfiguration.availableKeys.contains(key) else { return }
+        guard key.isEmpty || !project.show.keys.contains(where: { $0.key != command.rawValue && $0.value == key }) else { message = "Show shortcut already assigned"; return }
+        project.show.keys[command.rawValue] = key
+    }
     func setPadKey(_ key: String, at index: Int) {
-        guard project.padKeys.indices.contains(index),
+        guard padKeys.indices.contains(index),
               key.isEmpty || SoundProject.availablePadKeys.contains(key) else { return }
-        guard key.isEmpty || !project.padKeys.enumerated().contains(where: { $0.offset != index && $0.element == key }) else {
+        guard key.isEmpty || !padKeys.enumerated().contains(where: { $0.offset != index && $0.element == key }) else {
             message = "Option–\(key.uppercased()) is already assigned to another pad"
             return
         }
-        project.padKeys[index] = key
+        padKeys[index] = key
     }
     func movePad(to destination: Int) {
         let source = selected
-        guard project.cues.indices.contains(source), project.cues.indices.contains(destination), source != destination else { return }
+        guard pads.indices.contains(source), pads.indices.contains(destination), source != destination else { return }
         // Invalidate loads tied to these positions before changing their occupants.
         mediaAssignments.removeValue(forKey: source)?.1.cancel()
         mediaAssignments.removeValue(forKey: destination)?.1.cancel()
-        guard project.swapPads(source, destination) else { return }
+        var moved = pads; moved.swapAt(source, destination); pads = moved
         selected = destination
         message = "Swapped pads \(source + 1) and \(destination + 1)"
     }
     /// Keep the old cue playing until validation succeeds; never autoplay dropped media.
     @discardableResult func assignMedia(_ urls: [URL], to index: Int) -> Bool {
-        guard project.cues.indices.contains(index), urls.count == 1, let url = urls.first, url.isFileURL else {
+        guard pads.indices.contains(index), urls.count == 1, let url = urls.first, url.isFileURL else {
             message = "Drop one local media file onto a pad"
             return false
         }
         let request = UUID()
         let document = documentToken
-        let cueID = project.cues[index]?.id
+        let cueID = pads[index]?.id
         mediaAssignments.removeValue(forKey: index)?.1.cancel()
         message = "Checking \(url.lastPathComponent)…"
         let task = Task { [weak self, assignmentLoader, visualLoader] in
@@ -233,13 +290,14 @@ import Combine
                 if kind == .audio { _ = try await assignmentLoader.load(url.path) }
                 else { _ = try await visualLoader.inspect(url.path, kind: kind) }
                 guard let self, self.documentToken == document, self.mediaAssignments[index]?.0 == request,
-                      self.project.cues[index]?.id == cueID else { return }
-                var cue = self.project.cues[index] ?? Cue(title: url.deletingPathExtension().lastPathComponent)
+                      self.pads[index]?.id == cueID else { return }
+                var cue = self.pads[index] ?? Cue(title: url.deletingPathExtension().lastPathComponent)
                 if cue.filePath.isEmpty && cue.title == "Cue \(index + 1)" { cue.title = url.deletingPathExtension().lastPathComponent }
-                if let old = self.project.cues[index] { self.stopCue(old) }
+                if let old = self.pads[index] { self.stopCue(old) }
                 cue.filePath = url.path
                 cue.kind = kind
-                self.project.cues[index] = cue
+                cue.groupID = nil
+                self.pads[index] = cue
                 self.selected = index
                 self.mediaAssignments.removeValue(forKey: index)
                 self.message = "Assigned \(url.lastPathComponent) to pad \(index + 1)"
@@ -257,7 +315,7 @@ import Combine
         for task in tasks { await task.value }
     }
     func trigger(_ index: Int) {
-        guard project.cues.indices.contains(index), let cue = project.cues[index] else { return }
+        guard pads.indices.contains(index), let cue = pads[index] else { return }
         selected = index
         if cue.kind == .group {
             guard let id = cue.groupID, let group = project.groups.first(where: { $0.id == id }) else { message = "Missing cue group"; return }
@@ -269,7 +327,7 @@ import Combine
     }
     func stopCue(_ cue: Cue) {
         if cue.kind == .group {
-            for run in scheduler.activeRuns where run.definition.id == cue.groupID { scheduler.stop(run.id) }
+            for run in scheduler.runs where run.definition.id == cue.groupID && [.running, .paused, .error].contains(run.state) { scheduler.stop(run.id) }
             return
         }
         scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
@@ -288,7 +346,10 @@ import Combine
         else if video.currentCue?.id == cue.id { video.fade(to: 0, seconds: project.manualFadeSeconds) }
     }
     func fadeStop(_ cue: Cue) {
-        if cue.kind == .group { stopCue(cue); return }
+        if cue.kind == .group {
+            for run in scheduler.runs where run.definition.id == cue.groupID && [.running, .paused, .error].contains(run.state) { scheduler.stop(run.id, mode: .fade) }
+            return
+        }
         scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
         if cue.kind == .audio { sound.fadeOutAndStop(cue.id, seconds: project.manualFadeSeconds) }
         else { video.stopCue(cue.id, seconds: project.manualFadeSeconds) }
@@ -301,11 +362,12 @@ import Combine
         let snapshot = project
         Task {
             var audioProject = snapshot
-            audioProject.cues = snapshot.cues.map { $0?.kind == .audio ? $0 : nil }
+            audioProject.cues = snapshot.allCues.filter { $0.kind == .audio }.map(Optional.some)
             message = "Checking audio…"
             preflightItems = await sound.preflight(audioProject)
-            for (index, cue) in snapshot.cues.enumerated() {
-                guard let cue, cue.kind == .video || cue.kind == .image else { continue }
+            preflightItems += snapshot.showReferenceIssues()
+            for (index, cue) in snapshot.allCues.enumerated() {
+                guard cue.kind == .video || cue.kind == .image else { continue }
                 message = "Checking pad \(index + 1): \(cue.title)…"
                 do { _ = try await visualLoader.inspect(cue.filePath, kind: cue.kind) }
                 catch { preflightItems.append("Pad \(index + 1): \(error.localizedDescription)") }
@@ -361,14 +423,19 @@ import Combine
                 .keyboardShortcut("x", modifiers: [.option, .shift])
                 .disabled(state.selectedCue == nil)
                 Divider()
+                ForEach(ShowCommand.allCases) { command in
+                    Button(command.rawValue + " (Show Control)") { state.performShowCommand(command) }
+                }
+                Button("Configure Show Shortcuts…") { state.editingShowKeys = true }
+                Divider()
                 ForEach(0..<32, id: \.self) { n in
-                    if let key = state.project.padKeys[n].first {
+                    if let key = state.padKeys[n].first {
                         Button("Trigger Pad \(n + 1)") { state.trigger(n) }
                             .keyboardShortcut(KeyEquivalent(key), modifiers: [.option])
-                            .disabled(state.project.cues[n] == nil)
+                            .disabled(state.pads[n] == nil)
                     } else {
                         Button("Trigger Pad \(n + 1)") { state.trigger(n) }
-                            .disabled(state.project.cues[n] == nil)
+                            .disabled(state.pads[n] == nil)
                     }
                 }
             }
@@ -386,6 +453,9 @@ struct MainView: View {
                 ProjectTitle(title: $state.project.title)
 
                 Spacer()
+                Picker("Mode", selection: $state.project.show.showMode) {
+                    Text("Soundboard").tag(false); Text("Show Mode").tag(true)
+                }.pickerStyle(.segmented).labelsHidden().frame(width: 230)
                 Button("Sequences") { state.editingSequences = true }
                 Button("Cue Groups") { state.editingGroups = true }
                 Button("Open") { state.open() }
@@ -395,8 +465,22 @@ struct MainView: View {
                 Button("FADE ALL") { state.fadeAll() }
                 Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
             }
+            if state.project.show.showMode {
+                ShowPerformanceView().environmentObject(state)
+            } else {
             HStack(alignment: .top, spacing: 14) {
                 VStack(spacing: 9) {
+                    HStack {
+                        Picker("Page", selection: Binding(get: { state.page }, set: { state.changePage($0) })) {
+                            Text(state.project.show.mainPageTitle).tag(0)
+                            ForEach(Array(state.project.additionalPages.enumerated()), id: \.element.id) { i, item in Text(item.title).tag(i + 1) }
+                        }.frame(maxWidth: 260)
+                        TextField("Page name", text: Binding(get: { state.page == 0 ? state.project.show.mainPageTitle : state.project.additionalPages[state.page - 1].title }, set: {
+                            if state.page == 0 { state.project.show.mainPageTitle = $0 } else { state.project.additionalPages[state.page - 1].title = $0 }
+                        })).finishEditingOnCommit().frame(maxWidth: 200)
+                        Button("New Page") { state.addPage() }
+                        Spacer()
+                    }
                     ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 8), spacing: 9) {
                         ForEach(0..<32, id: \.self) { index in
@@ -440,6 +524,7 @@ struct MainView: View {
                 Divider()
                 ScrollView { CueInspector().frame(width: 280) }.frame(width: 300)
             }
+            }
             Divider()
             VideoControls(video: state.video, output: state.output, project: $state.project, onManualControl: { state.scheduler.manualOverride("video") })
             HStack {
@@ -458,6 +543,7 @@ struct MainView: View {
             }
         }
         .padding(16)
+        .sheet(isPresented: $state.editingShowKeys) { ShowKeyEditor().environmentObject(state) }
         .sheet(isPresented: $state.editingSequences) { SequenceEditor().environmentObject(state) }
         .sheet(isPresented: $state.editingGroups) { GroupEditor().environmentObject(state) }
         .alert("Preflight", isPresented: $showPreflight) {
@@ -475,7 +561,7 @@ struct Pad: View {
     @State private var dropTargeted = false
     let index: Int
     var body: some View {
-        let cue = state.project.cues[index]
+        let cue = state.pads[index]
         let running = cue.map { item in state.sound.active.contains(item.id) || state.video.activeIDs.contains(item.id) || state.scheduler.activeRuns.contains { $0.definition.id == item.groupID } } ?? false
         VStack(spacing: 5) {
             Button {
@@ -485,8 +571,8 @@ struct Pad: View {
                 VStack {
                     HStack {
                         Text(String(format: "%02d", index + 1)).font(.caption2.monospaced())
-                        if !state.project.padKeys[index].isEmpty {
-                            Text("⌥" + state.project.padKeys[index].uppercased()).font(.caption2.monospaced())
+                        if !state.padKeys[index].isEmpty {
+                            Text("⌥" + state.padKeys[index].uppercased()).font(.caption2.monospaced())
                         }
                         Spacer()
                         if running { Image(systemName: "waveform").foregroundStyle(.green) }
@@ -534,12 +620,12 @@ struct CueInspector: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("PAD \(state.selected + 1) • SETTINGS").font(.headline)
             Picker("Trigger shortcut", selection: Binding(
-                get: { state.project.padKeys[state.selected] },
+                get: { state.padKeys[state.selected] },
                 set: { state.setPadKey($0, at: state.selected) }
             )) {
                 Text("None").tag("")
                 ForEach(SoundProject.availablePadKeys.filter { key in
-                    key == state.project.padKeys[state.selected] || !state.project.padKeys.contains(key)
+                    key == state.padKeys[state.selected] || !state.padKeys.contains(key)
                 }, id: \.self) { key in
                     Text("Option–\(key.uppercased())").tag(key)
                 }
@@ -553,7 +639,7 @@ struct CueInspector: View {
             }
             Text("Swap preserves both cues. Shortcuts stay with pad positions.")
                 .font(.caption).foregroundStyle(.secondary)
-            Picker("Assign group", selection: Binding(get: { state.selectedCue?.groupID }, set: { id in
+            Picker("Assign group", selection: Binding(get: { state.selectedCue?.kind == .group ? state.selectedCue?.groupID : nil }, set: { id in
                 if let id, let group = state.project.groups.first(where: { $0.id == id }) {
                     state.setCue(Cue(title: group.title, kind: .group, groupID: id))
                 }
@@ -561,7 +647,7 @@ struct CueInspector: View {
                 Text("Media cue / none").tag(Optional<UUID>.none)
                 ForEach(state.project.groups) { Text($0.title).tag(Optional($0.id)) }
             }
-            if let cue = state.project.cues[state.selected] {
+            if let cue = state.pads[state.selected] {
                 cueControls(cue)
             } else {
                 Text("Unassigned pad").foregroundStyle(.secondary)
@@ -643,7 +729,7 @@ struct CueInspector: View {
         }
         Divider()
         Button("Stop using cue's fade setting") {
-            if current.kind == .audio { state.sound.configuredStop(current.id) }
+            if current.kind == .audio { state.scheduler.manualOverride("audio:\(current.id)"); state.sound.configuredStop(current.id) }
             else { state.scheduler.manualOverride("video"); state.video.stopCue(current.id, seconds: current.videoFadeOut) }
         }
         Button("Clear Pad", role: .destructive) {
@@ -653,12 +739,14 @@ struct CueInspector: View {
     }
     private func bind<T>(_ key: WritableKeyPath<Cue, T>) -> Binding<T> {
         let index = state.selected
+        let page = state.page
+        let cueID = state.selectedCue?.id
         let fallback = Cue()[keyPath: key]
         return Binding(get: {
-            guard state.project.cues.indices.contains(index) else { return fallback }
-            return state.project.cues[index]?[keyPath: key] ?? fallback
+            guard state.page == page, state.pads.indices.contains(index), state.pads[index]?.id == cueID else { return fallback }
+            return state.pads[index]?[keyPath: key] ?? fallback
         }, set: { newValue in
-            guard state.project.cues.indices.contains(index), var cue = state.project.cues[index] else { return }
+            guard state.page == page, state.pads.indices.contains(index), var cue = state.pads[index], cue.id == cueID else { return }
             cue[keyPath: key] = newValue
             cue.normalize()
             if key == \Cue.gainDB {
@@ -669,7 +757,7 @@ struct CueInspector: View {
                 state.scheduler.manualOverride("video")
                 if state.video.currentCue?.id == cue.id { state.video.setSoundtrackDB(cue.soundtrackDB) }
             }
-            state.project.cues[index] = cue
+            state.pads[index] = cue
         })
     }
     private func chooseFile() {

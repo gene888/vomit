@@ -23,3 +23,7 @@
 ## Outside 0.1
 
 No video playback, video routing, HDMI/projector output or video preview was implemented. Version 0.2 video work remains separate.
+
+## Version 0.3 follow-up priorities
+
+The 0.1 list above is historical. Groups, sequences, Show Mode and soundboard pages now exist. Remaining priorities: real interface/projector acceptance and hot-plug checks; extended-show Instruments CPU/GPU/memory profiling; media preloading and synchronized starts; portable media/security bookmarks; timeline seeking; page deletion/undo and richer copy/edit tooling; explicit sleep/suspension recovery rather than dispatching overdue actions. Existing video soundtrack bus-routing and 30 fps SDR limitations remain. No out-of-scope network/MIDI/OSC/DMX features are added.

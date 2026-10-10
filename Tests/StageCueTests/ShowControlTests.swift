@@ -5,6 +5,7 @@ import Testing
 
 @MainActor final class TestShowDriver: ShowPlaybackDriver {
     var events: [GroupAction] = []
+    var onEvent: (GroupAction) -> Void = { _ in }
     var stopped: [(UUID, Double)] = []
     var paused: Set<UUID> = []
     var statuses: [UUID: PlaybackStatus] = [:]
@@ -16,7 +17,7 @@ import Testing
         return action.kind == .bus ? "bus:\(action.bus)" : nil
     }
     func execute(_ action: GroupAction) throws -> OwnedPlayback? {
-        _ = try resource(for: action); events.append(action)
+        _ = try resource(for: action); events.append(action); onEvent(action)
         if action.kind == .play, let id = action.cueID {
             statuses[id] = .playing
             return OwnedPlayback(resource: "audio:\(id)", cueID: id, survives: action.survivesTermination)
@@ -136,10 +137,13 @@ import Testing
     @Test func continuousClockFiresWithoutUITimerUnderWorkerLoad() async throws {
         let driver = TestShowDriver(), scheduler = ShowScheduler(); scheduler.driver = driver
         let start = ContinuousClock.now
+        var fired: Double = -1
+        driver.onEvent = { _ in let t = start.duration(to: .now).components; fired = Double(t.seconds) + Double(t.attoseconds) / 1e18 }
         let load = Task.detached { var n: UInt64 = 1; for i in 0..<2_000_000 { n = n &* 1664525 &+ UInt64(i) }; return n }
         _ = scheduler.launch(CueGroup(actions: [GroupAction(cueID: UUID(), delay: 0.08)]))
         try await Task.sleep(for: .milliseconds(240))
         expectEqual(driver.events.count, 1)
+        expectTrue(fired >= 0.08 && fired < 0.23)
         let elapsed = start.duration(to: .now).components
         expectTrue(Double(elapsed.seconds) + Double(elapsed.attoseconds) / 1e18 < 1)
         _ = await load.value; scheduler.cancelAll()
