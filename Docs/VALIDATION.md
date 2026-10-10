@@ -2,7 +2,7 @@
 
 ## Result
 
-A functioning Apple Silicon macOS app project now builds in both Debug and Release. The Release app is ad-hoc signed, verifies successfully, and was launched and exercised through the native UI. The final audio/model/persistence test run passed **32 tests in four suites**, exit status 0. This is a development build with physical audio validation still required, not a certified show-ready release.
+A functioning Apple Silicon macOS app project now builds in both Debug and Release. The Release app is ad-hoc signed, verifies successfully, and was launched and exercised through the native UI. The final audio/model/persistence test run passed **36 tests in five suites**, exit status 0. This is a development build with physical audio validation still required, not a certified show-ready release.
 
 Source remains in `/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1`. A local Git repository preserves the original extraction as commit `46beb25`, followed by the implementation commit. Origin points to the inspected repository, `https://github.com/gene888/vomit.git`. Initial read-only remote inspection and clone found no commits/advertised refs. Nothing has been pushed. No unrelated projects were edited; the original source zip is preserved. Commits use the transparent tooling identity `StageCue Local Development <stagecue@localhost>` scoped to each commit command, without changing global Git identity.
 
@@ -17,7 +17,7 @@ Source remains in `/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1`. A loca
 
 ## Automated evidence
 
-The log ends with `Test run with 32 tests in 4 suites passed`; the native runner wrote exit status `0`. Tests render the actual AVAudioEngine graph into PCM buffers and compare results against calculated gain values. Silence fixtures used with the live engine emit no audible signal.
+The log ends with `Test run with 36 tests in 5 suites passed`; the native runner wrote exit status `0`. Tests render the actual AVAudioEngine graph into PCM buffers and compare results against calculated gain values. Silence fixtures used with the live engine emit no audible signal.
 
 | Area | Verified behavior |
 | --- | --- |
@@ -57,3 +57,11 @@ Before performance use, test the actual interface with audible clips: gain/headr
 Per-clip decoded media limit is 64 MiB; the active-plus-reserved budget is 256 MiB. These are buffer budgets, not process-memory ceilings. Decoding is not cached, so first-trigger latency remains. Long media streaming, preloading, metering/clipping protection, device selection, Hold, pause, portable media collection and sandbox bookmarks remain outstanding. Node/buffer accounting tests are not a full Instruments leak/CPU profile. The macOS 14 deployment target has not been tested on a separate macOS 14 machine. The app is ad-hoc signed, not notarized.
 
 The complete remaining list is in `OUTSTANDING.md`. No Version 0.2 video functionality was added.
+
+## Follow-up: Pad file drops
+
+Pads accept one local file URL using SwiftUI native drop destinations and highlight the targeted pad. Media is decoded and checked off the UI actor before assignment. Empty pads use the filename; assigned pads preserve their ID, name and playback/gain/bus/fade settings. A successful replacement stops only that pad's current voice; drops never autoplay. Browse shares this validation. Failed validation does not change or stop the old cue. A newer drop supersedes pending validation, and cleared pads/opened projects invalidate stale assignments.
+
+Release build and signature verification passed after this change. Four new native tests verify empty-pad creation without playback, settings-preserving replacement with independent audio, rejection of invalid/missing/folder/remote/multiple files, and superseded/cleared assignment cancellation. The full regression suite passed 36 tests in five suites. Test state uses an injected autosave location and never modifies the user's show.
+
+An isolated UI harness displayed the actual pad/drop code, but the UI automation drag API repeatedly returned `noWindowsAvailable`. A physical Finder drag gesture was therefore not verified in this run. Assignment behavior is tested directly using the same URL handler invoked by the drop destination.

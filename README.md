@@ -39,6 +39,7 @@ Open the generated `work/NativeValidation.app` in Finder to run the compiled sui
 
 ## Performance workflow
 
+- Drag one local audio file from Finder onto a pad to assign it. Empty pads create a cue named after the file. Assigned pads retain their name, gain, bus, looping and fade settings; their current playback stops only after the replacement validates. Drops never start playback. Invalid files, folders and multi-file drops leave the cue unchanged. Pads highlight while targeted. Browse remains available and uses the same validation.
 - Select an empty pad and Create Cue. Browse for local audio, choose clip gain in dB and one of six buses, then configure One-shot or Toggle and optional looping/fades.
 - Click the large pad or Option+1 through Option+9 to trigger. One-shot retriggers replace the prior voice for that pad. Toggle stops the active voice using its configured stop fade, or starts it if inactive. Toggling a loading cue cancels it. Different pads play concurrently.
 - Edit selects a pad without playing it. Settings changes apply on the next trigger; bus/master faders apply live. Gains support −60 to +6 dB. −60 dB is attenuation, not an exact mute.

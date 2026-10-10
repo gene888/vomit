@@ -9,3 +9,10 @@
 - Added project validation, compatible legacy decoding, duplicate-ID repair, debounced atomic autosave and explicit document-save semantics.
 - Removed unsupported Hold selection and moved cue shortcuts to Option+1 through Option+9.
 - Physical audio/interface validation remains required; video is outside this build.
+
+## File-drop update
+
+- Drop one local audio file onto a pad to create a cue or replace its media.
+- Preserve existing cue settings and reject invalid media without interrupting its playback.
+- Highlight drop targets, share validation with Browse, and cancel stale assignments.
+- Release build passes; all 36 tests pass. Automated native drag gestures were unavailable in the UI tool.

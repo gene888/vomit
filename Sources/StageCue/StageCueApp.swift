@@ -17,11 +17,16 @@ import Combine
     private var engineChanges: AnyCancellable?
     private var terminationObserver: NSObjectProtocol?
     private var recoveredAutosave = true
+    private let assignmentLoader = MediaLoader()
+    private var documentToken = UUID()
+    private var mediaAssignments: [Int: (UUID, Task<Void, Never>)] = [:]
+    private let autosaveURL: URL
 
-    init() {
-        if FileManager.default.fileExists(atPath: Self.defaultURL.path) {
+    init(autosaveURL: URL? = nil) {
+        self.autosaveURL = autosaveURL ?? Self.defaultURL
+        if FileManager.default.fileExists(atPath: self.autosaveURL.path) {
             do {
-                let (saved, notes) = try ProjectStore.load(from: Self.defaultURL)
+                let (saved, notes) = try ProjectStore.load(from: self.autosaveURL)
                 project = saved
                 if !notes.isEmpty { message = notes.joined(separator: "; ") }
             } catch {
@@ -36,13 +41,14 @@ import Combine
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.autosaveTask?.cancel()
-                if self.recoveredAutosave { try? ProjectStore.save(self.project, to: Self.defaultURL) }
+                if self.recoveredAutosave { try? ProjectStore.save(self.project, to: self.autosaveURL) }
                 self.sound.shutdown()
             }
         }
     }
     isolated deinit {
         autosaveTask?.cancel()
+        for request in mediaAssignments.values { request.1.cancel() }
         if let terminationObserver { NotificationCenter.default.removeObserver(terminationObserver) }
     }
     static var defaultURL: URL {
@@ -55,11 +61,12 @@ import Combine
         revision += 1
         let version = revision
         let snapshot = project
+        let destination = autosaveURL
         autosaveTask = Task { [weak self, writer] in
             do {
                 try await Task.sleep(for: .milliseconds(350))
                 try Task.checkCancellation()
-                try await writer.save(snapshot, to: Self.defaultURL, revision: version)
+                try await writer.save(snapshot, to: destination, revision: version)
             } catch is CancellationError { }
             catch { self?.message = "Autosave failed: \(error.localizedDescription)" }
         }
@@ -72,9 +79,10 @@ import Combine
         let version = revision
         let snapshot = project
         let destination = saveURL
+        let autosave = autosaveURL
         Task {
             do {
-                try await writer.save(snapshot, to: Self.defaultURL, revision: version)
+                try await writer.save(snapshot, to: autosave, revision: version)
                 if let destination { try await writer.save(snapshot, to: destination, revision: version) }
                 message = "Project saved"
             } catch { message = "Save failed: \(error.localizedDescription)" }
@@ -96,6 +104,9 @@ import Combine
             do {
                 let (decoded, notes) = try ProjectStore.load(from: url)
                 sound.stopAll()
+                documentToken = UUID()
+                for request in mediaAssignments.values { request.1.cancel() }
+                mediaAssignments.removeAll()
                 recoveredAutosave = true
                 project = decoded
                 saveURL = url
@@ -107,8 +118,51 @@ import Combine
     }
     func setCue(_ cue: Cue?) {
         guard project.cues.indices.contains(selected) else { return }
+        mediaAssignments.removeValue(forKey: selected)?.1.cancel()
         if let old = project.cues[selected] { sound.stop(old.id) }
         project.cues[selected] = cue
+    }
+    /// Keep the old cue playing until validation succeeds; never autoplay dropped media.
+    @discardableResult func assignMedia(_ urls: [URL], to index: Int) -> Bool {
+        guard project.cues.indices.contains(index), urls.count == 1, let url = urls.first, url.isFileURL else {
+            message = "Drop one local audio file onto a pad"
+            return false
+        }
+        let request = UUID()
+        let document = documentToken
+        let cueID = project.cues[index]?.id
+        mediaAssignments.removeValue(forKey: index)?.1.cancel()
+        message = "Checking \(url.lastPathComponent)…"
+        let task = Task { [weak self, assignmentLoader] in
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let values = try url.resourceValues(forKeys: [.isRegularFileKey])
+                guard values.isRegularFile == true else { throw MediaIssue(message: "Choose an audio file, not a folder") }
+                // Use the existing bounded decoder off the UI actor, rather than trusting the extension.
+                _ = try await assignmentLoader.load(url.path)
+                guard let self, self.documentToken == document, self.mediaAssignments[index]?.0 == request,
+                      self.project.cues[index]?.id == cueID else { return }
+                var cue = self.project.cues[index] ?? Cue(title: url.deletingPathExtension().lastPathComponent)
+                if cue.filePath.isEmpty && cue.title == "Cue \(index + 1)" { cue.title = url.deletingPathExtension().lastPathComponent }
+                if let old = self.project.cues[index] { self.sound.stop(old.id) }
+                cue.filePath = url.path
+                self.project.cues[index] = cue
+                self.selected = index
+                self.mediaAssignments.removeValue(forKey: index)
+                self.message = "Assigned \(url.lastPathComponent) to pad \(index + 1)"
+            } catch {
+                guard let self, self.documentToken == document, self.mediaAssignments[index]?.0 == request else { return }
+                self.mediaAssignments.removeValue(forKey: index)
+                self.message = "Cannot assign \(url.lastPathComponent): \(error.localizedDescription)"
+            }
+        }
+        mediaAssignments[index] = (request, task)
+        return true
+    }
+    func waitForMediaAssignments() async {
+        let tasks = mediaAssignments.values.map { $0.1 }
+        for task in tasks { await task.value }
     }
     func trigger(_ index: Int) {
         guard project.cues.indices.contains(index), let cue = project.cues[index] else { return }
@@ -242,6 +296,7 @@ struct MainView: View {
 
 struct Pad: View {
     @EnvironmentObject var state: ShowState
+    @State private var dropTargeted = false
     let index: Int
     var body: some View {
         let cue = state.project.cues[index]
@@ -269,7 +324,16 @@ struct Pad: View {
                 .frame(maxWidth: .infinity).frame(height: 86)
             }
             .buttonStyle(.borderedProminent)
-            .tint(running ? .green : state.selected == index ? .indigo : .gray)
+            .tint(dropTargeted ? .blue : running ? .green : state.selected == index ? .indigo : .gray)
+            .overlay {
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(dropTargeted ? Color.accentColor : .clear, lineWidth: 3)
+                    .allowsHitTesting(false)
+            }
+            .help("Drop one audio file here to assign it. Existing cue settings are preserved.")
+            .dropDestination(for: URL.self) { urls, _ in
+                state.assignMedia(urls, to: index)
+            } isTargeted: { dropTargeted = $0 }
             HStack(spacing: 2) {
                 Button("Edit") { state.selected = index }.help("Select settings without triggering audio")
                 Button("▲") { if let cue { state.sound.fadeIn(cue.id, seconds: state.project.manualFadeSeconds) } }
@@ -363,10 +427,7 @@ struct CueInspector: View {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.audio]
         if panel.runModal() == .OK, let url = panel.url {
-            state.project.cues[index]?.filePath = url.path
-            if state.project.cues[index]?.title.hasPrefix("Cue ") == true {
-                state.project.cues[index]?.title = url.deletingPathExtension().lastPathComponent
-            }
+            state.assignMedia([url], to: index)
         }
     }
 }
