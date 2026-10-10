@@ -14,6 +14,10 @@ import Combine
     @Published var preflightItems: [String] = []
     @Published var checking = false
     let sound = SoundEngine()
+    let video = VideoEngine()
+    lazy var output = VideoOutputController(engine: video)
+    private let visualLoader = VisualMediaLoader()
+    private var videoChanges: AnyCancellable?
     private var saveURL: URL?
     private let writer = ProjectWriter()
     private var autosaveTask: Task<Void, Never>?
@@ -40,6 +44,12 @@ import Combine
             }
         }
         sound.applyMix(project)
+        video.setBackground(project.backgroundPath)
+        videoChanges = Publishers.Merge3(
+            video.$activeIDs.dropFirst().map { _ in () },
+            video.$paused.dropFirst().map { _ in () },
+            video.$loading.dropFirst().map { _ in () }
+        ).sink { [weak self] _ in self?.objectWillChange.send() }
         // Catch performance Option shortcuts before text fields interpret them as symbols.
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             let handled = MainActor.assumeIsolated {
@@ -60,7 +70,7 @@ import Combine
                 guard let self else { return }
                 self.autosaveTask?.cancel()
                 if self.recoveredAutosave { try? ProjectStore.save(self.project, to: self.autosaveURL) }
-                self.sound.shutdown()
+                self.sound.shutdown(); self.video.shutdown(); self.output.close()
             }
         }
     }
@@ -72,7 +82,7 @@ import Combine
     }
     static var defaultURL: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("StageCue", isDirectory: true).appendingPathComponent("autosave.json")
+            .appendingPathComponent("StageCue", isDirectory: true).appendingPathComponent("autosave-v0.2.json")
     }
     private func scheduleAutosave() {
         guard recoveredAutosave else { return }
@@ -122,7 +132,7 @@ import Combine
         if panel.runModal() == .OK, let url = panel.url {
             do {
                 let (decoded, notes) = try ProjectStore.load(from: url)
-                sound.stopAll()
+                stopAll()
                 documentToken = UUID()
                 for request in mediaAssignments.values { request.1.cancel() }
                 mediaAssignments.removeAll()
@@ -138,22 +148,22 @@ import Combine
     func setCue(_ cue: Cue?) {
         guard project.cues.indices.contains(selected) else { return }
         mediaAssignments.removeValue(forKey: selected)?.1.cancel()
-        if let old = project.cues[selected] { sound.stop(old.id) }
+        if let old = project.cues[selected] { stopCue(old) }
         project.cues[selected] = cue
     }
     @discardableResult func performPadKey(_ key: String, shift: Bool = false, execute: Bool = true) -> Bool {
         if key == "x" {
             if execute, let cue = selectedCue {
-                if shift { sound.fadeOutAndStop(cue.id, seconds: project.manualFadeSeconds) }
-                else { sound.stop(cue.id) }
+                if shift { fadeStop(cue) }
+                else { stopCue(cue) }
             }
             return true
         }
         guard !shift else { return false }
         if key == "\u{F700}" || key == "\u{F701}" {
             if execute, let cue = selectedCue {
-                if key == "\u{F700}" { sound.fadeIn(cue.id, seconds: project.manualFadeSeconds) }
-                else { sound.fadeToSilence(cue.id, seconds: project.manualFadeSeconds) }
+                if key == "\u{F700}" { fadeUp(cue) }
+                else { fadeDown(cue) }
             }
             return true
         }
@@ -183,7 +193,7 @@ import Combine
     /// Keep the old cue playing until validation succeeds; never autoplay dropped media.
     @discardableResult func assignMedia(_ urls: [URL], to index: Int) -> Bool {
         guard project.cues.indices.contains(index), urls.count == 1, let url = urls.first, url.isFileURL else {
-            message = "Drop one local audio file onto a pad"
+            message = "Drop one local media file onto a pad"
             return false
         }
         let request = UUID()
@@ -191,20 +201,23 @@ import Combine
         let cueID = project.cues[index]?.id
         mediaAssignments.removeValue(forKey: index)?.1.cancel()
         message = "Checking \(url.lastPathComponent)…"
-        let task = Task { [weak self, assignmentLoader] in
+        let task = Task { [weak self, assignmentLoader, visualLoader] in
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             do {
                 let values = try url.resourceValues(forKeys: [.isRegularFileKey])
                 guard values.isRegularFile == true else { throw MediaIssue(message: "Choose an audio file, not a folder") }
                 // Use the existing bounded decoder off the UI actor, rather than trusting the extension.
-                _ = try await assignmentLoader.load(url.path)
+                let kind = VisualMediaLoader.kind(for: url)
+                if kind == .audio { _ = try await assignmentLoader.load(url.path) }
+                else { _ = try await visualLoader.inspect(url.path, kind: kind) }
                 guard let self, self.documentToken == document, self.mediaAssignments[index]?.0 == request,
                       self.project.cues[index]?.id == cueID else { return }
                 var cue = self.project.cues[index] ?? Cue(title: url.deletingPathExtension().lastPathComponent)
                 if cue.filePath.isEmpty && cue.title == "Cue \(index + 1)" { cue.title = url.deletingPathExtension().lastPathComponent }
-                if let old = self.project.cues[index] { self.sound.stop(old.id) }
+                if let old = self.project.cues[index] { self.stopCue(old) }
                 cue.filePath = url.path
+                cue.kind = kind
                 self.project.cues[index] = cue
                 self.selected = index
                 self.mediaAssignments.removeValue(forKey: index)
@@ -225,14 +238,42 @@ import Combine
     func trigger(_ index: Int) {
         guard project.cues.indices.contains(index), let cue = project.cues[index] else { return }
         selected = index
-        sound.play(cue)
+        if cue.kind == .audio { sound.play(cue) } else { video.play(cue) }
     }
+    func stopCue(_ cue: Cue) {
+        if cue.kind == .audio { sound.stop(cue.id) } else { video.stopCue(cue.id) }
+    }
+    func fadeUp(_ cue: Cue) {
+        if cue.kind == .audio { sound.fadeIn(cue.id, seconds: project.manualFadeSeconds) }
+        else if video.currentCue?.id == cue.id { video.fade(to: 1, seconds: project.manualFadeSeconds) }
+    }
+    func fadeDown(_ cue: Cue) {
+        if cue.kind == .audio { sound.fadeToSilence(cue.id, seconds: project.manualFadeSeconds) }
+        else if video.currentCue?.id == cue.id { video.fade(to: 0, seconds: project.manualFadeSeconds) }
+    }
+    func fadeStop(_ cue: Cue) {
+        if cue.kind == .audio { sound.fadeOutAndStop(cue.id, seconds: project.manualFadeSeconds) }
+        else { video.stopCue(cue.id, seconds: project.manualFadeSeconds) }
+    }
+    func stopAll() { sound.stopAll(); video.stop() }
+    func fadeAll() { sound.fadeAll(seconds: project.manualFadeSeconds); video.stop(seconds: project.manualFadeSeconds) }
     func check() {
         guard !checking else { return }
         checking = true
         let snapshot = project
         Task {
-            preflightItems = await sound.preflight(snapshot)
+            var audioProject = snapshot
+            audioProject.cues = snapshot.cues.map { $0?.kind == .audio ? $0 : nil }
+            preflightItems = await sound.preflight(audioProject)
+            for (index, cue) in snapshot.cues.enumerated() {
+                guard let cue, cue.kind != .audio else { continue }
+                do { _ = try await visualLoader.inspect(cue.filePath, kind: cue.kind) }
+                catch { preflightItems.append("Pad \(index + 1): \(error.localizedDescription)") }
+            }
+            if !snapshot.backgroundPath.isEmpty {
+                do { _ = try await visualLoader.inspect(snapshot.backgroundPath, kind: .image) }
+                catch { preflightItems.append("Background: \(error.localizedDescription)") }
+            }
             if project != snapshot { preflightItems.append("Project changed during preflight; run it again") }
             checking = false
             message = preflightItems.isEmpty ? "Preflight passed: media decoded and engine running" : "Preflight: \(preflightItems.count) issue(s)"
@@ -245,7 +286,7 @@ import Combine
     var body: some Scene {
         WindowGroup("StageCue") {
             MainView().environmentObject(state)
-                .frame(minWidth: 1160, minHeight: 700)
+                .frame(minWidth: 1220, minHeight: 740)
         }
         .commands {
             CommandGroup(replacing: .newItem) {
@@ -254,28 +295,28 @@ import Combine
                 Button("Export Project…") { state.export() }.keyboardShortcut("e", modifiers: [.command, .shift])
             }
             CommandMenu("Performance") {
-                Button("Fade All & Stop") { state.sound.fadeAll(seconds: state.project.manualFadeSeconds) }
+                Button("Fade All & Stop") { state.fadeAll() }
                     .keyboardShortcut("f", modifiers: [.command, .shift])
-                Button("Emergency Stop All") { state.sound.stopAll() }
+                Button("Emergency Stop All") { state.stopAll() }
                     .keyboardShortcut(".", modifiers: [.command])
                 Divider()
                 Button("Fade Up Selected Pad") {
-                    if let cue = state.selectedCue { state.sound.fadeIn(cue.id, seconds: state.project.manualFadeSeconds) }
+                    if let cue = state.selectedCue { state.fadeUp(cue) }
                 }
                 .keyboardShortcut(.upArrow, modifiers: [.option])
                 .disabled(state.selectedCue == nil)
                 Button("Fade to Silence Selected Pad") {
-                    if let cue = state.selectedCue { state.sound.fadeToSilence(cue.id, seconds: state.project.manualFadeSeconds) }
+                    if let cue = state.selectedCue { state.fadeDown(cue) }
                 }
                 .keyboardShortcut(.downArrow, modifiers: [.option])
                 .disabled(state.selectedCue == nil)
                 Button("Stop Selected Pad") {
-                    if let cue = state.selectedCue { state.sound.stop(cue.id) }
+                    if let cue = state.selectedCue { state.stopCue(cue) }
                 }
                 .keyboardShortcut("x", modifiers: [.option])
                 .disabled(state.selectedCue == nil)
                 Button("Fade Out & Stop Selected Pad") {
-                    if let cue = state.selectedCue { state.sound.fadeOutAndStop(cue.id, seconds: state.project.manualFadeSeconds) }
+                    if let cue = state.selectedCue { state.fadeStop(cue) }
                 }
                 .keyboardShortcut("x", modifiers: [.option, .shift])
                 .disabled(state.selectedCue == nil)
@@ -309,10 +350,11 @@ struct MainView: View {
                 Button("Save") { state.save() }
                 Button("Export") { state.export() }
                 Button(state.checking ? "Checking…" : "Preflight") { state.check() }.disabled(state.checking)
-                Button("FADE ALL") { state.sound.fadeAll(seconds: state.project.manualFadeSeconds) }
-                Button("STOP ALL") { state.sound.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
+                Button("FADE ALL") { state.fadeAll() }
+                Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
             }
             HStack(alignment: .top, spacing: 14) {
+                ScrollView {
                 VStack(spacing: 9) {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 8), spacing: 9) {
                         ForEach(0..<32, id: \.self) { index in
@@ -351,13 +393,16 @@ struct MainView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+                }
                 Divider()
-                CueInspector().frame(width: 280)
+                ScrollView { CueInspector().frame(width: 280) }.frame(width: 300)
             }
+            Divider()
+            VideoControls(video: state.video, output: state.output, project: $state.project)
             HStack {
                 Text(state.message).font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Text("StageCue 0.1 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.2 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -373,8 +418,9 @@ struct MainView: View {
         .alert("Preflight", isPresented: $showPreflight) {
             Button("OK") {}
         } message: {
-            Text(state.preflightItems.isEmpty ? "All assigned media decoded successfully and the audio engine is running. Hardware output still needs a listening check." : state.preflightItems.joined(separator: "\n"))
+            Text(state.preflightItems.isEmpty ? "All assigned media validated and the audio engine is running. Hardware output still needs a listening check." : state.preflightItems.joined(separator: "\n"))
         }
+        .onChange(of: state.project.backgroundPath) { _, path in state.video.setBackground(path) }
         .onChange(of: state.checking) { old, new in if old && !new { showPreflight = true } }
     }
 }
@@ -385,7 +431,7 @@ struct Pad: View {
     let index: Int
     var body: some View {
         let cue = state.project.cues[index]
-        let running = cue.map { state.sound.active.contains($0.id) } ?? false
+        let running = cue.map { state.sound.active.contains($0.id) || state.video.activeIDs.contains($0.id) } ?? false
         VStack(spacing: 5) {
             Button {
                 state.selected = index
@@ -406,7 +452,7 @@ struct Pad: View {
                         .font(.system(size: 13, weight: .semibold))
                         .multilineTextAlignment(.center).lineLimit(2)
                     Spacer()
-                    Text(cue.map { String(format: "%.0f dB", $0.gainDB) } ?? "")
+                    Text(cue.map { $0.kind == .audio ? String(format: "%.0f dB", $0.gainDB) : $0.kind.rawValue } ?? "")
                         .font(.caption2.monospacedDigit())
                 }
                 .frame(maxWidth: .infinity).frame(height: 86)
@@ -418,19 +464,19 @@ struct Pad: View {
                     .strokeBorder(dropTargeted ? Color.accentColor : .clear, lineWidth: 3)
                     .allowsHitTesting(false)
             }
-            .help("Drop one audio file here to assign it. Existing cue settings are preserved.")
+            .help("Drop one media file here to assign it. Existing cue settings are preserved.")
             .dropDestination(for: URL.self) { urls, _ in
                 state.assignMedia(urls, to: index)
             } isTargeted: { dropTargeted = $0 }
             HStack(spacing: 2) {
                 Button("Edit") { state.selected = index }.help("Select settings without triggering audio")
-                Button("▲") { if let cue { state.sound.fadeIn(cue.id, seconds: state.project.manualFadeSeconds) } }
+                Button("▲") { if let cue { state.fadeUp(cue) } }
                     .help("Manual fade in to configured clip level")
-                Button("▼") { if let cue { state.sound.fadeToSilence(cue.id, seconds: state.project.manualFadeSeconds) } }
+                Button("▼") { if let cue { state.fadeDown(cue) } }
                     .help("Fade to silence, keep playback running")
-                Button("■") { if let cue { state.sound.fadeOutAndStop(cue.id, seconds: state.project.manualFadeSeconds) } }
+                Button("■") { if let cue { state.fadeStop(cue) } }
                     .help("Fade out and stop")
-                Button("✕") { if let cue { state.sound.stop(cue.id) } }.help("Immediate stop")
+                Button("✕") { if let cue { state.stopCue(cue) } }.help("Immediate stop")
             }.buttonStyle(.borderless).font(.caption2)
         }
     }
@@ -477,11 +523,13 @@ struct CueInspector: View {
         // Dedicated bindings update the value-type cue in its indexed slot.
         TextField("Cue name", text: bind(\.title))
         HStack {
-            Text(current.filePath.isEmpty ? "No audio assigned" : URL(fileURLWithPath: current.filePath).lastPathComponent)
+            Text(current.filePath.isEmpty ? "No media assigned" : URL(fileURLWithPath: current.filePath).lastPathComponent)
                 .lineLimit(1).font(.caption)
             Spacer()
             Button("Browse…") { chooseFile() }
         }
+        Text(current.kind.rawValue).font(.caption.bold())
+        if current.kind == .audio {
         HStack {
             Text("Clip level")
             Spacer()
@@ -491,11 +539,13 @@ struct CueInspector: View {
         Picker("Bus", selection: bind(\.bus)) {
             ForEach(0..<6, id: \.self) { index in Text(["Music", "Ambience", "Effects", "Voice", "Stingers", "Special"][index]).tag(index) }
         }
+        }
         Picker("Playback", selection: bind(\.mode)) {
             ForEach(CueMode.supported) { mode in Text(mode.rawValue).tag(mode) }
         }
-        Toggle("Loop continuously", isOn: bind(\.loop))
+        if current.kind != .image { Toggle("Loop continuously", isOn: bind(\.loop)) }
         Divider()
+        if current.kind == .audio {
         Toggle("Auto fade in on play", isOn: bind(\.autoFadeIn))
         HStack {
             Text("In (sec)")
@@ -509,12 +559,27 @@ struct CueInspector: View {
         Picker("Fade curve", selection: bind(\.curve)) {
             ForEach(FadeCurve.allCases) { curve in Text(curve.rawValue).tag(curve) }
         }
+        } else {
+            Picker("Transition", selection: bind(\.transition)) {
+                ForEach(VisualTransition.allCases) { transition in Text(transition.rawValue).tag(transition) }
+            }
+            HStack { Text("Fade in (sec)"); TextField("Visual fade in", value: bind(\.videoFadeIn), format: .number).frame(width: 65) }
+            HStack { Text("Fade out (sec)"); TextField("Visual fade out", value: bind(\.videoFadeOut), format: .number).frame(width: 65) }
+            if current.kind == .video {
+                HStack { Text("Soundtrack"); Spacer(); Text(String(format: "%.1f dB", current.soundtrackDB)) }
+                Slider(value: bind(\.soundtrackDB), in: -60...0)
+                Button(state.video.paused ? "Resume Video" : "Pause Video") {
+                    if state.video.currentCue?.id == current.id { state.video.paused ? state.video.resume() : state.video.pause() }
+                }
+            }
+        }
         Divider()
         Button("Stop using cue's fade setting") {
-            state.sound.configuredStop(current.id)
+            if current.kind == .audio { state.sound.configuredStop(current.id) }
+            else { state.video.stopCue(current.id, seconds: current.videoFadeOut) }
         }
         Button("Clear Pad", role: .destructive) {
-            state.sound.stop(current.id)
+            state.stopCue(current)
             state.setCue(nil)
         }
     }
@@ -534,7 +599,7 @@ struct CueInspector: View {
     private func chooseFile() {
         let index = state.selected
         let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.audio]
+        panel.allowedContentTypes = [.audio, .movie, .png, .jpeg]
         if panel.runModal() == .OK, let url = panel.url {
             state.assignMedia([url], to: index)
         }
