@@ -6,6 +6,10 @@ import Combine
 @MainActor final class ShowState: ObservableObject {
     @Published var project = SoundProject() { didSet { scheduleAutosave() } }
     @Published var selected = 0
+    var selectedCue: Cue? {
+        guard project.cues.indices.contains(selected) else { return nil }
+        return project.cues[selected]
+    }
     @Published var message = ""
     @Published var preflightItems: [String] = []
     @Published var checking = false
@@ -199,6 +203,27 @@ import Combine
                     .keyboardShortcut("f", modifiers: [.command, .shift])
                 Button("Emergency Stop All") { state.sound.stopAll() }
                     .keyboardShortcut(".", modifiers: [.command])
+                Divider()
+                Button("Fade Up Selected Pad") {
+                    if let cue = state.selectedCue { state.sound.fadeIn(cue.id, seconds: state.project.manualFadeSeconds) }
+                }
+                .keyboardShortcut(.upArrow, modifiers: [.option])
+                .disabled(state.selectedCue == nil)
+                Button("Fade to Silence Selected Pad") {
+                    if let cue = state.selectedCue { state.sound.fadeToSilence(cue.id, seconds: state.project.manualFadeSeconds) }
+                }
+                .keyboardShortcut(.downArrow, modifiers: [.option])
+                .disabled(state.selectedCue == nil)
+                Button("Stop Selected Pad") {
+                    if let cue = state.selectedCue { state.sound.stop(cue.id) }
+                }
+                .keyboardShortcut("x", modifiers: [.option])
+                .disabled(state.selectedCue == nil)
+                Button("Fade Out & Stop Selected Pad") {
+                    if let cue = state.selectedCue { state.sound.fadeOutAndStop(cue.id, seconds: state.project.manualFadeSeconds) }
+                }
+                .keyboardShortcut("x", modifiers: [.option, .shift])
+                .disabled(state.selectedCue == nil)
                 Divider()
                 ForEach(0..<9, id: \.self) { n in
                     Button("Trigger Pad \(n + 1)") { state.trigger(n) }

@@ -77,3 +77,7 @@ Clip, six bus and master gains now use a shared native NSSlider wrapper. Option-
 ## Click-to-edit project title
 
 The title normally displays as a non-focusable button. Clicking creates and focuses an editor with a draft; Return/focus loss commits, Escape cancels, and empty names retain the previous title. A local mouse observer ends renaming on outside clicks without consuming transport/pad actions. Native isolated UI verified typing/Backspace cannot alter the displayed title, click focuses editing, Return commits, moving to another text field commits, and Escape preserves the prior title. The automation tool could not issue coordinate clicks, so the mouse-only outside-button observer remains a hands-on check. Release build passed with no Swift compiler warnings; also corrected the prior gain slider coordinator actor annotation.
+
+## Selected-pad keyboard commands
+
+Added Performance menu actions: Option–Up Arrow fades to configured level; Option–Down Arrow fades to silence; Option–X immediately stops; Option–Shift–X fades out and stops. Each resolves the selected cue through a bounds-checked lookup, uses the same SoundEngine entry point as the corresponding pad button, and is disabled for empty pads. Release build and all 36 native audio/model/persistence tests passed.

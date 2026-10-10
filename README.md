@@ -68,3 +68,12 @@ See `Docs/VALIDATION.md` for evidence, hardware checks and remaining features. T
 Option-click any clip, bus or master gain slider to reset it to 0.0 dB. Normal dragging and keyboard adjustment remain available.
 
 Click the project name to rename it. Return or leaving the field commits the name; Escape cancels. Empty names keep the previous title. The displayed name does not accept typing until clicked.
+
+Selected pad shortcuts (also shown in the Performance menu):
+
+- Option–Up Arrow: fade up to configured clip level.
+- Option–Down Arrow: fade to silence, keeping playback running.
+- Option–X: immediate stop.
+- Option–Shift–X: fade out and stop.
+
+Fades use the show manual fade duration. These commands affect only the selected pad (selected by clicking a pad, Edit, or an Option–1…9 trigger); they never choose another playing pad or start an inactive cue. Commands are disabled for empty pads.
