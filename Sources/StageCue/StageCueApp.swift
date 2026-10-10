@@ -20,6 +20,7 @@ import Combine
     private var revision = 0
     private var engineChanges: AnyCancellable?
     private var terminationObserver: NSObjectProtocol?
+    private var keyboardMonitor: Any?
     private var recoveredAutosave = true
     private let assignmentLoader = MediaLoader()
     private var documentToken = UUID()
@@ -39,6 +40,19 @@ import Combine
             }
         }
         sound.applyMix(project)
+        // Catch performance Option shortcuts before text fields interpret them as symbols.
+        keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let handled = MainActor.assumeIsolated {
+                let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                guard flags.contains(.option), !flags.contains(.command), !flags.contains(.control),
+                      NSApp.modalWindow == nil, let window = event.window,
+                      window == NSApp.keyWindow, window.sheetParent == nil, window.attachedSheet == nil,
+                      let key = event.charactersIgnoringModifiers?.lowercased(), let self else { return false }
+                // Ignore held-key repeats once a recognized command has been handled.
+                return self.performPadKey(key, shift: flags.contains(.shift), execute: !event.isARepeat)
+            }
+            return handled ? nil : event
+        }
         // Forward nested engine changes so pads, loading indicators and errors update immediately.
         engineChanges = sound.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
         terminationObserver = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
@@ -54,6 +68,7 @@ import Combine
         autosaveTask?.cancel()
         for request in mediaAssignments.values { request.1.cancel() }
         if let terminationObserver { NotificationCenter.default.removeObserver(terminationObserver) }
+        if let keyboardMonitor { NSEvent.removeMonitor(keyboardMonitor) }
     }
     static var defaultURL: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -126,6 +141,45 @@ import Combine
         if let old = project.cues[selected] { sound.stop(old.id) }
         project.cues[selected] = cue
     }
+    @discardableResult func performPadKey(_ key: String, shift: Bool = false, execute: Bool = true) -> Bool {
+        if key == "x" {
+            if execute, let cue = selectedCue {
+                if shift { sound.fadeOutAndStop(cue.id, seconds: project.manualFadeSeconds) }
+                else { sound.stop(cue.id) }
+            }
+            return true
+        }
+        guard !shift else { return false }
+        if key == "\u{F700}" || key == "\u{F701}" {
+            if execute, let cue = selectedCue {
+                if key == "\u{F700}" { sound.fadeIn(cue.id, seconds: project.manualFadeSeconds) }
+                else { sound.fadeToSilence(cue.id, seconds: project.manualFadeSeconds) }
+            }
+            return true
+        }
+        guard !key.isEmpty, let index = project.padKeys.firstIndex(of: key) else { return false }
+        if execute { trigger(index) }
+        return true
+    }
+    func setPadKey(_ key: String, at index: Int) {
+        guard project.padKeys.indices.contains(index),
+              key.isEmpty || SoundProject.availablePadKeys.contains(key) else { return }
+        guard key.isEmpty || !project.padKeys.enumerated().contains(where: { $0.offset != index && $0.element == key }) else {
+            message = "Option–\(key.uppercased()) is already assigned to another pad"
+            return
+        }
+        project.padKeys[index] = key
+    }
+    func movePad(to destination: Int) {
+        let source = selected
+        guard project.cues.indices.contains(source), project.cues.indices.contains(destination), source != destination else { return }
+        // Invalidate loads tied to these positions before changing their occupants.
+        mediaAssignments.removeValue(forKey: source)?.1.cancel()
+        mediaAssignments.removeValue(forKey: destination)?.1.cancel()
+        guard project.swapPads(source, destination) else { return }
+        selected = destination
+        message = "Swapped pads \(source + 1) and \(destination + 1)"
+    }
     /// Keep the old cue playing until validation succeeds; never autoplay dropped media.
     @discardableResult func assignMedia(_ urls: [URL], to index: Int) -> Bool {
         guard project.cues.indices.contains(index), urls.count == 1, let url = urls.first, url.isFileURL else {
@@ -170,6 +224,7 @@ import Combine
     }
     func trigger(_ index: Int) {
         guard project.cues.indices.contains(index), let cue = project.cues[index] else { return }
+        selected = index
         sound.play(cue)
     }
     func check() {
@@ -225,9 +280,15 @@ import Combine
                 .keyboardShortcut("x", modifiers: [.option, .shift])
                 .disabled(state.selectedCue == nil)
                 Divider()
-                ForEach(0..<9, id: \.self) { n in
-                    Button("Trigger Pad \(n + 1)") { state.trigger(n) }
-                        .keyboardShortcut(KeyEquivalent(Character(String(n + 1))), modifiers: [.option])
+                ForEach(0..<32, id: \.self) { n in
+                    if let key = state.project.padKeys[n].first {
+                        Button("Trigger Pad \(n + 1)") { state.trigger(n) }
+                            .keyboardShortcut(KeyEquivalent(key), modifiers: [.option])
+                            .disabled(state.project.cues[n] == nil)
+                    } else {
+                        Button("Trigger Pad \(n + 1)") { state.trigger(n) }
+                            .disabled(state.project.cues[n] == nil)
+                    }
                 }
             }
         }
@@ -296,7 +357,7 @@ struct MainView: View {
             HStack {
                 Text(state.message).font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Text("StageCue 0.1 • 32 pads • shortcuts ⌥1–9 • ⌘. = emergency stop")
+                Text("StageCue 0.1 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -333,6 +394,9 @@ struct Pad: View {
                 VStack {
                     HStack {
                         Text(String(format: "%02d", index + 1)).font(.caption2.monospaced())
+                        if !state.project.padKeys[index].isEmpty {
+                            Text("⌥" + state.project.padKeys[index].uppercased()).font(.caption2.monospaced())
+                        }
                         Spacer()
                         if running { Image(systemName: "waveform").foregroundStyle(.green) }
                         else if cue.map({ state.sound.loading.contains($0.id) }) == true { ProgressView().controlSize(.mini) }
@@ -374,9 +438,30 @@ struct Pad: View {
 
 struct CueInspector: View {
     @EnvironmentObject var state: ShowState
+    @State private var moveDestination = 0
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("PAD \(state.selected + 1) • SETTINGS").font(.headline)
+            Picker("Trigger shortcut", selection: Binding(
+                get: { state.project.padKeys[state.selected] },
+                set: { state.setPadKey($0, at: state.selected) }
+            )) {
+                Text("None").tag("")
+                ForEach(SoundProject.availablePadKeys.filter { key in
+                    key == state.project.padKeys[state.selected] || !state.project.padKeys.contains(key)
+                }, id: \.self) { key in
+                    Text("Option–\(key.uppercased())").tag(key)
+                }
+            }
+            HStack {
+                Picker("Move to", selection: $moveDestination) {
+                    ForEach(0..<32, id: \.self) { n in Text("Pad \(n + 1)").tag(n) }
+                }
+                Button("Swap") { state.movePad(to: moveDestination) }
+                    .disabled(moveDestination == state.selected)
+            }
+            Text("Swap preserves both cues. Shortcuts stay with pad positions.")
+                .font(.caption).foregroundStyle(.secondary)
             if let cue = state.project.cues[state.selected] {
                 cueControls(cue)
             } else {

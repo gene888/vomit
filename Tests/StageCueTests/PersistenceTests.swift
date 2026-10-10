@@ -16,6 +16,7 @@ struct PersistenceTests {
                       curve: .equalPower, tint: "purple")
         var project = SoundProject(title: "Local Show", busDB: [-1, -2, -3, -4, -5, -6], masterDB: -2, manualFadeSeconds: 1)
         project.cues[31] = cue
+        project.padKeys[31] = "z"
         let url = try temporary().appendingPathComponent("nested/show.json")
         try ProjectStore.save(project, to: url)
         let (read, notes) = try ProjectStore.load(from: url)

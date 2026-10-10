@@ -2,7 +2,7 @@
 
 ## Result
 
-A functioning Apple Silicon macOS app project now builds in both Debug and Release. The Release app is ad-hoc signed, verifies successfully, and was launched and exercised through the native UI. The final audio/model/persistence test run passed **36 tests in five suites**, exit status 0. This is a development build with physical audio validation still required, not a certified show-ready release.
+A functioning Apple Silicon macOS app project now builds in both Debug and Release. The Release app is ad-hoc signed, verifies successfully, and was launched and exercised through the native UI. The final audio/model/persistence test run passed **41 tests in six suites**, exit status 0. This is a development build with physical audio validation still required, not a certified show-ready release.
 
 Source remains in `/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1`. A local Git repository preserves the original extraction as commit `46beb25`, followed by the implementation commit. Origin points to the inspected repository, `https://github.com/gene888/vomit.git`. Initial read-only remote inspection and clone found no commits/advertised refs. Nothing has been pushed. No unrelated projects were edited; the original source zip is preserved. Commits use the transparent tooling identity `StageCue Local Development <stagecue@localhost>` scoped to each commit command, without changing global Git identity.
 
@@ -17,7 +17,7 @@ Source remains in `/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1`. A loca
 
 ## Automated evidence
 
-The log ends with `Test run with 36 tests in 5 suites passed`; the native runner wrote exit status `0`. Tests render the actual AVAudioEngine graph into PCM buffers and compare results against calculated gain values. Silence fixtures used with the live engine emit no audible signal.
+The latest log ends with `Test run with 41 tests in 6 suites passed`; the native runner wrote exit status `0`. Tests render the actual AVAudioEngine graph into PCM buffers and compare results against calculated gain values. Silence fixtures used with the live engine emit no audible signal.
 
 | Area | Verified behavior |
 | --- | --- |
@@ -81,3 +81,11 @@ The title normally displays as a non-focusable button. Clicking creates and focu
 ## Selected-pad keyboard commands
 
 Added Performance menu actions: Option–Up Arrow fades to configured level; Option–Down Arrow fades to silence; Option–X immediately stops; Option–Shift–X fades out and stops. Each resolves the selected cue through a bounds-checked lookup, uses the same SoundEngine entry point as the corresponding pad button, and is disabled for empty pads. Release build and all 36 native audio/model/persistence tests passed.
+
+## Configurable shortcuts and pad reordering
+
+All 32 positions have project-persisted Option-plus-letter/digit shortcuts, retaining Option–1…9 defaults for legacy projects. Duplicate/invalid/reserved keys are repaired on load and rejected by settings; keys already assigned elsewhere are omitted from the picker. X is reserved for the stop commands. A local key monitor resolves performance commands before name fields insert Option symbols, skips modal/sheet dialogs, and suppresses held-key repeats. Triggering by shortcut also selects that pad for subsequent fades/stops.
+
+Pad Settings offers a destination picker and Swap. Swapping preserves cue IDs and every setting, permits empty destinations, follows the moved cue with selection, and leaves shortcut assignments tied to positions. Existing voices keep running because their IDs remain unchanged; pending media assignments for affected positions are canceled before swapping.
+
+Five new tests cover all 32 unique assignments and legacy defaults, malformed/duplicate/reserved key repair, swap invariants and invalid positions, real simultaneous live loops continuing after swap with stale-drop cancellation, and rejected conflicting settings. Persistence round-trip also includes a custom pad-32 shortcut. Release build and all 41 native tests in six suites passed. Isolated native UI verified Option–Z triggers pad 32 while a name field has focus, a pad-32/pad-1 swap preserves both titles and position shortcuts in autosave, and changing pad 1 to Option–Q updates its displayed shortcut immediately. No user show files were modified.

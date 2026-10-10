@@ -73,6 +73,15 @@ struct SoundProject: Codable, Equatable, Sendable {
     var busDB: [Double] = Array(repeating: 0, count: 6)
     var masterDB: Double = 0
     var manualFadeSeconds: Double = 3
+    // Shortcuts belong to pad positions; moving a cue does not move keyboard layout.
+    var padKeys: [String] = (1...9).map(String.init) + Array(repeating: "", count: 23)
+    static let availablePadKeys = Array("0123456789abcdefghijklmnopqrstuvwyz").map(String.init)
+
+    @discardableResult mutating func swapPads(_ source: Int, _ destination: Int) -> Bool {
+        guard cues.indices.contains(source), cues.indices.contains(destination), source != destination else { return false }
+        cues.swapAt(source, destination)
+        return true
+    }
 
     @discardableResult mutating func normalize() -> [String] {
         var notes: [String] = []
@@ -88,6 +97,17 @@ struct SoundProject: Codable, Equatable, Sendable {
         busDB = busDB.map { bounded($0, -60...6, fallback: 0) }
         masterDB = bounded(masterDB, -60...6, fallback: 0)
         manualFadeSeconds = bounded(manualFadeSeconds, 0...3600, fallback: 3)
+        let originalKeys = padKeys
+        padKeys = Array(padKeys.prefix(32))
+        padKeys += Array(repeating: "", count: 32 - padKeys.count)
+        var usedKeys: Set<String> = []
+        for index in padKeys.indices {
+            let key = padKeys[index].lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            if key.isEmpty { padKeys[index] = "" }
+            else if Self.availablePadKeys.contains(key), usedKeys.insert(key).inserted { padKeys[index] = key }
+            else { padKeys[index] = "" }
+        }
+        if padKeys != originalKeys { notes.append("Invalid or duplicate pad shortcuts repaired") }
         var seen: Set<UUID> = []
         for i in cues.indices {
             guard var cue = cues[i] else { continue }
@@ -103,7 +123,7 @@ struct SoundProject: Codable, Equatable, Sendable {
 }
 
 extension SoundProject {
-    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds }
+    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys }
     init(from decoder: Decoder) throws {
         self.init()
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -116,6 +136,7 @@ extension SoundProject {
         busDB = try c.decodeIfPresent([Double].self, forKey: .busDB) ?? busDB
         masterDB = try c.decodeIfPresent(Double.self, forKey: .masterDB) ?? masterDB
         manualFadeSeconds = try c.decodeIfPresent(Double.self, forKey: .manualFadeSeconds) ?? manualFadeSeconds
+        padKeys = try c.decodeIfPresent([String].self, forKey: .padKeys) ?? padKeys
     }
 }
 

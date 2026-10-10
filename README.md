@@ -41,7 +41,7 @@ Open the generated `work/NativeValidation.app` in Finder to run the compiled sui
 
 - Drag one local audio file from Finder onto a pad to assign it. Empty pads create a cue named after the file. Assigned pads retain their name, gain, bus, looping and fade settings; their current playback stops only after the replacement validates. Drops never start playback. Invalid files, folders and multi-file drops leave the cue unchanged. Pads highlight while targeted. Browse remains available and uses the same validation.
 - Select an empty pad and Create Cue. Browse for local audio, choose clip gain in dB and one of six buses, then configure One-shot or Toggle and optional looping/fades.
-- Click the large pad or Option+1 through Option+9 to trigger. One-shot retriggers replace the prior voice for that pad. Toggle stops the active voice using its configured stop fade, or starts it if inactive. Toggling a loading cue cancels it. Different pads play concurrently.
+- Click the large pad or its configured Option shortcut to trigger. Option+1 through Option+9 are the defaults for the first nine pads. One-shot retriggers replace the prior voice for that pad. Toggle stops the active voice using its configured stop fade, or starts it if inactive. Toggling a loading cue cancels it. Different pads play concurrently.
 - Edit selects a pad without playing it. Settings changes apply on the next trigger; bus/master faders apply live. Gains support −60 to +6 dB. −60 dB is attenuation, not an exact mute.
 - Manual ▲ fades an active cue toward its configured level; ▼ fades to exact silence while playback continues; ■ fades then stops and releases the voice; ✕ stops immediately. Each cue has its own envelope. A new manual fade replaces its previous envelope continuously and takes ownership of the remaining playback, suppressing later automatic tail fades for that voice.
 - Automatic fade-in begins at trigger. For a non-looping cue, auto fade-out begins near natural end. If the configured in/out durations together exceed the clip length, they are scaled proportionally to fit. Looping cues have an initial fade-in but no natural-end tail fade. Configured Stop uses fade-out settings for both looping and non-looping cues.
@@ -76,4 +76,10 @@ Selected pad shortcuts (also shown in the Performance menu):
 - Option–X: immediate stop.
 - Option–Shift–X: fade out and stop.
 
-Fades use the show manual fade duration. These commands affect only the selected pad (selected by clicking a pad, Edit, or an Option–1…9 trigger); they never choose another playing pad or start an inactive cue. Commands are disabled for empty pads.
+Fades use the show manual fade duration. These commands affect only the selected pad (selected by clicking a pad, Edit, or its configured trigger shortcut); they never choose another playing pad or start an inactive cue. Commands are disabled for empty pads.
+
+### Pad shortcuts and reordering
+
+Click Edit beneath any pad. In Pad Settings, choose a Trigger shortcut: Option plus a letter or digit, or None. Keys used by other pads are omitted; X is reserved for stop. Each project saves its own assignments. Shortcuts are shown on the pads and in the Performance menu. All 32 pads can have distinct shortcuts. Configured Option shortcuts take priority over typing special characters in StageCue name fields; they are suspended while file dialogs/sheets are open. Held-key repeats are ignored.
+
+To reorder, select a pad with Edit, choose a destination in Move to, then click Swap. An occupied destination swaps both cues; an empty destination moves the cue. Titles, media references, IDs and playback/fade settings are preserved. Active playback continues. The moved cue remains selected. Shortcuts belong to positions and stay in place when cues move. Pending file assignments on the two affected positions are canceled to prevent stale drops from replacing a swapped cue. Undo is not yet available; swapping the same positions again reverses the move.
