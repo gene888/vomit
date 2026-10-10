@@ -17,7 +17,7 @@ final class LoadedMedia: @unchecked Sendable {
 }
 
 actor MediaLoader {
-    static let maximumClipBytes = 64 * 1024 * 1024
+    static let maximumClipBytes = 512 * 1024 * 1024
     static func inspect(_ path: String) throws -> (AVAudioFile, Int) {
         guard !path.isEmpty else { throw MediaIssue(message: "No media assigned") }
         let file = try AVAudioFile(forReading: URL(fileURLWithPath: path))
@@ -29,7 +29,7 @@ actor MediaLoader {
         }
         let bytes = Double(file.length) * (format.isInterleaved ? 1 : Double(format.channelCount)) * Double(format.streamDescription.pointee.mBytesPerFrame)
         guard bytes.isFinite, bytes <= Double(maximumClipBytes) else {
-            throw MediaIssue(message: "Decoded clip exceeds the 64 MiB limit")
+            throw MediaIssue(message: "Decoded audio exceeds 512 MiB; use a shorter clip (about 23 minutes at 48 kHz stereo)")
         }
         return (file, Int(bytes))
     }
@@ -99,7 +99,7 @@ actor MediaLoader {
         offline ? Double(engine.manualRenderingSampleTime) / mixFormat.sampleRate : ProcessInfo.processInfo.systemUptime
     }
 
-    init(offline: Bool = false, memoryBudgetBytes: Int = 256 * 1024 * 1024) {
+    init(offline: Bool = false, memoryBudgetBytes: Int = 1024 * 1024 * 1024) {
         self.offline = offline
         maximumActiveBytes = max(0, memoryBudgetBytes)
         mixFormat = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 2)!
@@ -199,7 +199,7 @@ actor MediaLoader {
 
     private func start(_ cue: Cue, media: LoadedMedia) throws {
         guard retainedBytes + media.bytes <= maximumActiveBytes else {
-            throw MediaIssue(message: "Active audio exceeds the 256 MiB memory budget")
+            throw MediaIssue(message: "Active audio exceeds the decoded memory budget")
         }
         if !engine.isRunning { try engine.start(); applyMix(currentMix) }
         let voice = Voice(cue: cue, media: media, started: clock)
@@ -360,7 +360,7 @@ actor MediaLoader {
                 total += media.bytes
             } catch { warnings.append("\(cue.title): \(error.localizedDescription)") }
         }
-        if total > maximumActiveBytes { warnings.append("All assigned media together exceed the 256 MiB active budget") }
+        if total > maximumActiveBytes { warnings.append("All assigned media together exceed the active audio memory budget") }
         if !engine.isRunning && !warnings.contains(where: { $0.hasPrefix("Audio engine") }) {
             warnings.append("Audio engine stopped during preflight; check output before triggering")
         }

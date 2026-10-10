@@ -54,7 +54,7 @@ UI forwards nested engine changes, displays errors/loading, provides Edit withou
 
 Before performance use, test the actual interface with audible clips: gain/headroom, all six buses, curve quality and independent fade behavior. Measure latency and glitches under show load; test USB removal/reconnection, default output changes, rate/buffer changes, sleep/wake and a prolonged run. Simulating the interruption handler does not validate physical device notifications or driver behavior. Control-rate fades are not sample accurate and can be delayed by a blocked UI thread.
 
-Per-clip decoded media limit is 64 MiB; the active-plus-reserved budget is 256 MiB. These are buffer budgets, not process-memory ceilings. Decoding is not cached, so first-trigger latency remains. Long media streaming, preloading, metering/clipping protection, device selection, Hold, pause, portable media collection and sandbox bookmarks remain outstanding. Node/buffer accounting tests are not a full Instruments leak/CPU profile. The macOS 14 deployment target has not been tested on a separate macOS 14 machine. The app is ad-hoc signed, not notarized.
+Per-clip decoded media limit is 512 MiB; the active-plus-reserved budget is 1 GiB. These are buffer budgets, not process-memory ceilings. Decoding is not cached, so first-trigger latency remains. Long media streaming, preloading, metering/clipping protection, device selection, Hold, pause, portable media collection and sandbox bookmarks remain outstanding. Node/buffer accounting tests are not a full Instruments leak/CPU profile. The macOS 14 deployment target has not been tested on a separate macOS 14 machine. The app is ad-hoc signed, not notarized.
 
 The complete remaining list is in `OUTSTANDING.md`. No Version 0.2 video functionality was added.
 
@@ -65,3 +65,7 @@ Pads accept one local file URL using SwiftUI native drop destinations and highli
 Release build and signature verification passed after this change. Four new native tests verify empty-pad creation without playback, settings-preserving replacement with independent audio, rejection of invalid/missing/folder/remote/multiple files, and superseded/cleared assignment cancellation. The full regression suite passed 36 tests in five suites. Test state uses an injected autosave location and never modifies the user's show.
 
 An isolated UI harness displayed the actual pad/drop code, but the UI automation drag API repeatedly returned `noWindowsAvailable`. A physical Finder drag gesture was therefore not verified in this run. Assignment behavior is tested directly using the same URL handler invoked by the drop destination.
+
+## Longer audio follow-up
+
+Raised the per-clip decoded PCM limit to 512 MiB and the active-plus-reserved limit to 1 GiB. An 80 MiB decoded stereo fixture now passes inspection and full decoding; a 540 MiB fixture is rejected before buffer allocation. Release build and all 36 native tests pass. MP3 compressed file size does not determine decoded memory use. At 48 kHz stereo float PCM, the per-clip limit permits approximately 23 minutes. Full-buffer decoding remains in use, so longer files take more time and memory to load.

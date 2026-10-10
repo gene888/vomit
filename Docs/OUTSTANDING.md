@@ -13,7 +13,7 @@
 
 - Hold-to-play with pointer/key release and focus-loss cancellation. Hidden in the current UI; imported Hold values become One-shot with a repair notice.
 - Dedicated output-device selection and more detailed hardware diagnostics.
-- Clip preloading, bounded cache and disk streaming for long files. The current app uses per-trigger PCM decode with 64 MiB per-clip and 256 MiB combined active/load reservation limits.
+- Clip preloading, bounded cache and disk streaming for long files. The current app uses per-trigger PCM decode with 512 MiB per-clip and 1 GiB combined active/load reservation limits.
 - Sample-accurate envelopes/crossfades outside the UI control timer. Current timer handles modal tracking in common run-loop modes but can still stall if the UI thread is blocked.
 - Meters, clipping indication, limiter, pause/resume, and live editing of active cue gain/bus settings (settings currently take effect on next trigger).
 - Media collection/portable projects, automatic relinking and security-scoped bookmark support for sandboxed distribution.

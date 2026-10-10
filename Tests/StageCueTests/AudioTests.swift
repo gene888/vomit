@@ -299,9 +299,9 @@ struct SafetyAudioTests {
         expectTrue(engine.decodedBytes <= 40_000)
         expectEqual(engine.errors.count, 7)
     }
-    @Test func testSparseOversizedClipIsRejectedBeforeAllocation() throws {
+    @Test func testSparseOversizedClipIsRejectedBeforeAllocation() async throws {
         let url = temporaryFiles.directory.appendingPathComponent("large.wav")
-        let byteCount: UInt32 = 70 * 1024 * 1024
+        let byteCount: UInt32 = 270 * 1024 * 1024
         var header = Data()
         func text(_ string: String) { header.append(Data(string.utf8)) }
         func u16(_ value: UInt16) { var v = value.littleEndian; withUnsafeBytes(of: &v) { header.append(contentsOf: $0) } }
@@ -313,6 +313,20 @@ struct SafetyAudioTests {
         let file = try FileHandle(forWritingTo: url)
         try file.truncate(atOffset: UInt64(byteCount) + 44); try file.close()
         expectThrows(try MediaLoader.inspect(url.path))
+        // A file above the old 64 MiB decoded limit is now accepted.
+        let smallerBytes: UInt32 = 40 * 1024 * 1024
+        var riffSize = (smallerBytes + 36).littleEndian
+        var dataSize = smallerBytes.littleEndian
+        withUnsafeBytes(of: &riffSize) { header.replaceSubrange(4..<8, with: $0) }
+        withUnsafeBytes(of: &dataSize) { header.replaceSubrange(40..<44, with: $0) }
+        try header.write(to: url)
+        let smallerFile = try FileHandle(forWritingTo: url)
+        try smallerFile.truncate(atOffset: UInt64(smallerBytes) + 44); try smallerFile.close()
+        let (_, decodedSize) = try MediaLoader.inspect(url.path)
+        expectEqual(decodedSize, Int(smallerBytes) * 2)
+        let decoded = try await MediaLoader().load(url.path)
+        expectEqual(decoded.bytes, decodedSize)
+        expectTrue(decoded.buffer.frameLength > 0)
     }
     @Test @MainActor func testLiveCompletionAndTimerFadesUsingSilentAudio() async throws {
         let engine = SoundEngine(); defer { engine.shutdown() }
