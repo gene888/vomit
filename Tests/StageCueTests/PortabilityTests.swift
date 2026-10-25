@@ -199,6 +199,7 @@ struct PortabilityTests {
         await model.waitForOperation()
         expectEqual(state.project, original)
         expectEqual(model.report.count(.available), 1)
+        expectTrue(abs((model.draft.media.assets.first?.duration ?? 0) - 1) < 0.01)
         expectTrue(model.apply(to: state))
         expectEqual(state.project.cues[0]?.filePath, replacement.path)
         let changed = MediaManagementModel(project: state.project, root: nil)

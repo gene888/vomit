@@ -10,7 +10,7 @@ Baseline 0edf90f is preserved by local annotated tag v0.3. Development uses feat
 
 0.4C commit aa108c6: open/save migration, manifest-aware preflight, missing-cue guards, UTI, and real media relocation playback. Release Xcode build passed; 98 tests in 12 suites passed in native context in 11.774 seconds.
 
-0.4D adds staged media management, Apply/Cancel protection, progress and export cancellation, explicit save/export options, Finder document registration, report access, and operator guidance. Final Release Xcode build succeeds. All 102 tests in 12 suites pass in 11.779 seconds; native runner exit 0. This includes the application-level portable export/open flow after deleting the source root. Package evidence accompanies the deliverable.
+0.4D adds staged media management, Apply/Cancel protection, progress and export cancellation, explicit save/export options, Finder document registration, report access, and operator guidance. Final Release Xcode build succeeds. All 102 tests in 12 suites pass in 11.645 seconds; native runner exit 0. This includes the application-level portable export/open flow after deleting the source root. Package evidence accompanies the deliverable.
 
 ## Relocation acceptance evidence
 

@@ -70,11 +70,21 @@ import AVFoundation
                 progress = "Validating selected file…"
                 let scoped = url.startAccessingSecurityScopedResource()
                 defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                var duration: Double?
                 if asset.kind == .image { _ = try await VisualMediaLoader().inspect(url.path, kind: .image) }
                 else {
                     let av = AVURLAsset(url: url)
-                    let tracks = try await av.loadTracks(withMediaType: asset.kind == .audio ? .audio : .video)
+                    let watchdog = Task {
+                        do { try await Task.sleep(for: .seconds(10)); av.cancelLoading() } catch { }
+                    }
+                    defer { watchdog.cancel() }
+                    let tracks = try await withTaskCancellationHandler {
+                        try await av.loadTracks(withMediaType: asset.kind == .audio ? .audio : .video)
+                    } onCancel: { av.cancelLoading() }
                     guard !tracks.isEmpty else { throw MediaIssue(message: "Selected file has no matching media track") }
+                    let seconds = try await withTaskCancellationHandler { try await av.load(.duration).seconds } onCancel: { av.cancelLoading() }
+                    guard seconds.isFinite, seconds > 0 else { throw MediaIssue(message: "Selected media has no finite duration") }
+                    duration = seconds
                 }
                 let fp = try await Task.detached { try MediaLibrary.fingerprint(url) }.value
                 try Task.checkCancellation(); guard generation == token else { return }
@@ -82,6 +92,7 @@ import AVFoundation
                 if let i = draft.media.assets.firstIndex(where: { $0.id == asset.id }) {
                     draft.media.assets[i].filename = url.lastPathComponent
                     draft.media.assets[i].sha256 = fp.hash; draft.media.assets[i].bytes = fp.bytes; draft.media.assets[i].modified = fp.modified
+                    draft.media.assets[i].duration = duration
                     draft.media.assets[i].relativePath = root.flatMap { MediaPaths.relative(url, root: $0) }
                     draft.media.assets[i].bookmark = try? url.bookmarkData(options: [.withSecurityScope], includingResourceValuesForKeys: nil, relativeTo: nil)
                 }
