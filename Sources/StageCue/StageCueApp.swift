@@ -165,6 +165,18 @@ import Combine
             catch { self?.message = "Autosave failed: \(error.localizedDescription)" }
         }
     }
+    /// Audio is updated immediately; document/UI publication and the existing debounced
+    /// autosave then observe the same validated value. No separate asynchronous mixer state.
+    @discardableResult func setBusGain(_ index: Int, decibels: Double, manual: Bool = true) -> Bool {
+        guard (0..<6).contains(index), project.busDB.indices.contains(index) else { return false }
+        if manual { scheduler.manualOverride("bus:\(index)") }
+        guard let safe = sound.setBusGain(index, decibels: decibels) else { return false }
+        project.busDB[index] = safe
+        return true
+    }
+    func setMasterGain(decibels: Double) {
+        project.masterDB = sound.setMasterGain(decibels: decibels)
+    }
     func save() { saveProject(to: saveURL) }
     func saveProject(to destination: URL?) {
         let snapshot = project
@@ -594,8 +606,7 @@ struct MainView: View {
                             VStack(alignment: .leading) {
                                 Text(busNames[index]).font(.caption.bold())
                                 GainSlider(value: Binding(get: { state.project.busDB[index] }, set: {
-                                    state.scheduler.manualOverride("bus:\(index)")
-                                    state.project.busDB[index] = $0; state.sound.applyMix(state.project)
+                                    state.setBusGain(index, decibels: $0)
                                 }))
                                 Text(String(format: "%.1f dB", state.project.busDB[index])).font(.caption.monospacedDigit())
                             }.frame(maxWidth: .infinity)
@@ -603,10 +614,7 @@ struct MainView: View {
                     }
                     HStack {
                         Text("MASTER").bold()
-                        GainSlider(value: $state.project.masterDB)
-                            .onChange(of: state.project.masterDB) { _, _ in
-                                state.sound.applyMix(state.project)
-                            }
+                        GainSlider(value: Binding(get: { state.project.masterDB }, set: { state.setMasterGain(decibels: $0) }))
                         Text(String(format: "%.1f dB", state.project.masterDB)).monospacedDigit()
                     }
                 }
@@ -621,7 +629,7 @@ struct MainView: View {
                 Text(state.mediaBusy ? state.mediaProgress : state.message).font(.caption).foregroundStyle(.secondary)
                 if state.mediaBusy { ProgressView().controlSize(.small); Button("Cancel Media Operation") { state.cancelMediaOperation() }.font(.caption) }
                 Spacer()
-                Text("StageCue 0.4.1 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.5A • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

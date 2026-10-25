@@ -217,7 +217,10 @@ extension ShowState: ShowPlaybackDriver {
     }
     func execute(_ action: GroupAction) throws -> OwnedPlayback? {
         if action.kind == .bus {
-            project.busDB[action.bus] = action.levelDB; sound.applyMix(project); return nil
+            guard setBusGain(action.bus, decibels: action.levelDB, manual: false) else {
+                throw MediaIssue(message: "Unsupported mixer bus")
+            }
+            return nil
         }
         if action.kind == .blackout { video.blackout = action.blackout; return nil }
         if action.kind == .page {

@@ -61,6 +61,20 @@ actor MediaLoader {
     }
 }
 
+/// Engine restore snapshot only; the project remains the document's source of truth.
+/// Validating seven mixer values never visits cue, page, group or sequence metadata.
+private struct MixerSettings {
+    var busDB: [Double] = Array(repeating: 0, count: 6)
+    var masterDB: Double = 0
+    init() {}
+    init(_ project: SoundProject) {
+        for index in busDB.indices where project.busDB.indices.contains(index) {
+            busDB[index] = bounded(project.busDB[index], -60...6, fallback: 0)
+        }
+        masterDB = bounded(project.masterDB, -60...6, fallback: 0)
+    }
+}
+
 /// One output, six stereo virtual buses. All graph and voice mutation stays on MainActor.
 /// Live fades use a common-mode control timer; offline tests drive the same envelopes from sample time.
 @MainActor final class SoundEngine: ObservableObject {
@@ -88,7 +102,7 @@ actor MediaLoader {
     private var routeObserver: NSObjectProtocol?
     private var pending: [UUID: (UUID, Task<Void, Never>)] = [:]
     private let maximumActiveBytes: Int
-    private var currentMix = SoundProject()
+    private var currentMix = MixerSettings()
     private var retainedBytes = 0
     private var requestedFades: [UUID: (Float, Double, Bool, Bool)] = [:]
     private var reservations: [UUID: Int] = [:]
@@ -170,12 +184,30 @@ actor MediaLoader {
         if errors.count > 20 { errors.removeFirst(errors.count - 20) }
     }
     func applyMix(_ project: SoundProject) {
-        var safe = project; safe.normalize()
+        applyMixerSettings(MixerSettings(project))
+    }
+    private func applyMixerSettings(_ safe: MixerSettings) {
         currentMix = safe
         masterBoost.globalGain = 6
         for boost in busBoosts { boost.globalGain = 6 }
         for i in buses.indices { buses[i].outputVolume = amplitude(safe.busDB[i]) / boostScale }
         master.outputVolume = amplitude(safe.masterDB) / boostScale
+    }
+
+    /// Returns the applied, bounded dB value so the caller can persist the exact same value.
+    /// Unsupported bus identifiers are rejected without touching any mixer parameter.
+    @discardableResult func setBusGain(_ index: Int, decibels: Double) -> Double? {
+        guard buses.indices.contains(index) else { return nil }
+        let safe = bounded(decibels, -60...6, fallback: 0)
+        currentMix.busDB[index] = safe
+        buses[index].outputVolume = amplitude(safe) / boostScale
+        return safe
+    }
+    @discardableResult func setMasterGain(decibels: Double) -> Double {
+        let safe = bounded(decibels, -60...6, fallback: 0)
+        currentMix.masterDB = safe
+        master.outputVolume = amplitude(safe) / boostScale
+        return safe
     }
 
     /// Retrigger replaces both pending loads and active voices. Stale asynchronous work cannot publish.
@@ -239,7 +271,7 @@ actor MediaLoader {
         guard retainedBytes + media.bytes <= maximumActiveBytes else {
             throw MediaIssue(message: "Active audio exceeds the decoded memory budget")
         }
-        if !engine.isRunning { try engine.start(); applyMix(currentMix) }
+        if !engine.isRunning { try engine.start(); applyMixerSettings(currentMix) }
         let voice = Voice(cue: cue, media: media, started: clock)
         engine.attach(voice.player)
         engine.attach(voice.mixer)
