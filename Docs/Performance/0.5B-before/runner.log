@@ -1,0 +1,13 @@
+PROFILE: generating local fixtures
+AUDIO PROFILE: short-state
+AUDIO PROFILE: short-pad-model
+AUDIO PROFILE: short-direct-engine
+AUDIO PROFILE: short-scheduled-group
+AUDIO PROFILE: long-wav
+AUDIO PROFILE: long-aac
+AUDIO PROFILE: different-short-files
+AUDIO PROFILE: short-during-video
+AUDIO PROFILE: short-during-mixer-and-video
+AUDIO PROFILE: simultaneous four-voice groups
+AUDIO PROFILE: cold-project first triggers (warm OS filesystem cache)
+AUDIO PROFILE: finished
