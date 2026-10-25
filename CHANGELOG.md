@@ -25,3 +25,9 @@
 - Added preview, blackout, optional background and persistent borderless external output with disconnect safeguards.
 - Extended pads, shortcuts, preflight and media assignment without changing the audio engine.
 - 50 native tests pass; hardware acceptance requirements documented.
+
+## 0.5A mixer performance
+
+- Added bounded incremental bus/master updates and a seven-value engine restore snapshot; removed project-wide normalization from live mixer control.
+- Preserved immediate gain application, synchronous project/UI consistency, existing 350 ms autosave debounce, manual precedence and audio/video separation.
+- Release build and 111 native tests pass. Median measured real-command cost fell about 97%; both performance runs and remaining timing/cadence limitations are documented in Docs/MIXER_AUTOMATION_0.5A.md.

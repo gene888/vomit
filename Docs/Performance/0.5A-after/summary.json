@@ -1,0 +1,456 @@
+{
+  "date": "2026-10-25T23:20:53Z",
+  "configuration": "SwiftPM release -O, STAGECUE_PROFILING; native AppKit host; actual MainView with built-in preview, engines and two additional VisualCanvas views",
+  "memoryBeforeEngines": {
+    "footprintMiB": 123.01667785644531,
+    "residentMiB": 97.609375
+  },
+  "memoryIdleEnginesAndCanvases": {
+    "footprintMiB": 192.8448944091797,
+    "residentMiB": 164.59375
+  },
+  "largeShow": {
+    "cues": 1024,
+    "groups": 64,
+    "loadMs": 23.461125092580914,
+    "memory": {
+      "footprintMiB": 123.67304229736328,
+      "residentMiB": 205.78125
+    },
+    "projectBytes": 1347390,
+    "sequences": 16
+  },
+  "largeShowIdleCPUPercentOneCore": 1.1330975866090252,
+  "memoryEight60SecondAudioVoices": {
+    "decodedAudioMiB": 175.78125,
+    "footprintMiB": 504.8920440673828,
+    "residentMiB": 420.6875
+  },
+  "memoryAfterStop": {
+    "footprintMiB": 138.73561096191406,
+    "residentMiB": 232.234375
+  },
+  "audioNodesAfterStop": 16,
+  "audioErrors": [],
+  "videoError": "",
+  "audioConfiguration": {
+    "outputPresentationLatencySeconds": 0.0002916666666666667,
+    "outputSampleRate": 48000
+  },
+  "canvasConfiguration": {
+    "additionalPreviewCanvasPoints": [
+      480,
+      270
+    ],
+    "additionalProgramCanvasPoints": [
+      960,
+      540
+    ],
+    "operatorPreviewPoints": [
+      224,
+      126
+    ]
+  },
+  "audio": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 135.2551250020042,
+      "p95": 144.66120838187635,
+      "maximum": 192.95158330351114,
+      "mean": 139.77031458634883,
+      "minimum": 131.34520826861262
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 134.0898125199601,
+      "p95": 190.41095837019384,
+      "maximum": 190.41095837019384,
+      "mean": 141.34894581511617,
+      "minimum": 132.53120821900666
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 135.11822919826955,
+      "p95": 202.65891659073532,
+      "maximum": 202.65891659073532,
+      "mean": 144.08033336512744,
+      "minimum": 131.6601252183318
+    }
+  },
+  "videoStartup": {
+    "1080p30.mp4": {
+      "n": 20,
+      "median": 131.5231875050813,
+      "p95": 135.21887501701713,
+      "maximum": 188.81387496367097,
+      "mean": 126.97978335199878,
+      "minimum": 86.94387483410537
+    },
+    "1080p60.mp4": {
+      "n": 20,
+      "median": 91.09481249470264,
+      "p95": 136.65000000037253,
+      "maximum": 137.70899991504848,
+      "mean": 108.06179998908192,
+      "minimum": 86.49308327585459
+    }
+  },
+  "audioRenderTimestampMs": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 91.46112482994795,
+      "p95": 101.29895806312561,
+      "maximum": 118.49683313630521,
+      "mean": 93.02696853410453,
+      "minimum": 79.25695809535682
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 99.82814558316022,
+      "p95": 115.92249991372228,
+      "maximum": 115.92249991372228,
+      "mean": 97.81561642885208,
+      "minimum": 79.8538748640567
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 122.94237466994673,
+      "p95": 138.85674974881113,
+      "maximum": 138.85674974881113,
+      "mean": 122.93712894897908,
+      "minimum": 110.07333314046264
+    }
+  },
+  "audioTriggerToLoaderTaskMs": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 44.043937465175986,
+      "p95": 49.220999935641885,
+      "maximum": 70.55799989029765,
+      "mean": 44.29737916216254,
+      "minimum": 29.865749878808856
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 42.500708252191544,
+      "p95": 62.22641677595675,
+      "maximum": 62.22641677595675,
+      "mean": 42.18638751190156,
+      "minimum": 17.953041708096862
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 42.59591666050255,
+      "p95": 61.162583297118545,
+      "maximum": 61.162583297118545,
+      "mean": 43.438862543553114,
+      "minimum": 28.116958448663354
+    }
+  },
+  "audioInspectionAndDispatchMs": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 0.33991679083555937,
+      "p95": 0.3836667165160179,
+      "maximum": 13.744416646659374,
+      "mean": 1.0097896098159254,
+      "minimum": 0.3028751816600561
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 0.3581874771043658,
+      "p95": 0.4125833511352539,
+      "maximum": 0.4125833511352539,
+      "mean": 0.3620791481807828,
+      "minimum": 0.31979172490537167
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 0.623208237811923,
+      "p95": 3.475791774690151,
+      "maximum": 3.475791774690151,
+      "mean": 0.9091166313737631,
+      "minimum": 0.5841250531375408
+    }
+  },
+  "audioDecodeMs": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 0.2793333260342479,
+      "p95": 0.33804168924689293,
+      "maximum": 0.3495833370834589,
+      "mean": 0.2810812904499471,
+      "minimum": 0.23879180662333965
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 4.782708245329559,
+      "p95": 15.598791651427746,
+      "maximum": 15.598791651427746,
+      "mean": 6.705049984157085,
+      "minimum": 4.198041744530201
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 27.891812496818602,
+      "p95": 29.860083246603608,
+      "maximum": 29.860083246603608,
+      "mean": 28.331087506376207,
+      "minimum": 27.181999990716577
+    }
+  },
+  "audioGraphSetupMs": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 4.085520748049021,
+      "p95": 9.910083375871181,
+      "maximum": 10.070041753351688,
+      "mean": 4.57449370296672,
+      "minimum": 1.1469165328890085
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 5.263541708700359,
+      "p95": 10.056500090286136,
+      "maximum": 10.056500090286136,
+      "mean": 5.694762524217367,
+      "minimum": 1.8266667611896992
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 8.680020924657583,
+      "p95": 9.920249925926328,
+      "maximum": 9.920249925926328,
+      "mean": 7.40198337007314,
+      "minimum": 1.5842083375900984
+    }
+  },
+  "actualTapBufferFrames": [
+    4800
+  ],
+  "audioLoadAndGraphMs": {
+    "one-second.wav": {
+      "n": 20,
+      "median": 74.01574996765703,
+      "p95": 87.70325011573732,
+      "maximum": 106.36312491260469,
+      "mean": 76.47412915248424,
+      "minimum": 67.07591679878533
+    },
+    "sixty-seconds.wav": {
+      "n": 10,
+      "median": 84.24958330579102,
+      "p95": 102.32241661287844,
+      "maximum": 102.32241661287844,
+      "mean": 82.69607082474977,
+      "minimum": 63.998583471402526
+    },
+    "sixty-seconds.m4a": {
+      "n": 10,
+      "median": 104.58814585581422,
+      "p95": 122.46158323250711,
+      "maximum": 122.46158323250711,
+      "mean": 104.7423749929294,
+      "minimum": 92.22204168327153
+    }
+  },
+  "videoCanvasCompletedMs": {
+    "1080p30.mp4": {
+      "n": 20,
+      "median": 134.07820835709572,
+      "p95": 138.65799992345273,
+      "maximum": 190.0183749385178,
+      "mean": 136.63022082764655,
+      "minimum": 129.3987084645778
+    },
+    "1080p60.mp4": {
+      "n": 20,
+      "median": 134.14168753661215,
+      "p95": 137.83495826646686,
+      "maximum": 138.71737499721348,
+      "mean": 132.08679794333875,
+      "minimum": 115.48383324407041
+    }
+  },
+  "cpuSimultaneousAVPercentOneCore": {
+    "n": 30,
+    "median": 47.44742941453088,
+    "p95": 48.90250488250443,
+    "maximum": 49.653338584929514,
+    "mean": 47.43237055576616,
+    "minimum": 44.68916890546995
+  },
+  "steadyAVMemoryFootprintMiB": {
+    "n": 30,
+    "median": 405.1342086791992,
+    "p95": 412.5014419555664,
+    "maximum": 413.1576919555664,
+    "mean": 405.91860122680663,
+    "minimum": 404.4701461791992
+  },
+  "scheduler": {
+    "AV + 2 CPU workers": {
+      "latenessMs": {
+        "n": 960,
+        "median": 5.105062387883663,
+        "p95": 9.983791736885905,
+        "maximum": 10.067833354696631,
+        "mean": 4.762008906254778,
+        "minimum": 0.5774167366325855
+      },
+      "sixteenActionBurstSpreadMs": {
+        "n": 60,
+        "median": 0.03043748438358307,
+        "p95": 0.04249997437000275,
+        "maximum": 0.04687486216425896,
+        "mean": 0.03240971903627118,
+        "minimum": 0.022416701540350914
+      },
+      "bursts": 60
+    },
+    "AV + real mixer bus actions": {
+      "latenessMs": {
+        "n": 960,
+        "median": 6.576354033313692,
+        "p95": 14.529000036418438,
+        "maximum": 15.472166473045945,
+        "mean": 5.910544327101282,
+        "minimum": 0.7279585115611553
+      },
+      "sixteenActionBurstSpreadMs": {
+        "n": 60,
+        "median": 0.3544375067576766,
+        "p95": 0.42625004425644875,
+        "maximum": 0.46558352187275887,
+        "mean": 0.36091736595456797,
+        "minimum": 0.3066249191761017
+      },
+      "bursts": 60
+    },
+    "AV loaded": {
+      "latenessMs": {
+        "n": 1920,
+        "median": 1.25760433729738,
+        "p95": 11.328458553180099,
+        "maximum": 13.362208381295204,
+        "mean": 3.4519716050757174,
+        "minimum": 0.1591250766068697
+      },
+      "sixteenActionBurstSpreadMs": {
+        "n": 120,
+        "median": 0.0555417500436306,
+        "p95": 0.07241684943437576,
+        "maximum": 0.08308328688144684,
+        "mean": 0.0541798654012382,
+        "minimum": 0.025791581720113754
+      },
+      "bursts": 120
+    }
+  },
+  "crossfadeOneSecond": {
+    "triggerToReadyMs": {
+      "n": 12,
+      "median": 109.83195819426328,
+      "p95": 146.27999998629093,
+      "maximum": 146.27999998629093,
+      "mean": 117.88421871218209,
+      "minimum": 96.52320854365826
+    },
+    "readyToCompleteMs": {
+      "n": 12,
+      "median": 1024.2364167934284,
+      "p95": 1055.3035833872855,
+      "maximum": 1055.3035833872855,
+      "mean": 1017.0521840724783,
+      "minimum": 986.8342082481831
+    },
+    "envelopeStartToCompleteMs": {
+      "n": 12,
+      "median": 1036.3722917390987,
+      "p95": 1055.4124168120325,
+      "maximum": 1055.4124168120325,
+      "mean": 1037.211520888377,
+      "minimum": 1032.071083318442
+    },
+    "triggerToCompleteMs": {
+      "n": 12,
+      "median": 1133.315208251588,
+      "p95": 1152.7376249432564,
+      "maximum": 1152.7376249432564,
+      "mean": 1134.936420149946,
+      "minimum": 1131.4871250651777
+    }
+  },
+  "frames1080p30": {
+    "decodedFrameObservations": 870,
+    "elapsedSeconds": 30.22933387500234,
+    "observedFPS": 28.74691197607254,
+    "frameCallbackIntervalMs": {
+      "n": 869,
+      "median": 33.33608340471983,
+      "p95": 34.87608325667679,
+      "maximum": 68.66295821964741,
+      "mean": 34.78634508055505,
+      "minimum": 29.077166691422462
+    },
+    "intervalsOver50ms": 38,
+    "unobservedSourceFramesWithinContinuousPTS": 35,
+    "sourceFrameIntervalsWithinContinuousPTS": 901,
+    "ptsResets": 3
+  },
+  "frames1080p60": {
+    "decodedFrameObservations": 301,
+    "elapsedSeconds": 9.999940916663036,
+    "observedFPS": 30.00017725105815,
+    "frameCallbackIntervalMs": {
+      "n": 300,
+      "median": 33.33629167173058,
+      "p95": 34.029125003144145,
+      "maximum": 35.3877916932106,
+      "mean": 33.33313638887679,
+      "minimum": 31.63799992762506
+    },
+    "intervalsOver50ms": 0,
+    "unobservedSourceFramesWithinContinuousPTS": 298,
+    "sourceFrameIntervalsWithinContinuousPTS": 597,
+    "ptsResets": 1
+  },
+  "framesDuringRealBusActions": {
+    "decodedFrameObservations": 89,
+    "elapsedSeconds": 3.1638469581957906,
+    "observedFPS": 27.814240436643217,
+    "frameCallbackIntervalMs": {
+      "n": 88,
+      "median": 33.4254790795967,
+      "p95": 62.8603333607316,
+      "maximum": 66.27929164096713,
+      "mean": 35.952806343133986,
+      "minimum": 16.33362495340407
+    },
+    "intervalsOver50ms": 9,
+    "unobservedSourceFramesWithinContinuousPTS": 7,
+    "sourceFrameIntervalsWithinContinuousPTS": 95,
+    "ptsResets": 0
+  },
+  "realMixerCommandCostMs": {
+    "n": 960,
+    "median": 0.019999919459223747,
+    "p95": 0.02404162660241127,
+    "maximum": 0.08679158054292202,
+    "mean": 0.020993970732282225,
+    "minimum": 0.017416663467884064
+  },
+  "realMixerWorkloadCPUPercentOneCore": 47.45556946544035,
+  "realMixerMemoryBefore": {
+    "footprintMiB": 414.25146484375,
+    "residentMiB": 430.234375
+  },
+  "realMixerMemoryAfter": {
+    "footprintMiB": 415.2045211791992,
+    "residentMiB": 431.75
+  },
+  "audioNodesBeforeRealMixer": 40,
+  "audioNodesAfterRealMixer": 40,
+  "audioVoicesAfterRealMixer": 8,
+  "decodedBytesAfterRealMixer": 184320000
+}

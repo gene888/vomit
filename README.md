@@ -1,4 +1,6 @@
-# StageCue 0.4.1
+# StageCue 0.5A
+
+The [0.5A mixer optimization](Docs/MIXER_AUTOMATION_0.5A.md) adds targeted bus/master gain updates and removes whole-project normalization from mixer control. Engine changes remain immediate; UI publication and the existing debounced save behavior are preserved.
 
 The [persistent video hold fix](Docs/PERSISTENT_VIDEO_HOLD.md) keeps a completed video's final picture independent of audio-only actions. **FADE AUDIO** and Command-Shift-F now affect audio only; Performance > Fade All Media & Stop and Emergency Stop All are explicitly combined controls. See [control separation](AGENTS.md) for the rule used in further development.
 
