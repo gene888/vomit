@@ -3,6 +3,20 @@ import AVFoundation
 import Combine
 
 #if STAGECUE_PROFILING
+import QuartzCore
+
+/// Bounded, lock-protected diagnostic events; absent from ordinary app builds.
+final class AudioTriggerTrace: @unchecked Sendable {
+    private let lock = NSLock()
+    private var entries: [(UUID, String, Double)] = []
+    func mark(_ id: UUID, _ phase: String, at time: Double = CACurrentMediaTime()) {
+        lock.lock(); defer { lock.unlock() }
+        if entries.count < 20000 { entries.append((id, phase, time)) }
+    }
+    func take() -> [(UUID, String, Double)] {
+        lock.lock(); defer { lock.unlock() }; let value = entries; entries.removeAll(keepingCapacity: true); return value
+    }
+}
 // Opt-in benchmark hook. Not compiled into ordinary application builds.
 extension SoundEngine {
     func profileOutput(_ callback: @escaping @Sendable (AVAudioPCMBuffer, AVAudioTime) -> Void) {
@@ -30,6 +44,19 @@ final class LoadedMedia: @unchecked Sendable {
 }
 
 actor MediaLoader {
+#if STAGECUE_PROFILING
+    private var traceContext: (AudioTriggerTrace, UUID)?
+    func profileSize(_ path: String, id: UUID, trace: AudioTriggerTrace) throws -> Int {
+        trace.mark(id, "loader.inspect.enter")
+        defer { trace.mark(id, "loader.inspect.exit") }
+        return try size(path)
+    }
+    func profileLoad(_ path: String, expectedBytes: Int, id: UUID, trace: AudioTriggerTrace) throws -> LoadedMedia {
+        traceContext = (trace, id); trace.mark(id, "loader.load.enter")
+        defer { trace.mark(id, "loader.load.exit"); traceContext = nil }
+        return try load(path, expectedBytes: expectedBytes)
+    }
+#endif
     static let maximumClipBytes = 512 * 1024 * 1024
     static func inspect(_ path: String) throws -> (AVAudioFile, Int) {
         guard !path.isEmpty else { throw MediaIssue(message: "No media assigned") }
@@ -49,12 +76,24 @@ actor MediaLoader {
     func size(_ path: String) throws -> Int { try Self.inspect(path).1 }
     func load(_ path: String, expectedBytes: Int? = nil) throws -> LoadedMedia {
         try Task.checkCancellation()
+#if STAGECUE_PROFILING
+        if let (trace, id) = traceContext { trace.mark(id, "loader.open.begin") }
+#endif
         let (file, bytes) = try Self.inspect(path)
+#if STAGECUE_PROFILING
+        if let (trace, id) = traceContext { trace.mark(id, "loader.open.end") }
+#endif
         if let expectedBytes, bytes != expectedBytes { throw MediaIssue(message: "Media changed while loading; retrigger") }
         guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)) else {
             throw MediaIssue(message: "Cannot allocate decoded audio")
         }
+#if STAGECUE_PROFILING
+        if let (trace, id) = traceContext { trace.mark(id, "loader.read.begin") }
+#endif
         try file.read(into: buffer)
+#if STAGECUE_PROFILING
+        if let (trace, id) = traceContext { trace.mark(id, "loader.read.end") }
+#endif
         try Task.checkCancellation()
         guard buffer.frameLength > 0 else { throw MediaIssue(message: "Empty audio file") }
         return LoadedMedia(buffer: buffer, bytes: bytes)
@@ -79,6 +118,8 @@ private struct MixerSettings {
 /// Live fades use a common-mode control timer; offline tests drive the same envelopes from sample time.
 @MainActor final class SoundEngine: ObservableObject {
 #if STAGECUE_PROFILING
+    let triggerTrace = AudioTriggerTrace()
+    var profileVoiceOutput: (@Sendable (UUID, AVAudioPCMBuffer, AVAudioTime) -> Void)?
     var profilePhase: ((UUID, String) -> Void)?
 #endif
     @Published private(set) var active: Set<UUID> = []
@@ -120,6 +161,9 @@ private struct MixerSettings {
         var fade: FadeEnvelope?
         var tailStarted = false
         var manualOverride = false
+#if STAGECUE_PROFILING
+        var profileTap = false
+#endif
         init(cue: Cue, media: LoadedMedia, started: Double) {
             self.cue = cue; self.media = media; self.started = started
         }
@@ -212,23 +256,47 @@ private struct MixerSettings {
 
     /// Retrigger replaces both pending loads and active voices. Stale asynchronous work cannot publish.
     func play(_ input: Cue) {
+#if STAGECUE_PROFILING
+        triggerTrace.mark(input.id, "engine.play.enter")
+        defer { triggerTrace.mark(input.id, "engine.play.return") }
+#endif
         var cue = input; cue.normalize()
         if (voices[cue.id] != nil || pending[cue.id] != nil), cue.mode == .toggle {
             configuredStop(cue.id); return
         }
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.cleanup.begin")
+#endif
         stop(cue.id)
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.cleanup.end")
+#endif
         failed.remove(cue.id)
         let token = UUID()
         loading.insert(cue.id)
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.task.create")
+#endif
+        #if STAGECUE_PROFILING
+        let trace = triggerTrace
+        #endif
         let task = Task { [weak self, loader] in
+#if STAGECUE_PROFILING
+            self?.triggerTrace.mark(cue.id, "engine.task.enter")
+#endif
             do {
 #if STAGECUE_PROFILING
                 self?.profilePhase?(cue.id, "inspectBegin")
 #endif
+#if STAGECUE_PROFILING
+                let size = try await loader.profileSize(cue.filePath, id: cue.id, trace: trace)
+#else
                 let size = try await loader.size(cue.filePath)
+#endif
                 guard !Task.isCancelled, let self, self.pending[cue.id]?.0 == token else { return }
 #if STAGECUE_PROFILING
                 self.profilePhase?(cue.id, "inspectComplete")
+                self.triggerTrace.mark(cue.id, "engine.inspect.return")
 #endif
                 guard self.retainedBytes + self.reservations.values.reduce(0, +) + size <= self.maximumActiveBytes else {
                     throw MediaIssue(message: "Active and loading audio exceed the decoded memory budget")
@@ -237,13 +305,25 @@ private struct MixerSettings {
 #if STAGECUE_PROFILING
                 self.profilePhase?(cue.id, "decodeBegin")
 #endif
+#if STAGECUE_PROFILING
+                self.triggerTrace.mark(cue.id, "engine.load.submit")
+                let media = try await loader.profileLoad(cue.filePath, expectedBytes: size, id: cue.id, trace: self.triggerTrace)
+                self.triggerTrace.mark(cue.id, "engine.load.return")
+#else
                 let media = try await loader.load(cue.filePath, expectedBytes: size)
+#endif
                 guard !Task.isCancelled, self.pending[cue.id]?.0 == token else { return }
 #if STAGECUE_PROFILING
                 self.profilePhase?(cue.id, "decodeComplete")
                 self.profilePhase?(cue.id, "graphBegin")
 #endif
+#if STAGECUE_PROFILING
+                self.triggerTrace.mark(cue.id, "engine.graph.begin")
+#endif
                 try self.start(cue, media: media)
+#if STAGECUE_PROFILING
+                self.triggerTrace.mark(cue.id, "engine.graph.end")
+#endif
 #if STAGECUE_PROFILING
                 self.profilePhase?(cue.id, "graphComplete")
 #endif
@@ -259,6 +339,9 @@ private struct MixerSettings {
             }
         }
         pending[cue.id] = (token, task)
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.task.stored")
+#endif
     }
 
     /// Waits for loads in tests/preparation; UI triggering itself remains nonblocking.
@@ -286,17 +369,40 @@ private struct MixerSettings {
         voice.mixer.outputVolume = voice.level / boostScale
         voices[cue.id] = voice
         retainedBytes += media.bytes
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.active.publish.begin")
+#endif
         active.insert(cue.id)
         playingLevels[cue.id] = voice.level
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.active.publish.end")
+#endif
+#if STAGECUE_PROFILING
+        if let callback = profileVoiceOutput {
+            let id = cue.id
+            voice.player.installTap(onBus: 0, bufferSize: 256, format: media.buffer.format) { buffer, time in callback(id, buffer, time) }
+            voice.profileTap = true
+        }
+#endif
         let token = voice.token
         // Capture only Sendable identities, never a Voice/audio node across the callback boundary.
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.buffer.schedule.begin")
+#endif
         voice.player.scheduleBuffer(media.buffer, at: nil, options: cue.loop ? [.loops] : [], completionCallbackType: .dataPlayedBack) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self, !cue.loop, !self.offline, self.voices[cue.id]?.token == token else { return }
                 self.detach(cue.id)
             }
         }
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.buffer.schedule.end")
+        triggerTrace.mark(cue.id, "engine.player.play.begin")
+#endif
         voice.player.play()
+#if STAGECUE_PROFILING
+        triggerTrace.mark(cue.id, "engine.player.play.end")
+#endif
         if paused.contains(cue.id) { voice.pausedAt = clock; voice.player.pause() }
         if cue.autoFadeIn {
             let length = AutomaticFades(cue: cue, duration: media.duration).fadeIn
@@ -428,6 +534,9 @@ private struct MixerSettings {
     private func detach(_ id: UUID) {
         guard let voice = voices.removeValue(forKey: id) else { return }
         voice.player.stop()
+#if STAGECUE_PROFILING
+        if voice.profileTap { voice.player.removeTap(onBus: 0) }
+#endif
         engine.disconnectNodeOutput(voice.player)
         engine.disconnectNodeOutput(voice.mixer)
         engine.disconnectNodeOutput(voice.boost)

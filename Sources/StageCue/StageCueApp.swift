@@ -386,14 +386,30 @@ import Combine
         for task in tasks { await task.value }
     }
     func trigger(_ index: Int) {
+#if STAGECUE_PROFILING
+        let profileID = pads.indices.contains(index) ? pads[index]?.id : nil
+        if let id = profileID { sound.triggerTrace.mark(id, "state.trigger.enter") }
+#endif
         guard pads.indices.contains(index), let cue = pads[index] else { return }
+#if STAGECUE_PROFILING
+        sound.triggerTrace.mark(cue.id, "state.cue.resolved")
+#endif
         selected = index
+#if STAGECUE_PROFILING
+        sound.triggerTrace.mark(cue.id, "state.selected.published")
+#endif
         guard !unavailable(cue) else { message = "Media unavailable or changed; open Media to relink or confirm it"; return }
+#if STAGECUE_PROFILING
+        sound.triggerTrace.mark(cue.id, "state.validated")
+#endif
         if cue.kind == .group {
             guard let id = cue.groupID, let group = project.groups.first(where: { $0.id == id }) else { message = "Missing cue group"; return }
             _ = scheduler.launch(group)
         } else {
             scheduler.manualOverride(cue.kind == .audio ? "audio:\(cue.id)" : "video")
+#if STAGECUE_PROFILING
+            sound.triggerTrace.mark(cue.id, "state.engine.submit")
+#endif
             if cue.kind == .audio { sound.play(cue) } else { video.play(cue) }
         }
     }
@@ -666,6 +682,12 @@ struct Pad: View {
         let running = cue.map { item in state.sound.active.contains(item.id) || state.video.activeIDs.contains(item.id) || state.scheduler.activeRuns.contains { $0.definition.id == item.groupID } } ?? false
         VStack(spacing: 5) {
             Button {
+#if STAGECUE_PROFILING
+                if let id = cue?.id {
+                    state.sound.triggerTrace.mark(id, "ui.pad.action")
+                    if let event = NSApp.currentEvent { state.sound.triggerTrace.mark(id, "ui.event.timestamp", at: event.timestamp) }
+                }
+#endif
                 state.selected = index
                 if cue != nil { state.trigger(index) }
             } label: {

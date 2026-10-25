@@ -8,12 +8,12 @@ import Darwin
 import Testing
 @testable import StageCue
 
-private func stamp() -> Double { CACurrentMediaTime() }
-private func processCPU() -> Double {
+func stamp() -> Double { CACurrentMediaTime() }
+func processCPU() -> Double {
     var r = rusage(); getrusage(RUSAGE_SELF, &r)
     return Double(r.ru_utime.tv_sec + r.ru_stime.tv_sec) + Double(r.ru_utime.tv_usec + r.ru_stime.tv_usec) / 1e6
 }
-private func memory() -> [String: Double] {
+func memory() -> [String: Double] {
     var info = task_vm_info_data_t()
     var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
     let result = withUnsafeMutablePointer(to: &info) { pointer in
@@ -22,7 +22,7 @@ private func memory() -> [String: Double] {
     return ["residentMiB": result == KERN_SUCCESS ? Double(info.resident_size) / 1048576 : -1,
             "footprintMiB": result == KERN_SUCCESS ? Double(info.phys_footprint) / 1048576 : -1]
 }
-private final class Onset: @unchecked Sendable {
+final class Onset: @unchecked Sendable {
     private let lock = NSLock()
     private var at: (render: Double, callback: Double, frames: Int, sampleRate: Double)?
     func clear() { lock.lock(); at = nil; lock.unlock() }
@@ -149,6 +149,10 @@ private final class Onset: @unchecked Sendable {
         defer { window.orderOut(nil); previewWindow.orderOut(nil) }
         try await Task.sleep(for: .seconds(1))
         result["memoryIdleEnginesAndCanvases"] = memory()
+        if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "audio" {
+            try await AudioTriggerBaseline.measure(root: root, state: state, short: short, long: long, compressed: compressed, movie: v30, onset: onset, operatorWindow: operatorWindow)
+            return
+        }
         progress("audio trigger-to-first-nonzero-mixer-buffer")
         var audioRows: [[String: Any]] = []
         for (url, count) in [(short, 20), (long, 10), (compressed, 10)] {
