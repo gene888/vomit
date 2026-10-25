@@ -8,7 +8,7 @@ struct PortabilityTests {
     func folder(_ name: String) throws -> URL {
         let url = temporaryFiles.directory.appendingPathComponent(name)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        return url
+        return url.resolvingSymlinksInPath()
     }
     @Test func portableExportMovesBetweenDifferentHomesWithOriginalsRemoved() async throws {
         let alice = try folder("Users/Alice/Productions/Séance")
@@ -79,5 +79,55 @@ struct PortabilityTests {
         try Data([42]).write(to: output.appendingPathComponent("keep"))
         do { _ = try await MediaLibrary().exportPortable(SoundProject(), to: output); Issue.record("Overwrote destination") } catch { }
         expectEqual(try Data(contentsOf: output.appendingPathComponent("keep")), Data([42]))
+    }
+    @Test func batchRelinkWithoutSpotlightRejectsWrongContentAndPersists() async throws {
+        let original = try folder("Alice/Original"), replacement = try folder("Bob/Replacement")
+        let a = original.appendingPathComponent("A 音.wav"), b = original.appendingPathComponent("B.wav")
+        try Data([1,2,3]).write(to: a); try Data([4,5,6]).write(to: b)
+        var p = SoundProject(); p.cues[0] = Cue(filePath: a.path); p.cues[1] = Cue(filePath: b.path)
+        p = try await MediaLibrary().catalog(p, root: original)
+        let nested = replacement.appendingPathComponent("Nested"); try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: a, to: nested.appendingPathComponent(a.lastPathComponent))
+        try Data([6,5,4]).write(to: nested.appendingPathComponent(b.lastPathComponent))
+        try FileManager.default.removeItem(at: original)
+        let result = try await MediaResolver().resolve(p, root: nil, folders: [replacement])
+        expectEqual(result.report.count(.relinked), 1); expectEqual(result.report.count(.ambiguous), 1)
+        expectTrue(MediaPaths.relative(URL(fileURLWithPath: result.project.cues[0]!.filePath), root: replacement) != nil)
+        expectEqual(result.project.cues[1]?.filePath, b.path)
+        let save = replacement.appendingPathComponent("Relinked.stagecue")
+        try ProjectStore.save(result.project, to: save)
+        let read = try ProjectStore.load(from: save).0
+        expectEqual(read.cues[0]?.id, p.cues[0]?.id)
+        expectTrue(MediaPaths.readable(URL(fileURLWithPath: read.cues[0]!.filePath)))
+    }
+    @Test func duplicateNamesChooseContentIdentityAndLegacyNamesNeedReview() async throws {
+        let source = try folder("Names/Source"), good = try folder("Names/Replacement/Good"), bad = try folder("Names/Replacement/Bad")
+        let a = source.appendingPathComponent("Thunder.wav")
+        try Data([1,2,3,4]).write(to: a)
+        var p = SoundProject(); p.cues[0] = Cue(filePath: a.path)
+        p = try await MediaLibrary().catalog(p, root: nil)
+        try Data([1,2,3,4]).write(to: good.appendingPathComponent("Thunder.wav"))
+        try Data([4,3,2,1]).write(to: bad.appendingPathComponent("Thunder.wav"))
+        try FileManager.default.removeItem(at: source)
+        let result = try await MediaResolver().resolve(p, root: nil, folders: [bad,good])
+        expectEqual(result.report.count(.relinked), 1)
+        expectTrue(MediaPaths.relative(URL(fileURLWithPath: result.project.cues[0]!.filePath), root: good) != nil)
+        p.media = MediaManifest()
+        let legacy = try await MediaResolver().resolve(p, root: nil, folders: [good,bad])
+        expectEqual(legacy.report.count(.ambiguous), 1); expectEqual(legacy.report.items.first?.candidates.count, 2)
+        expectEqual(legacy.project.cues[0]?.filePath, a.path)
+    }
+    @Test func validRelativePathWinsOverOriginalMacAndChangedFileIsFlagged() async throws {
+        let source = try folder("Priority/Alice"), moved = try folder("Priority/Bob")
+        let a = source.appendingPathComponent("music.wav"), b = moved.appendingPathComponent("music.wav")
+        try Data([1,2]).write(to: a); try Data([1,2]).write(to: b)
+        var p = SoundProject(); p.cues[0] = Cue(filePath: a.path)
+        p = try await MediaLibrary().catalog(p, root: source)
+        let r = try await MediaResolver().resolve(p, root: moved)
+        expectEqual(r.project.cues[0]?.filePath, b.path)
+        try Data([2,1]).write(to: a); try Data([2,1]).write(to: b)
+        let changed = try await MediaResolver().resolve(p, root: moved)
+        expectEqual(changed.report.count(.ambiguous), 1)
+        expectEqual(changed.report.count(.available), 0)
     }
 }

@@ -102,7 +102,7 @@ actor MediaLibrary {
         return Fingerprint(bytes: count, modified: after.contentModificationDate ?? .distantPast,
                            hash: hash.finalize().map { String(format: "%02x", $0) }.joined())
     }
-    func catalog(_ input: SoundProject, root: URL?, progress: @Sendable (String) -> Void = { _ in }) async throws -> SoundProject {
+    func catalog(_ input: SoundProject, root: URL?, refresh: Bool = true, progress: @Sendable (String) -> Void = { _ in }) async throws -> SoundProject {
         var project = input
         var paths: [(String, CueKind, UUID?, Bool)] = project.allCues.filter { $0.kind != .group && !$0.filePath.isEmpty }.map { ($0.filePath, $0.kind, $0.id, false) }
         if !project.backgroundPath.isEmpty { paths.append((project.backgroundPath, .image, nil, true)) }
@@ -119,7 +119,7 @@ actor MediaLibrary {
             var asset = old ?? MediaAsset(filename: url.lastPathComponent, originalPath: url.path, kind: kind)
             asset.cueIDs = cueID.map { [$0] } ?? []; asset.background = background; asset.kind = kind
             // Keep an unresolved record's expected metadata and original location.
-            if MediaPaths.readable(url) {
+            if MediaPaths.readable(url), refresh || old == nil {
                 progress("Reading \(url.lastPathComponent)")
                 let fp = try Self.fingerprint(url)
                 asset.filename = url.lastPathComponent; asset.originalPath = url.path
