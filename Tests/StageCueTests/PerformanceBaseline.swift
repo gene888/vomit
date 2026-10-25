@@ -39,9 +39,16 @@ private final class Onset: @unchecked Sendable {
 }
 @MainActor private final class TimingDriver: ShowPlaybackDriver {
     var observations: [(UUID, Double)] = []
+    var commandCostsMs: [Double] = []
     var executeAction: ((GroupAction) throws -> OwnedPlayback?)?
     func resource(for action: GroupAction) throws -> String? { nil }
-    func execute(_ action: GroupAction) throws -> OwnedPlayback? { observations.append((action.id, stamp())); return try executeAction?(action) }
+    func execute(_ action: GroupAction) throws -> OwnedPlayback? {
+        observations.append((action.id, stamp()))
+        let began = stamp()
+        let playback = try executeAction?(action)
+        if executeAction != nil { commandCostsMs.append((stamp()-began)*1000) }
+        return playback
+    }
     func status(_ playback: OwnedPlayback) -> PlaybackStatus { .completed }
     func stop(_ playback: OwnedPlayback, fade: Double) {}
     func pause(_ playback: OwnedPlayback) {}
@@ -268,7 +275,16 @@ private final class Onset: @unchecked Sendable {
         video.play(Cue(filePath: v30.path, loop: true, kind: .video, transition: .cut)); await video.waitForLoad()
         frameRows = []; video.profileFrame = { id, pts, host in frameRows.append(["cueID": id.uuidString, "pts": pts, "host": host]) }
         driver.executeAction = { try state.execute($0) }
+        result["realMixerMemoryBefore"] = memory()
+        result["audioNodesBeforeRealMixer"] = sound.attachedNodeCount
+        let mixerWall = stamp(), mixerCPU = processCPU()
         for _ in 0..<5 { try await scheduleBatch("AV + real mixer bus actions") }
+        result["realMixerWorkloadCPUPercentOneCore"] = (processCPU()-mixerCPU)/(stamp()-mixerWall)*100
+        result["realMixerCommandCostMs"] = driver.commandCostsMs
+        result["realMixerMemoryAfter"] = memory()
+        result["audioNodesAfterRealMixer"] = sound.attachedNodeCount
+        result["audioVoicesAfterRealMixer"] = sound.voiceCount
+        result["decodedBytesAfterRealMixer"] = sound.decodedBytes
         result["framesDuringRealBusActions"] = frameRows; video.profileFrame = nil
         result["scheduler"] = schedulerRows
         progress("12 one-second video crossfades, eight audio voices continue")

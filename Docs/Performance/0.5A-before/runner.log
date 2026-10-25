@@ -1,0 +1,10 @@
+PROFILE: generating local fixtures
+PROFILE: audio trigger-to-first-nonzero-mixer-buffer
+PROFILE: large saved show: 1024 cues, 64 groups, 16 sequences
+PROFILE: video first frame: 20 trials per format
+PROFILE: 30 seconds of eight audio loops + 1080p30 video + concurrent delayed actions
+PROFILE: 10 seconds of 1080p60 source through 30 Hz output
+PROFILE: scheduler under AV + two CPU workers
+PROFILE: real mixer-bus action bursts under simultaneous AV
+PROFILE: 12 one-second video crossfades, eight audio voices continue
+PROFILE: finished; results.json written

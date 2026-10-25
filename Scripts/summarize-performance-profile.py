@@ -42,5 +42,8 @@ for key,fps in [('frames1080p30',30),('frames1080p60',60),('framesDuringRealBusA
     s[key]={'decodedFrameObservations':len(rows),'elapsedSeconds':rows[-1]['host']-rows[0]['host'],'observedFPS':(len(rows)-1)/(rows[-1]['host']-rows[0]['host']),
             'frameCallbackIntervalMs':stats(intervals),'intervalsOver50ms':sum(x>50 for x in intervals),
             'unobservedSourceFramesWithinContinuousPTS':skipped,'sourceFrameIntervalsWithinContinuousPTS':skipped+observedIntervals,'ptsResets':resets}
+if 'realMixerCommandCostMs' in r:
+    s['realMixerCommandCostMs']=stats(r['realMixerCommandCostMs'])
+    for key in ['realMixerWorkloadCPUPercentOneCore','realMixerMemoryBefore','realMixerMemoryAfter','audioNodesBeforeRealMixer','audioNodesAfterRealMixer','audioVoicesAfterRealMixer','decodedBytesAfterRealMixer']: s[key]=r[key]
 output=p.with_name('summary.json'); output.write_text(json.dumps(s,indent=2)+'\n')
 print(json.dumps(s,indent=2))
