@@ -1,6 +1,9 @@
 import Foundation
 import AVFoundation
 import CryptoKit
+import UniformTypeIdentifiers
+
+extension UTType { static let stagecueProject = UTType(exportedAs: "local.StageCue.project", conformingTo: .json) }
 
 struct MediaAsset: Codable, Equatable, Identifiable, Sendable {
     var id = UUID()

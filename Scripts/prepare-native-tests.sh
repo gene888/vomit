@@ -8,7 +8,7 @@ mkdir -p "$CLANG_MODULE_CACHE_PATH"
 swift build --build-tests --disable-sandbox --scratch-path "$PWD/work/SwiftBuild"
 runner="$PWD/work/NativeValidation.app"
 mkdir -p "$runner/Contents/MacOS"
-xcrun swiftc -parse-as-library -target arm64-apple-macos14.0 -swift-version 5 Scripts/ValidationRunner.swift -o "$runner/Contents/MacOS/StageCueValidation"
+xcrun swiftc -module-cache-path "$CLANG_MODULE_CACHE_PATH" -parse-as-library -target arm64-apple-macos14.0 -swift-version 5 Scripts/ValidationRunner.swift -o "$runner/Contents/MacOS/StageCueValidation"
 python3 - "$runner" "$PWD" <<'PY'
 import plistlib, sys
 from pathlib import Path

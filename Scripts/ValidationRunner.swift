@@ -41,10 +41,12 @@ import Foundation
             let file = try FileHandle(forWritingTo: log)
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/swift/pm/swiftpm-testing-helper")
-            process.arguments = ["--test-bundle-path", root.appendingPathComponent("work/SwiftBuild/arm64-apple-macosx/debug/StageCuePackageTests.xctest/Contents/MacOS/StageCuePackageTests").path, "--testing-library", "swift-testing"]
+            let candidates = ["work/SwiftBuild/out/Products/Debug/StageCueTests.xctest/Contents/MacOS/StageCueTests", "work/SwiftBuild/arm64-apple-macosx/debug/StageCuePackageTests.xctest/Contents/MacOS/StageCuePackageTests"]
+            guard let bundle = candidates.map({ root.appendingPathComponent($0) }).first(where: { FileManager.default.fileExists(atPath: $0.path) }) else { throw CocoaError(.fileNoSuchFile) }
+            process.arguments = ["--test-bundle-path", bundle.path, "--testing-library", "swift-testing"]
             var environment = ProcessInfo.processInfo.environment
             environment["DYLD_FRAMEWORK_PATH"] = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks"
-            environment["DYLD_LIBRARY_PATH"] = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx"
+            environment["DYLD_LIBRARY_PATH"] = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx"
             process.environment = environment
             process.currentDirectoryURL = root
             process.standardOutput = file; process.standardError = file

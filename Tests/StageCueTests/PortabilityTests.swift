@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import AVFoundation
 @testable import StageCue
 
 @Suite(.serialized)
@@ -129,5 +130,44 @@ struct PortabilityTests {
         let changed = try await MediaResolver().resolve(p, root: moved)
         expectEqual(changed.report.count(.ambiguous), 1)
         expectEqual(changed.report.count(.available), 0)
+    }
+    @Test @MainActor func realAudioVideoAndBackgroundPlayAfterSourceRootIsRemoved() async throws {
+        let alice = try folder("Playback/Users/Alice"), bob = try folder("Playback/Users/Bob")
+        let audioFixtures = AudioTests(), visualFixtures = VideoTests()
+        let wav = try audioFixtures.fixture(), movie = try await visualFixtures.movie("Portable", mp4: true)
+        let image = try visualFixtures.image("Portable", color: .red)
+        for url in [wav,movie,image] { try FileManager.default.copyItem(at: url, to: alice.appendingPathComponent(url.lastPathComponent)) }
+        var p = SoundProject(); p.cues[0] = Cue(filePath: alice.appendingPathComponent(wav.lastPathComponent).path, loop: true)
+        p.cues[1] = Cue(filePath: alice.appendingPathComponent(movie.lastPathComponent).path, kind: .video, transition: .cut)
+        p.cues[2] = Cue(filePath: alice.appendingPathComponent(image.lastPathComponent).path, kind: .image, transition: .cut)
+        p.backgroundPath = p.cues[2]!.filePath
+        _ = try await MediaLibrary().exportPortable(p, to: alice.appendingPathComponent("Export"))
+        try FileManager.default.copyItem(at: alice.appendingPathComponent("Export"), to: bob.appendingPathComponent("Imported"))
+        try FileManager.default.removeItem(at: alice)
+        let url = bob.appendingPathComponent("Imported/Project.stagecue")
+        let read = try ProjectStore.load(from: url).0
+        let result = try await MediaResolver().resolve(read, root: url.deletingLastPathComponent())
+        expectEqual(result.report.items.count, 3); expectEqual(result.report.count(.available), 3)
+        expectEqual(result.project.media.assets.first(where: { $0.background })?.cueIDs, [p.cues[2]!.id])
+        let audio = SoundEngine(offline: true), video = VideoEngine()
+        defer { audio.shutdown(); video.shutdown() }
+        audio.play(result.project.cues[0]!); await audio.waitForLoads()
+        expectTrue(audio.errors.isEmpty); expectTrue(audio.active.contains(p.cues[0]!.id))
+        video.play(result.project.cues[2]!); await video.waitForLoad(); expectTrue(video.frontFrame != nil)
+        video.play(result.project.cues[1]!); await video.waitForLoad()
+        expectTrue(video.error.isEmpty, video.error); expectTrue(video.frontFrame != nil)
+        expectTrue(audio.active.contains(p.cues[0]!.id)); expectTrue(try audio.render(frames: 512).frameLength > 0)
+    }
+    @Test func manifestVersionAndLegacyMissingReferencesArePreserved() async throws {
+        let root = try folder("Migration"), url = root.appendingPathComponent("legacy.json")
+        let original = Data("{\"schemaVersion\":3,\"cues\":[{\"title\":\"Lost\",\"filePath\":\"/Volumes/Disconnected/Lost.wav\"}]}".utf8)
+        try original.write(to: url)
+        let (read, notes) = try ProjectStore.load(from: url)
+        let result = try await MediaResolver().resolve(read, root: root)
+        expectTrue(notes.contains(SoundProject.migrationNotice)); expectEqual(result.report.count(.missing), 1)
+        expectEqual(result.project.cues[0]?.id, read.cues[0]?.id)
+        expectEqual(result.report.items.first?.asset.originalPath, "/Volumes/Disconnected/Lost.wav")
+        expectEqual(try Data(contentsOf: url), original)
+        expectThrows(try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":4,\"media\":{\"version\":99,\"assets\":[]}}".utf8)))
     }
 }

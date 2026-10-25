@@ -200,6 +200,7 @@ extension ShowState: ShowPlaybackDriver {
         guard let id, let cue = project.allCues.first(where: { $0.id == id }), cue.kind != .group else {
             throw MediaIssue(message: "Missing media cue reference")
         }
+        guard !unavailable(cue) else { throw MediaIssue(message: "Media missing or changed: \(cue.title)") }
         return cue
     }
     func resource(for action: GroupAction) throws -> String? {

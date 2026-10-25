@@ -5,7 +5,7 @@ import AVFoundation
 @Suite(.serialized)
 struct AudioTests {
     private let temporaryFiles = TemporaryFiles()
-    private func fixture(seconds: Double = 1, rate: Double = 48_000, channels: AVAudioChannelCount = 2, value: Float = 0.05) throws -> URL {
+    func fixture(seconds: Double = 1, rate: Double = 48_000, channels: AVAudioChannelCount = 2, value: Float = 0.05) throws -> URL {
         let url = temporaryFiles.directory.appendingPathComponent("stagecue-\(UUID()).wav")
         let layout = AVAudioChannelLayout(layoutTag: channels == 4 ? kAudioChannelLayoutTag_Quadraphonic : channels == 1 ? kAudioChannelLayoutTag_Mono : kAudioChannelLayoutTag_Stereo)!
         let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: rate, interleaved: false, channelLayout: layout)

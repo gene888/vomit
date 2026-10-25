@@ -9,7 +9,7 @@ import UniformTypeIdentifiers
 @Suite(.serialized)
 struct VideoTests {
     private let files = TemporaryFiles()
-    private func image(_ name: String, color: CIColor, type: UTType = .png) throws -> URL {
+    func image(_ name: String, color: CIColor, type: UTType = .png) throws -> URL {
         let url = files.directory.appendingPathComponent(name).appendingPathExtension(type == .png ? "png" : "jpg")
         let picture = CIContext().createCGImage(CIImage(color: color).cropped(to: CGRect(x: 0, y: 0, width: 64, height: 48)), from: CGRect(x: 0, y: 0, width: 64, height: 48))!
         let destination = CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil)!
@@ -17,7 +17,7 @@ struct VideoTests {
         expectTrue(CGImageDestinationFinalize(destination))
         return url
     }
-    private func movie(_ name: String, mp4: Bool = false, finalFrameRed: Bool = false) async throws -> URL {
+    func movie(_ name: String, mp4: Bool = false, finalFrameRed: Bool = false) async throws -> URL {
         let url = files.directory.appendingPathComponent(name).appendingPathExtension(mp4 ? "mp4" : "mov")
         let writer = try AVAssetWriter(outputURL: url, fileType: mp4 ? .mp4 : .mov)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: [AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 64, AVVideoHeightKey: 48])

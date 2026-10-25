@@ -6,7 +6,7 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [.executable(name: "StageCue", targets: ["StageCue"])],
     targets: [
-        .executableTarget(name: "StageCue", path: "Sources/StageCue"),
+        .executableTarget(name: "StageCue", path: "Sources/StageCue", exclude: ["Info.plist"]),
         .testTarget(name: "StageCueTests", dependencies: ["StageCue"])
     ],
     swiftLanguageModes: [.v5]

@@ -34,6 +34,16 @@ import Combine
     @Published var message = ""
     @Published var preflightItems: [String] = []
     @Published var checking = false
+    @Published var mediaReport = MediaReport()
+    @Published var mediaBusy = false
+    @Published var mediaProgress = ""
+    @Published var editingMedia = false
+    var projectRoot: URL?
+    let mediaLibrary = MediaLibrary()
+    let mediaResolver = MediaResolver()
+    let spotlightSearch = SpotlightMediaSearch()
+    var mediaTask: Task<Void, Never>?
+    var mediaOperation = UUID()
     let sound = SoundEngine()
     let video = VideoEngine()
     let scheduler = ShowScheduler()
@@ -116,7 +126,7 @@ import Combine
         terminationObserver = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                self.autosaveTask?.cancel()
+                self.autosaveTask?.cancel(); self.mediaTask?.cancel(); self.spotlightSearch.finish([])
                 if self.recoveredAutosave { try? ProjectStore.save(self.project, to: self.autosaveURL) }
                 self.sequence.emergencyCancel(); self.scheduler.cancelAll(); self.sound.shutdown(); self.video.shutdown(); self.output.close()
             }
@@ -124,13 +134,14 @@ import Combine
     }
     isolated deinit {
         autosaveTask?.cancel()
+        mediaTask?.cancel()
         for request in mediaAssignments.values { request.1.cancel() }
         if let terminationObserver { NotificationCenter.default.removeObserver(terminationObserver) }
         if let keyboardMonitor { NSEvent.removeMonitor(keyboardMonitor) }
     }
     static var defaultURL: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("StageCue", isDirectory: true).appendingPathComponent("autosave-v0.3.json")
+            .appendingPathComponent("StageCue", isDirectory: true).appendingPathComponent("autosave-v0.4.json")
     }
     private func scheduleAutosave() {
         guard recoveredAutosave else { return }
@@ -148,60 +159,99 @@ import Combine
             catch { self?.message = "Autosave failed: \(error.localizedDescription)" }
         }
     }
-    func save() {
-        project.normalize()
-        recoveredAutosave = true
-        autosaveTask?.cancel()
+    func save() { saveProject(to: saveURL) }
+    func saveProject(to destination: URL?) {
+        let snapshot = project
+        let token = documentToken
         revision += 1
         let version = revision
-        let snapshot = project
-        let destination = saveURL
-        let autosave = autosaveURL
         Task {
             do {
-                try await writer.save(snapshot, to: autosave, revision: version)
-                if let destination { try await writer.save(snapshot, to: destination, revision: version) }
-                message = "Project saved"
+                let prepared = try await mediaLibrary.catalog(snapshot, root: destination?.deletingLastPathComponent() ?? projectRoot)
+                guard token == documentToken else { return }
+                try await writer.save(prepared, to: autosaveURL, revision: version)
+                if let destination { try await writer.save(prepared, to: destination, revision: version) }
+                if token == documentToken {
+                    if project == snapshot { project = prepared }
+                    recoveredAutosave = true
+                    if let destination { saveURL = destination; projectRoot = destination.deletingLastPathComponent() }
+                    message = destination == nil ? "Saved local autosave. Use Export Project Only for a named project file." : "Project saved; media remains in its existing locations"
+                }
             } catch { message = "Save failed: \(error.localizedDescription)" }
         }
     }
     func export() {
         let panel = NSSavePanel()
-        panel.allowedContentTypes = [.json]
-        panel.nameFieldStringValue = "\(project.title).json"
-        if panel.runModal() == .OK, let url = panel.url {
-            saveURL = url
-            save()
-        }
+        panel.allowedContentTypes = [.stagecueProject, .json]
+        panel.nameFieldStringValue = "\(project.title).stagecue"
+        if panel.runModal() == .OK, let url = panel.url { saveProject(to: url) }
     }
     func open() {
         let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.json]
-        if panel.runModal() == .OK, let url = panel.url {
+        panel.allowedContentTypes = [.stagecueProject, .json]
+        if panel.runModal() == .OK, let url = panel.url { openProject(url) }
+    }
+    func openProject(_ url: URL) {
+        let oldToken = documentToken
+        Task {
             do {
-                let (decoded, notes) = try ProjectStore.load(from: url)
+                let (decoded, notes) = try await Task.detached { try ProjectStore.load(from: url) }.value
+                guard documentToken == oldToken else { return }
                 stopAll()
-                documentToken = UUID()
-                for request in mediaAssignments.values { request.1.cancel() }
-                mediaAssignments.removeAll()
-                recoveredAutosave = true
-                page = 0
-                scheduler.reset()
-                sequence.unload()
-                project = decoded
+                mediaTask?.cancel(); spotlightSearch.finish([])
+                documentToken = UUID(); mediaOperation = UUID()
+                for request in mediaAssignments.values { request.1.cancel() }; mediaAssignments.removeAll()
+                recoveredAutosave = true; page = 0
+                scheduler.reset(); sequence.unload()
+                project = decoded; mediaReport = MediaReport()
+                projectRoot = url.deletingLastPathComponent()
                 if let id = project.show.sequenceID, let item = project.sequences.first(where: { $0.id == id }) { sequence.select(item) }
                 let migrated = notes.contains(SoundProject.migrationNotice)
                 saveURL = migrated ? nil : url
-                sound.applyMix(project)
-                message = migrated ? "Older project opened. Export a new 0.3 copy to preserve the original. " + notes.joined(separator: "; ") : notes.isEmpty ? "Project opened" : notes.joined(separator: "; ")
-                // Opening never rewrites the imported document. Only explicit Save/Export does.
+                sound.applyMix(project); video.setBackground(project.backgroundPath)
+                message = migrated ? "Older project opened. Export Project Only to a new 0.4 copy to preserve the original." : "Project opened"
+                resolveMediaAutomatically()
             } catch { message = "Open failed: \(error.localizedDescription)" }
         }
+    }
+    func resolveMediaAutomatically() {
+        mediaTask?.cancel()
+        let snapshot = project, root = projectRoot, token = documentToken
+        let operation = UUID(); mediaOperation = operation; mediaBusy = true
+        mediaTask = Task {
+            defer { if mediaOperation == operation { mediaBusy = false } }
+            do {
+                var result = try await mediaResolver.resolve(snapshot, root: root)
+                let missing = result.report.items.filter { $0.status == .missing || $0.status == .ambiguous }
+                if !missing.isEmpty {
+                    mediaProgress = "Searching Spotlight for missing media…"
+                    let urls = await spotlightSearch.search(filenames: missing.map { $0.asset.filename })
+                    try Task.checkCancellation()
+                    if !urls.isEmpty { result = try await mediaResolver.resolve(snapshot, root: root, spotlight: urls) }
+                }
+                guard documentToken == token, mediaOperation == operation else { return }
+                guard project == snapshot else { message = "Project changed during media check; open Media to check again"; return }
+                project = result.project; mediaReport = result.report
+                video.setBackground(project.backgroundPath)
+                mediaProgress = result.report.summary
+                message = "Media check: \(result.report.count(.missing)) missing, \(result.report.count(.ambiguous)) need review. Open Media for details."
+            } catch is CancellationError { }
+            catch { if documentToken == token { message = "Media check failed: \(error.localizedDescription)" } }
+        }
+    }
+    func unavailable(_ cue: Cue) -> Bool {
+        mediaReport.items.contains { ($0.status == .missing || $0.status == .ambiguous) && $0.asset.cueIDs.contains(cue.id) }
+    }
+    func detachMedia(_ cueID: UUID) {
+        for i in project.media.assets.indices { project.media.assets[i].cueIDs.removeAll { $0 == cueID } }
+        project.media.assets.removeAll { $0.cueIDs.isEmpty && !$0.background }
+        mediaReport.items.removeAll { $0.asset.cueIDs.contains(cueID) }
     }
     func setCue(_ cue: Cue?) {
         guard pads.indices.contains(selected) else { return }
         mediaAssignments.removeValue(forKey: selected)?.1.cancel()
         if let old = pads[selected] { stopCue(old) }
+        if let old = pads[selected] { detachMedia(old.id) }
         pads[selected] = cue
     }
     @discardableResult func performPadKey(_ key: String, shift: Bool = false, execute: Bool = true) -> Bool {
@@ -294,6 +344,7 @@ import Combine
                 var cue = self.pads[index] ?? Cue(title: url.deletingPathExtension().lastPathComponent)
                 if cue.filePath.isEmpty && cue.title == "Cue \(index + 1)" { cue.title = url.deletingPathExtension().lastPathComponent }
                 if let old = self.pads[index] { self.stopCue(old) }
+                self.detachMedia(cue.id)
                 cue.filePath = url.path
                 cue.kind = kind
                 cue.groupID = nil
@@ -317,6 +368,7 @@ import Combine
     func trigger(_ index: Int) {
         guard pads.indices.contains(index), let cue = pads[index] else { return }
         selected = index
+        guard !unavailable(cue) else { message = "Media unavailable or changed; open Media to relink or confirm it"; return }
         if cue.kind == .group {
             guard let id = cue.groupID, let group = project.groups.first(where: { $0.id == id }) else { message = "Missing cue group"; return }
             _ = scheduler.launch(group)
@@ -360,23 +412,33 @@ import Combine
         guard !checking else { return }
         checking = true
         let snapshot = project
+        let token = documentToken
         Task {
-            var audioProject = snapshot
-            audioProject.cues = snapshot.allCues.filter { $0.kind == .audio }.map(Optional.some)
+            var checkedProject = snapshot
+            do {
+                let result = try await mediaResolver.resolve(snapshot, root: projectRoot)
+                if documentToken == token, project == snapshot {
+                    project = result.project; checkedProject = result.project; mediaReport = result.report
+                }
+                preflightItems = result.report.items.filter { $0.status == .missing || $0.status == .ambiguous }.map { "\($0.asset.filename): \($0.status.rawValue) — \($0.detail)" }
+                preflightItems += result.report.notes
+            } catch { preflightItems = ["Media resolution failed: \(error.localizedDescription)"] }
+            var audioProject = checkedProject
+            audioProject.cues = checkedProject.allCues.filter { $0.kind == .audio }.map(Optional.some)
             message = "Checking audio…"
-            preflightItems = await sound.preflight(audioProject)
-            preflightItems += snapshot.showReferenceIssues()
-            for (index, cue) in snapshot.allCues.enumerated() {
+            preflightItems += await sound.preflight(audioProject)
+            preflightItems += checkedProject.showReferenceIssues()
+            for (index, cue) in checkedProject.allCues.enumerated() {
                 guard cue.kind == .video || cue.kind == .image else { continue }
                 message = "Checking pad \(index + 1): \(cue.title)…"
                 do { _ = try await visualLoader.inspect(cue.filePath, kind: cue.kind) }
                 catch { preflightItems.append("Pad \(index + 1): \(error.localizedDescription)") }
             }
-            if !snapshot.backgroundPath.isEmpty {
-                do { _ = try await visualLoader.inspect(snapshot.backgroundPath, kind: .image) }
+            if !checkedProject.backgroundPath.isEmpty {
+                do { _ = try await visualLoader.inspect(checkedProject.backgroundPath, kind: .image) }
                 catch { preflightItems.append("Background: \(error.localizedDescription)") }
             }
-            if project != snapshot { preflightItems.append("Project changed during preflight; run it again") }
+            if project != checkedProject { preflightItems.append("Project changed during preflight; run it again") }
             checking = false
             message = preflightItems.isEmpty ? "Preflight passed: media validated and engine running" : "Preflight: \(preflightItems.count) issue(s)"
         }
@@ -394,7 +456,7 @@ import Combine
             CommandGroup(replacing: .newItem) {
                 Button("Open Project…") { state.open() }.keyboardShortcut("o")
                 Button("Save Project") { state.save() }.keyboardShortcut("s")
-                Button("Export Project…") { state.export() }.keyboardShortcut("e", modifiers: [.command, .shift])
+                Button("Export Project Only…") { state.export() }.keyboardShortcut("e", modifiers: [.command, .shift])
             }
             CommandMenu("Performance") {
                 Button("Fade All & Stop") { state.fadeAll() }
@@ -460,7 +522,7 @@ struct MainView: View {
                 Button("Cue Groups") { state.editingGroups = true }
                 Button("Open") { state.open() }
                 Button("Save") { state.save() }
-                Button("Export") { state.export() }
+                Button("Export Project Only") { state.export() }
                 Button(state.checking ? "Checking…" : "Preflight") { state.check() }.disabled(state.checking)
                 Button("FADE ALL") { state.fadeAll() }
                 Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
@@ -530,7 +592,7 @@ struct MainView: View {
             HStack {
                 Text(state.message).font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Text("StageCue 0.3 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.4 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
