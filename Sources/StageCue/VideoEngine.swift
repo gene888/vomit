@@ -117,6 +117,7 @@ struct VisualDissolve: Equatable {
     private var timer: Timer?
     private var pausedAt: Double?
     var currentCue: Cue? { current.flatMap { slots[$0].cue } }
+    var holdingLastFrame: Bool { current.map { slots[$0].holdingEnd } ?? false }
     var retainedPlayerItems: Int { slots.filter { $0.player.currentItem != nil }.count }
     var currentSoundtrackVolume: Float { current.map { slots[$0].player.volume } ?? 0 }
     var time: Double { current.map { slots[$0].player.currentTime().seconds } ?? 0 }
@@ -201,19 +202,32 @@ struct VisualDissolve: Equatable {
         }
     }
     func waitForLoad() async { await loadTask?.value }
-    private func readFrame(_ slot: Slot) {
+    private func readFrame(_ slot: Slot, completingHold: Bool = false) {
+        // Completed video is persistent program content. Never poll its decoder
+        // again because an unrelated audio start can change AVFoundation timing.
+        guard !slot.holdingEnd || completingHold else { return }
         guard let output = slot.output else { return }
         let time = slot.player.currentTime()
         if output.hasNewPixelBuffer(forItemTime: time), let buffer = output.copyPixelBuffer(forItemTime: time, itemTimeForDisplay: nil) {
             autoreleasepool {
                 let image = CIImage(cvPixelBuffer: buffer).transformed(by: slot.transform)
-                slot.frame = context.createCGImage(image, from: image.extent)
+                if let decoded = context.createCGImage(image, from: image.extent) { slot.frame = decoded }
             }
         }
+    }
+    private func freezeFrame(_ slot: Slot) {
+        guard let frame = slot.frame,
+              let bitmap = CGContext(data: nil, width: frame.width, height: frame.height,
+                  bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
+                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+        // Materialize owned pixels instead of retaining decoder/IOSurface backing.
+        bitmap.draw(frame, in: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
+        if let retained = bitmap.makeImage() { slot.frame = retained }
     }
     private func didEnd(_ index: Int, item: AVPlayerItem) {
         let slot = slots[index]
         guard slot.player.currentItem === item, index == current || index == outgoing, let cue = slot.cue else { return }
+        guard !slot.holdingEnd else { return }
         if cue.loop {
             slot.seekInProgress = true
             slot.player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] finished in
@@ -226,6 +240,7 @@ struct VisualDissolve: Equatable {
         } else if cue.holdLastFrame {
             slot.holdingEnd = true
             slot.player.pause()
+            freezeFrame(slot)
             // Seek just inside the end to retain the final decoded sample rather
             // than an empty frame at the exclusive duration boundary.
             let end = item.duration
@@ -235,7 +250,8 @@ struct VisualDissolve: Equatable {
                     Task { @MainActor in
                         guard let self, finished, self.slots[index].player.currentItem === item,
                               self.slots[index].holdingEnd else { return }
-                        self.readFrame(self.slots[index])
+                        self.readFrame(self.slots[index], completingHold: true)
+                        self.freezeFrame(self.slots[index])
                         self.tick()
                     }
                 }

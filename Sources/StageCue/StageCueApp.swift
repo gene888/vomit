@@ -415,6 +415,13 @@ import Combine
         else { video.stopCue(cue.id, seconds: project.manualFadeSeconds) }
     }
     func stopAll() { sequence.emergencyCancel(); scheduler.cancelAll(); sound.stopAll(); video.stop() }
+    func fadeAudio() {
+        // Override audio automation only; visual ownership and schedules survive.
+        let audioIDs = Set(project.allCues.filter { $0.kind == .audio }.map(\.id))
+            .union(sound.active).union(sound.loading)
+        for id in audioIDs { scheduler.manualOverride("audio:\(id)") }
+        sound.fadeAll(seconds: project.manualFadeSeconds)
+    }
     func fadeAll() { sequence.emergencyCancel(); scheduler.cancelAll(); sound.fadeAll(seconds: project.manualFadeSeconds); video.stop(seconds: project.manualFadeSeconds) }
     func check() {
         guard !checking else { return }
@@ -471,8 +478,9 @@ import Combine
                 Button("View Media Preflight Report…") { state.editingMedia = true }
             }
             CommandMenu("Performance") {
-                Button("Fade All & Stop") { state.fadeAll() }
+                Button("Fade Audio & Stop") { state.fadeAudio() }
                     .keyboardShortcut("f", modifiers: [.command, .shift])
+                Button("Fade All Media & Stop") { state.fadeAll() }
                 Button("Emergency Stop All") { state.stopAll() }
                     .keyboardShortcut(".", modifiers: [.command])
                 Divider()
@@ -540,8 +548,10 @@ struct MainView: View {
                 }
                 Button("Media") { state.editingMedia = true }
                 Button(state.checking ? "Checking…" : "Preflight") { state.check() }.disabled(state.checking)
-                Button("FADE ALL") { state.fadeAll() }
+                Button("FADE AUDIO") { state.fadeAudio() }
+                    .help("Fade and stop audio cues only; visual output and visual automation continue")
                 Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
+                    .help("Emergency: stop all audio and video and cancel show automation")
             }
             if state.project.show.showMode {
                 ShowPerformanceView().environmentObject(state)
@@ -609,7 +619,7 @@ struct MainView: View {
                 Text(state.mediaBusy ? state.mediaProgress : state.message).font(.caption).foregroundStyle(.secondary)
                 if state.mediaBusy { ProgressView().controlSize(.small); Button("Cancel Media Operation") { state.cancelMediaOperation() }.font(.caption) }
                 Spacer()
-                Text("StageCue 0.4 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.4.1 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

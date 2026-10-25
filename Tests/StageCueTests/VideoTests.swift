@@ -236,4 +236,107 @@ struct VideoTests {
         expectEqual(video.retainedPlayerItems, 0)
     }
 
+    @Test @MainActor func heldProgramPixelsSurviveAudioPadsGroupsSequencesAndPages() async throws {
+        let state = ShowState(autosaveURL: files.directory.appendingPathComponent("persistent-program.json"))
+        defer { state.stopAll(); state.sound.shutdown(); state.video.shutdown() }
+        let audioFixtures = AudioTests()
+        let wav = try audioFixtures.fixture(seconds: 8, value: 0)
+        let heldCue = Cue(filePath: try await movie("PersistentEnd", finalFrameRed: true).path,
+                          kind: .video, transition: .cut, holdLastFrame: true)
+        state.project.cues[0] = heldCue
+        for index in 1...3 { state.project.cues[index] = Cue(title: "Audio \(index)", filePath: wav.path, loop: true) }
+        let projector = VisualCanvas(frame: CGRect(x: 0, y: 0, width: 64, height: 48))
+        projector.connect(state.video); projector.needsLayout = true; projector.layoutSubtreeIfNeeded()
+        func pixel() -> [UInt8] {
+            var rgba = [UInt8](repeating: 0, count: 4)
+            rgba.withUnsafeMutableBytes { bytes in
+                let cg = CGContext(data: bytes.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                   space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+                cg.scaleBy(x: 1 / 64, y: 1 / 48)
+                projector.layer?.render(in: cg)
+            }
+            return rgba
+        }
+        state.trigger(0); await state.video.waitForLoad()
+        try await Task.sleep(for: .seconds(2.4))
+        guard let retained = state.video.frontFrame else { Issue.record("No held final frame"); return }
+        func assertHeld() async throws {
+            try await Task.sleep(for: .milliseconds(60)) // Allow the shared output canvas to render published state.
+            expectTrue(state.video.holdingLastFrame)
+            expectEqual(state.video.currentCue?.id, heldCue.id)
+            expectTrue(state.video.frontFrame === retained, "Held program must not be replaced by decoder polling or audio UI changes")
+            let rgba = pixel()
+            expectTrue(rgba[0] > 200 && rgba[2] < 80, "Projector canvas must retain the actual red final-frame pixels")
+        }
+        try await assertHeld()
+        for index in 1...3 {
+            state.trigger(index); await state.sound.waitForLoads()
+            expectTrue(state.sound.active.contains(state.project.cues[index]!.id))
+            try await assertHeld()
+        }
+        state.project.manualFadeSeconds = 0
+        state.fadeDown(state.project.cues[1]!); state.fadeUp(state.project.cues[1]!)
+        state.fadeStop(state.project.cues[1]!); state.stopCue(state.project.cues[2]!)
+        state.fadeAudio(); try await assertHeld()
+
+        let audioID = state.project.cues[1]!.id
+        let group = CueGroup(title: "Audio only", actions: [
+            GroupAction(cueID: audioID), GroupAction(kind: .fade, cueID: audioID, delay: 0.02, duration: 0.02, levelDB: -18),
+            GroupAction(kind: .silence, cueID: audioID, delay: 0.05, duration: 0),
+            GroupAction(kind: .pause, cueID: audioID, delay: 0.06), GroupAction(kind: .resume, cueID: audioID, delay: 0.08),
+            GroupAction(kind: .stop, cueID: audioID, delay: 0.1)
+        ])
+        state.project.groups = [group]; state.project.cues[4] = Cue(kind: .group, groupID: group.id)
+        state.project.show.showMode = true
+        state.trigger(4); try await Task.sleep(for: .milliseconds(200)); try await assertHeld()
+        expectTrue(state.scheduler.runs.contains { $0.definition.id == group.id && $0.state == .completed })
+        let sequence = CueSequence(steps: [SequenceStep(cueID: audioID)])
+        state.project.sequences = [sequence]; state.loadSequence(sequence.id); state.performShowCommand(.go)
+        await state.sound.waitForLoads(); try await assertHeld()
+        state.performShowCommand(.pause); state.performShowCommand(.pause); state.performShowCommand(.stop)
+        try await assertHeld()
+        state.addPage(); state.changePage(0); state.project.show.showMode = false; try await assertHeld()
+
+        let next = Cue(filePath: try await movie("ReplacementLoop").path, loop: true, kind: .video, transition: .cut)
+        state.video.play(next); await state.video.waitForLoad()
+        expectEqual(state.video.currentCue?.id, next.id); expectFalse(state.video.holdingLastFrame)
+        try await Task.sleep(for: .seconds(2.3))
+        expectTrue(state.video.activeIDs.contains(next.id)); expectFalse(state.video.holdingLastFrame)
+        let imageCue = Cue(filePath: try image("ExplicitStill", color: .blue).path, kind: .image, videoFadeIn: 0.05)
+        state.video.play(imageCue); await state.video.waitForLoad(); state.video.tick(now: CACurrentMediaTime() + 1)
+        try await Task.sleep(for: .milliseconds(60))
+        expectEqual(state.video.currentCue?.id, imageCue.id); expectTrue(pixel()[2] > 200)
+        state.performShowCommand(.blackout); try await Task.sleep(for: .milliseconds(60))
+        expectTrue(state.video.blackout); expectTrue(pixel()[0] < 10 && pixel()[2] < 10)
+        state.performShowCommand(.blackout)
+        state.video.stop(); try await Task.sleep(for: .milliseconds(60))
+        expectTrue(state.video.frontFrame == nil); expectTrue(pixel()[0] < 10 && pixel()[2] < 10)
+    }
+
+    @Test @MainActor func audioFadeLeavesExplicitVisualAutomationRunning() async throws {
+        let state = ShowState(autosaveURL: files.directory.appendingPathComponent("audio-fade-only.json"))
+        defer { state.stopAll(); state.sound.shutdown(); state.video.shutdown() }
+        let fixtures = AudioTests()
+        state.project.cues[0] = Cue(filePath: try image("RedProgram", color: .red).path, kind: .image, transition: .cut)
+        state.project.cues[1] = Cue(filePath: try fixtures.fixture(seconds: 3, value: 0).path, loop: true)
+        state.project.cues[2] = Cue(filePath: try image("BlueProgram", color: .blue).path, kind: .image, transition: .cut)
+        state.trigger(0); await state.video.waitForLoad()
+        state.project.manualFadeSeconds = 0
+        let group = CueGroup(actions: [GroupAction(cueID: state.project.cues[1]!.id),
+                                      GroupAction(kind: .cut, cueID: state.project.cues[2]!.id, delay: 0.15)])
+        _ = state.scheduler.launch(group)
+        await state.sound.waitForLoads()
+        state.fadeAudio()
+        expectEqual(state.video.currentCue?.id, state.project.cues[0]?.id)
+        expectTrue(state.scheduler.activeRuns.contains { $0.definition.id == group.id })
+        for _ in 0..<100 {
+            if state.video.currentCue?.id == state.project.cues[2]?.id { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        expectEqual(state.video.currentCue?.id, state.project.cues[2]?.id)
+        expectFalse(state.sound.active.contains(state.project.cues[1]!.id))
+        state.fadeAll(); state.video.tick(now: CACurrentMediaTime() + 1)
+        expectTrue(state.video.frontFrame == nil, "Explicit combined fade must still stop visuals")
+    }
+
 }

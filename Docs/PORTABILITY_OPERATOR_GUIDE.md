@@ -2,6 +2,8 @@
 
 This guide updates the project, export, and media instructions in the StageCue 0.3 Operator Manual. Existing soundboard, mixer, fade, video, Cue Group, Sequence, Show Mode, and emergency controls remain available.
 
+For 0.4.1, also read [Persistent video hold](PERSISTENT_VIDEO_HOLD.md): FADE AUDIO and Command-Shift-F affect audio only; the combined fade remains explicitly labeled Fade All Media & Stop in the Performance menu.
+
 ## A project file and a portable production are different
 
 A **project file** (.stagecue or older .json) contains show settings and references to media. Files may remain anywhere on the Mac, including an external drive. Saving a project does not copy its media. Sending this file alone does not send the production's media.

@@ -1,4 +1,6 @@
-# StageCue 0.4
+# StageCue 0.4.1
+
+The [persistent video hold fix](Docs/PERSISTENT_VIDEO_HOLD.md) keeps a completed video's final picture independent of audio-only actions. **FADE AUDIO** and Command-Shift-F now affect audio only; Performance > Fade All Media & Stop and Emergency Stop All are explicitly combined controls. See [control separation](AGENTS.md) for the rule used in further development.
 
 Native, local macOS audio/video soundboard: SwiftUI, AVAudioEngine, AVPlayer and Core Audio. Apple Silicon only; macOS 14 or newer. No cloud services, third-party runtime dependencies, recording or streaming.
 
