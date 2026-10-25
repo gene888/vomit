@@ -10,6 +10,16 @@ enum ProjectStore {
         let data = try Data(contentsOf: url)
         guard data.count <= maximumBytes else { throw CocoaError(.fileReadTooLarge) }
         var project = try JSONDecoder().decode(SoundProject.self, from: data)
+        var assetIDs: Set<UUID> = [], cueAssets: Set<UUID> = []
+        guard project.media.assets.filter(\.background).count <= 1 else { throw MediaIssue(message: "Multiple background asset records") }
+        for asset in project.media.assets {
+            guard assetIDs.insert(asset.id).inserted, asset.kind != .group,
+                  asset.bytes.map({ $0 >= 0 }) ?? true,
+                  asset.sha256.map({ $0.count == 64 && $0.allSatisfy({ $0.isHexDigit }) }) ?? true else { throw MediaIssue(message: "Invalid media manifest record") }
+            for cue in asset.cueIDs {
+                guard cueAssets.insert(cue).inserted else { throw MediaIssue(message: "A cue is associated with more than one media asset") }
+            }
+        }
         let notes = project.normalize()
         let root = url.deletingLastPathComponent()
         try project.mapMediaPaths { try MediaPaths.resolve($0, root: root) }

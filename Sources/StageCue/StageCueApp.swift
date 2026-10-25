@@ -59,6 +59,7 @@ import Combine
     private let writer = ProjectWriter()
     private var autosaveTask: Task<Void, Never>?
     private var revision = 0
+    private var saveOperation = UUID()
     private var engineChanges: AnyCancellable?
     private var terminationObserver: NSObjectProtocol?
     private var keyboardMonitor: Any?
@@ -70,9 +71,11 @@ import Combine
 
     init(autosaveURL: URL? = nil) {
         self.autosaveURL = autosaveURL ?? Self.defaultURL
-        if FileManager.default.fileExists(atPath: self.autosaveURL.path) {
+        let previousAutosave = self.autosaveURL.deletingLastPathComponent().appendingPathComponent("autosave-v0.3.json")
+        let restoreURL = autosaveURL == nil && !FileManager.default.fileExists(atPath: self.autosaveURL.path) && FileManager.default.fileExists(atPath: previousAutosave.path) ? previousAutosave : self.autosaveURL
+        if FileManager.default.fileExists(atPath: restoreURL.path) {
             do {
-                let (saved, notes) = try ProjectStore.load(from: self.autosaveURL)
+                let (saved, notes) = try ProjectStore.load(from: restoreURL)
                 project = saved
                 if !notes.isEmpty { message = notes.joined(separator: "; ") }
             } catch {
@@ -131,6 +134,9 @@ import Combine
                 self.sequence.emergencyCancel(); self.scheduler.cancelAll(); self.sound.shutdown(); self.video.shutdown(); self.output.close()
             }
         }
+        if !project.allCues.isEmpty || !project.backgroundPath.isEmpty {
+            Task { [weak self] in self?.resolveMediaAutomatically() }
+        }
     }
     isolated deinit {
         autosaveTask?.cancel()
@@ -163,15 +169,16 @@ import Combine
     func saveProject(to destination: URL?) {
         let snapshot = project
         let token = documentToken
+        let operation = UUID(); saveOperation = operation
         revision += 1
         let version = revision
         Task {
             do {
-                let prepared = try await mediaLibrary.catalog(snapshot, root: destination?.deletingLastPathComponent() ?? projectRoot)
-                guard token == documentToken else { return }
+                let prepared = try await mediaLibrary.catalog(snapshot, root: destination?.deletingLastPathComponent() ?? projectRoot, refresh: false)
+                guard token == documentToken, saveOperation == operation else { return }
                 try await writer.save(prepared, to: autosaveURL, revision: version)
                 if let destination { try await writer.save(prepared, to: destination, revision: version) }
-                if token == documentToken {
+                if token == documentToken, saveOperation == operation {
                     if project == snapshot { project = prepared }
                     recoveredAutosave = true
                     if let destination { saveURL = destination; projectRoot = destination.deletingLastPathComponent() }
@@ -191,9 +198,9 @@ import Combine
         panel.allowedContentTypes = [.stagecueProject, .json]
         if panel.runModal() == .OK, let url = panel.url { openProject(url) }
     }
-    func openProject(_ url: URL) {
+    @discardableResult func openProject(_ url: URL) -> Task<Void, Never> {
         let oldToken = documentToken
-        Task {
+        return Task {
             do {
                 let (decoded, notes) = try await Task.detached { try ProjectStore.load(from: url) }.value
                 guard documentToken == oldToken else { return }
@@ -203,7 +210,8 @@ import Combine
                 for request in mediaAssignments.values { request.1.cancel() }; mediaAssignments.removeAll()
                 recoveredAutosave = true; page = 0
                 scheduler.reset(); sequence.unload()
-                project = decoded; mediaReport = MediaReport()
+                project = decoded
+                mediaReport = MediaReport(items: decoded.media.assets.map { AssetResolution(asset: $0, status: .missing, detail: "Checking media identity…") })
                 projectRoot = url.deletingLastPathComponent()
                 if let id = project.show.sequenceID, let item = project.sequences.first(where: { $0.id == id }) { sequence.select(item) }
                 let migrated = notes.contains(SoundProject.migrationNotice)
@@ -217,7 +225,7 @@ import Combine
     func resolveMediaAutomatically() {
         mediaTask?.cancel()
         let snapshot = project, root = projectRoot, token = documentToken
-        let operation = UUID(); mediaOperation = operation; mediaBusy = true
+        let operation = UUID(); mediaOperation = operation; mediaBusy = true; mediaProgress = "Checking media references…"
         mediaTask = Task {
             defer { if mediaOperation == operation { mediaBusy = false } }
             do {
@@ -451,12 +459,16 @@ import Combine
         WindowGroup("StageCue") {
             MainView().environmentObject(state)
                 .frame(minWidth: 1220, minHeight: 740)
+                .onOpenURL { state.openProject($0) }
         }
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Open Project…") { state.open() }.keyboardShortcut("o")
                 Button("Save Project") { state.save() }.keyboardShortcut("s")
                 Button("Export Project Only…") { state.export() }.keyboardShortcut("e", modifiers: [.command, .shift])
+                Button("Export Portable Project…") { state.exportPortable() }.disabled(state.mediaBusy)
+                Button("Relink Missing Media…") { state.editingMedia = true }
+                Button("View Media Preflight Report…") { state.editingMedia = true }
             }
             CommandMenu("Performance") {
                 Button("Fade All & Stop") { state.fadeAll() }
@@ -522,7 +534,11 @@ struct MainView: View {
                 Button("Cue Groups") { state.editingGroups = true }
                 Button("Open") { state.open() }
                 Button("Save") { state.save() }
-                Button("Export Project Only") { state.export() }
+                Menu("Export") {
+                    Button("Export Project Only…") { state.export() }
+                    Button("Export Portable Project…") { state.exportPortable() }.disabled(state.mediaBusy)
+                }
+                Button("Media") { state.editingMedia = true }
                 Button(state.checking ? "Checking…" : "Preflight") { state.check() }.disabled(state.checking)
                 Button("FADE ALL") { state.fadeAll() }
                 Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
@@ -590,7 +606,8 @@ struct MainView: View {
             Divider()
             VideoControls(video: state.video, output: state.output, project: $state.project, onManualControl: { state.scheduler.manualOverride("video") })
             HStack {
-                Text(state.message).font(.caption).foregroundStyle(.secondary)
+                Text(state.mediaBusy ? state.mediaProgress : state.message).font(.caption).foregroundStyle(.secondary)
+                if state.mediaBusy { ProgressView().controlSize(.small); Button("Cancel Media Operation") { state.cancelMediaOperation() }.font(.caption) }
                 Spacer()
                 Text("StageCue 0.4 • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
@@ -605,11 +622,13 @@ struct MainView: View {
             }
         }
         .padding(16)
+        .sheet(isPresented: $state.editingMedia) { MediaManagementView(project: state.project, root: state.projectRoot).environmentObject(state) }
         .sheet(isPresented: $state.editingShowKeys) { ShowKeyEditor().environmentObject(state) }
         .sheet(isPresented: $state.editingSequences) { SequenceEditor().environmentObject(state) }
         .sheet(isPresented: $state.editingGroups) { GroupEditor().environmentObject(state) }
         .alert("Preflight", isPresented: $showPreflight) {
             Button("OK") {}
+            Button("Media report and relinking") { state.editingMedia = true }
         } message: {
             Text(state.preflightItems.isEmpty ? "All assigned media validated and the audio engine is running. Hardware output still needs a listening check." : state.preflightItems.joined(separator: "\n"))
         }
@@ -641,7 +660,7 @@ struct Pad: View {
                         else if cue.map({ state.sound.loading.contains($0.id) || state.video.loadingCueID == $0.id }) == true { ProgressView().controlSize(.mini) }
                     }
                     Spacer()
-                    Text(cue?.title ?? "+ Assign")
+                    Text(cue.map { state.unavailable($0) ? "⚠ " + $0.title : $0.title } ?? "+ Assign")
                         .font(.system(size: 13, weight: .semibold))
                         .multilineTextAlignment(.center).lineLimit(2)
                     Spacer()
@@ -723,6 +742,10 @@ struct CueInspector: View {
     @ViewBuilder private func cueControls(_ current: Cue) -> some View {
         // Dedicated bindings update the value-type cue in its indexed slot.
         TextField("Cue name", text: bind(\.title)).finishEditingOnCommit()
+        if state.unavailable(current) {
+            Text("Media missing, changed, or awaiting identity verification").font(.caption).foregroundStyle(.orange)
+            Button("Relink Missing Media…") { state.editingMedia = true }
+        }
         if current.kind == .group {
             Text("Group settings are edited in Cue Groups.").font(.caption)
             ForEach(state.scheduler.activeRuns.filter { $0.definition.id == current.groupID }) { run in

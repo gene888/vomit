@@ -43,7 +43,7 @@ actor MediaResolver {
             progress("Searching \(folder.lastPathComponent)…")
             guard let en = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: [.isRegularFileKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles, .skipsPackageDescendants], errorHandler: { _, _ in true }) else { continue }
             var visited = 0
-            for case let url as URL in en {
+            while let url = en.nextObject() as? URL {
                 try Task.checkCancellation(); visited += 1
                 if visited > 100_000 { report.notes.append("Folder search reached 100000 entries; choose a narrower folder"); break }
                 if (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true { en.skipDescendants(); continue }
@@ -123,9 +123,11 @@ actor MediaResolver {
     private var observer: NSObjectProtocol?
     private var continuation: CheckedContinuation<[URL], Never>?
     private var timeout: Task<Void, Never>?
+    private var searchID = UUID()
     func search(filenames: [String]) async -> [URL] {
         finish([])
         guard !filenames.isEmpty else { return [] }
+        let id = UUID(); searchID = id
         return await withTaskCancellationHandler {
             await withCheckedContinuation { continuation in
                 self.continuation = continuation
@@ -137,8 +139,8 @@ actor MediaResolver {
                 query.searchScopes = [NSMetadataQueryLocalComputerScope]
                 self.query = query
                 observer = NotificationCenter.default.addObserver(forName: .NSMetadataQueryDidFinishGathering, object: query, queue: .main) { [weak self] _ in
-                    MainActor.assumeIsolated {
-                        guard let self, let query = self.query else { return }
+                    Task { @MainActor [weak self] in
+                        guard let self, self.searchID == id, let query = self.query else { return }
                         query.disableUpdates()
                         let urls = (0..<min(query.resultCount, 5000)).compactMap { i -> URL? in
                             guard let item = query.result(at: i) as? NSMetadataItem,
@@ -150,11 +152,11 @@ actor MediaResolver {
                 }
                 if !query.start() { finish([]); return }
                 timeout = Task { [weak self] in
-                    do { try await Task.sleep(for: .seconds(8)); self?.finish([]) } catch { }
+                    do { try await Task.sleep(for: .seconds(8)); if self?.searchID == id { self?.finish([]) } } catch { }
                 }
                 if Task.isCancelled { finish([]) }
             }
-        } onCancel: { Task { @MainActor [weak self] in self?.finish([]) } }
+        } onCancel: { Task { @MainActor [weak self] in if self?.searchID == id { self?.finish([]) } } }
     }
     func finish(_ urls: [URL]) {
         query?.stop(); query = nil

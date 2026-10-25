@@ -130,7 +130,14 @@ actor MediaLibrary {
                 asset.bytes = fp.bytes; asset.modified = fp.modified; asset.sha256 = fp.hash
                 if kind != .image {
                     let av = AVURLAsset(url: url)
-                    let duration = try? await av.load(.duration).seconds
+                    let watchdog = Task {
+                        do { try await Task.sleep(for: .seconds(10)); av.cancelLoading() } catch { }
+                    }
+                    let duration = try? await withTaskCancellationHandler {
+                        try await av.load(.duration).seconds
+                    } onCancel: { av.cancelLoading() }
+                    watchdog.cancel()
+                    try Task.checkCancellation()
                     asset.duration = duration.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
                 }
             }
@@ -154,7 +161,7 @@ actor MediaLibrary {
         try fm.createDirectory(at: staging, withIntermediateDirectories: false)
         var published = false
         defer { if !published { try? fm.removeItem(at: staging) } }
-        var project = try await catalog(input, root: nil, progress: progress)
+        var project = try await catalog(input, root: nil, refresh: false, progress: progress)
         for i in project.media.assets.indices {
             try Task.checkCancellation(); try beforeCopy(i)
             let asset = project.media.assets[i]
@@ -162,7 +169,7 @@ actor MediaLibrary {
             guard MediaPaths.readable(source), let expected = asset.sha256 else { throw MediaIssue(message: "Cannot export missing media: \(asset.filename)") }
             let folder = asset.kind == .audio ? "Audio" : asset.kind == .video ? "Video" : "Images"
             let safeName = source.lastPathComponent.replacingOccurrences(of: ":", with: "_")
-            let relative = "Media/\(folder)/\(asset.id.uuidString)-\(safeName)"
+            let relative = "Media/\(folder)/\(asset.id.uuidString)/\(safeName)"
             let target = try MediaPaths.relativeURL(relative, root: staging)
             try fm.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
             progress("Copying \(i + 1) of \(project.media.assets.count): \(asset.filename)")

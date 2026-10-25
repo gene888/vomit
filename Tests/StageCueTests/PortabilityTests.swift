@@ -170,4 +170,69 @@ struct PortabilityTests {
         expectEqual(try Data(contentsOf: url), original)
         expectThrows(try JSONDecoder().decode(SoundProject.self, from: Data("{\"schemaVersion\":4,\"media\":{\"version\":99,\"assets\":[]}}".utf8)))
     }
+    @Test func sameNamesRemainDistinctAndInterruptedSecondCopyCleansUp() async throws {
+        let root = try folder("DuplicateExport"), a = try folder("DuplicateExport/A"), b = try folder("DuplicateExport/B")
+        let x = a.appendingPathComponent("Thunder.wav"), y = b.appendingPathComponent("Thunder.wav")
+        try Data([1,2]).write(to: x); try Data([3,4]).write(to: y)
+        var p = SoundProject(); p.cues[0] = Cue(filePath: x.path); p.cues[1] = Cue(filePath: y.path)
+        let dest = root.appendingPathComponent("Good")
+        _ = try await MediaLibrary().exportPortable(p, to: dest)
+        let loaded = try ProjectStore.load(from: dest.appendingPathComponent("Project.stagecue")).0
+        expectEqual(loaded.media.assets.count, 2)
+        expectFalse(loaded.cues[0]?.filePath == loaded.cues[1]?.filePath)
+        expectEqual(try Data(contentsOf: URL(fileURLWithPath: loaded.cues[0]!.filePath)), Data([1,2]))
+        let canceled = root.appendingPathComponent("Canceled")
+        do { _ = try await MediaLibrary().exportPortable(p, to: canceled, beforeCopy: { if $0 == 1 { throw CancellationError() } }); Issue.record("Ignored mid-export cancellation") } catch is CancellationError { }
+        expectFalse(FileManager.default.fileExists(atPath: canceled.path))
+        expectFalse(try FileManager.default.contentsOfDirectory(atPath: root.path).contains { $0.hasPrefix(".stagecue-export") })
+    }
+    @Test @MainActor func mediaChoicesAreStagedAndStaleApplyCannotOverwriteEdits() async throws {
+        let state = ShowState(autosaveURL: temporaryFiles.directory.appendingPathComponent("isolated-autosave.json"))
+        defer { state.sound.shutdown(); state.video.shutdown() }
+        state.project.cues[0] = Cue(filePath: "/missing/Expected.wav")
+        let original = state.project
+        let model = MediaManagementModel(project: original, root: nil)
+        model.scan(); await model.waitForOperation()
+        expectEqual(model.report.count(.missing), 1); expectEqual(state.project, original)
+        let fixtures = AudioTests(), replacement = try fixtures.fixture()
+        model.accept(model.report.items[0].asset, url: replacement)
+        await model.waitForOperation()
+        expectEqual(state.project, original)
+        expectEqual(model.report.count(.available), 1)
+        expectTrue(model.apply(to: state))
+        expectEqual(state.project.cues[0]?.filePath, replacement.path)
+        let changed = MediaManagementModel(project: state.project, root: nil)
+        state.project.title = "Operator edit"
+        expectFalse(changed.apply(to: state)); expectEqual(state.project.title, "Operator edit")
+        let cancel = MediaManagementModel(project: state.project, root: nil)
+        let before = state.project; cancel.scan(); cancel.cancel(); await cancel.waitForOperation()
+        expectEqual(state.project, before)
+    }
+    @Test @MainActor func applicationExportLeavesWorkingProjectUnchangedAndOpenRebases() async throws {
+        let root = try folder("Application/Alice"), bob = try folder("Application/Bob")
+        let fixtures = AudioTests(), source = try fixtures.fixture()
+        let file = root.appendingPathComponent("Opening.wav"); try FileManager.default.copyItem(at: source, to: file)
+        let state = ShowState(autosaveURL: temporaryFiles.directory.appendingPathComponent("export-state.json"))
+        defer { state.sound.shutdown(); state.video.shutdown() }
+        state.project.cues[0] = Cue(title: "Opening", filePath: file.path)
+        let original = state.project
+        state.exportPortable(to: root.appendingPathComponent("Export")); await state.mediaTask?.value
+        expectEqual(state.project, original); expectFalse(state.mediaBusy)
+        let moved = bob.appendingPathComponent("Show")
+        try FileManager.default.copyItem(at: root.appendingPathComponent("Export"), to: moved)
+        try FileManager.default.removeItem(at: root)
+        await state.openProject(moved.appendingPathComponent("Project.stagecue")).value
+        await state.mediaTask?.value
+        expectEqual(state.mediaReport.count(.available), 1)
+        expectTrue(MediaPaths.relative(URL(fileURLWithPath: state.project.cues[0]!.filePath), root: moved) != nil)
+        expectEqual(state.project.cues[0]?.id, original.cues[0]?.id)
+    }
+    @Test func malformedManifestCannotAssociateOneCueWithDifferentAssets() throws {
+        let root = try folder("Malformed"), url = root.appendingPathComponent("bad.stagecue")
+        let cue = Cue(filePath: "/missing/a.wav")
+        var p = SoundProject(); p.cues[0] = cue
+        p.media.assets = [MediaAsset(filename: "a.wav", originalPath: cue.filePath, kind: .audio, cueIDs: [cue.id]), MediaAsset(filename: "b.wav", originalPath: "/missing/b.wav", kind: .audio, cueIDs: [cue.id])]
+        try JSONEncoder().encode(p).write(to: url)
+        expectThrows(try ProjectStore.load(from: url))
+    }
 }

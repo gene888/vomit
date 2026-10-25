@@ -1,10 +1,16 @@
-# StageCue 0.3
+# StageCue 0.4
 
 Native, local macOS audio/video soundboard: SwiftUI, AVAudioEngine, AVPlayer and Core Audio. Apple Silicon only; macOS 14 or newer. No cloud services, third-party runtime dependencies, recording or streaming.
 
 For setup, playback controls, Cue Groups, Sequences, Show Mode, keyboard shortcuts and troubleshooting, see the complete [Operator Manual](Docs/OPERATOR_MANUAL.md).
 
 The manual is also available as a [printable PDF](Docs/StageCue-0.3-Operator-Manual.pdf) and an [editable Word document](Docs/StageCue-0.3-Operator-Manual.docx).
+
+## Project portability in 0.4
+
+Read the [0.4 portability operator guide](Docs/PORTABILITY_OPERATOR_GUIDE.md) for the distinction between a project file and a complete portable production, the three save/export operations, batch recovery and destination checks. The 0.3 manual remains the reference for unchanged performance controls; its absolute-path-only project guidance is superseded by the 0.4 guide.
+
+A project file may reference media anywhere. Export Portable Project creates a new verified folder containing Project.stagecue, MediaManifest.json and collected media using project-relative paths. Copy the whole folder to the other Mac. Schema 1–3 migration preserves originals; schema 4 adds the shared manifest. See [architecture](Docs/PORTABILITY_ARCHITECTURE.md) and [validation](Docs/PORTABILITY_VALIDATION.md).
 
 ## Build and run
 

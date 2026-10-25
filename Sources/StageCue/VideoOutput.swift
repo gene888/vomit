@@ -168,9 +168,9 @@ struct VideoControls: View {
                 HStack {
                     Button("Background…") {
                         let panel = NSOpenPanel(); panel.allowedContentTypes = [.png, .jpeg]
-                        if panel.runModal() == .OK, let url = panel.url { project.backgroundPath = url.path }
+                        if panel.runModal() == .OK, let url = panel.url { forgetBackgroundIdentity(); project.backgroundPath = url.path }
                     }
-                    Button("Clear Background") { project.backgroundPath = "" }.disabled(project.backgroundPath.isEmpty)
+                    Button("Clear Background") { forgetBackgroundIdentity(); project.backgroundPath = "" }.disabled(project.backgroundPath.isEmpty)
                     Text("Soundtrack uses macOS audio output; separate from audio buses.").font(.caption).foregroundStyle(.secondary)
                 }
                 if !video.error.isEmpty { HStack { Text(video.error).font(.caption).foregroundStyle(.red); Button("Dismiss") { video.clearError() } } }
@@ -178,5 +178,9 @@ struct VideoControls: View {
             }
         }
         .onAppear { output.refresh() }
+    }
+    private func forgetBackgroundIdentity() {
+        for i in project.media.assets.indices { project.media.assets[i].background = false }
+        project.media.assets.removeAll { $0.cueIDs.isEmpty && !$0.background }
     }
 }
