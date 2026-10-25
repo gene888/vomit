@@ -11,11 +11,29 @@ enum ProjectStore {
         guard data.count <= maximumBytes else { throw CocoaError(.fileReadTooLarge) }
         var project = try JSONDecoder().decode(SoundProject.self, from: data)
         let notes = project.normalize()
+        let root = url.deletingLastPathComponent()
+        try project.mapMediaPaths { try MediaPaths.resolve($0, root: root) }
+        for i in project.media.assets.indices {
+            if let relative = project.media.assets[i].relativePath { _ = try MediaPaths.relativeURL(relative, root: root) }
+            project.media.assets[i].originalPath = try MediaPaths.resolve(project.media.assets[i].originalPath, root: root)
+        }
         return (project, notes)
     }
     static func save(_ project: SoundProject, to url: URL) throws {
         var validated = project
         validated.normalize()
+        let root = url.deletingLastPathComponent()
+        validated.mapMediaPaths { path in
+            guard !path.isEmpty, path.hasPrefix("/") else { return path }
+            return MediaPaths.relative(URL(fileURLWithPath: path), root: root) ?? path
+        }
+        for i in validated.media.assets.indices {
+            let path = validated.media.assets[i].originalPath
+            if path.hasPrefix("/") {
+                validated.media.assets[i].relativePath = MediaPaths.relative(URL(fileURLWithPath: path), root: root)
+                if let relative = validated.media.assets[i].relativePath { validated.media.assets[i].originalPath = relative }
+            }
+        }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(validated)

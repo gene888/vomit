@@ -131,7 +131,7 @@ import Testing
             var old = project; old.schemaVersion = version
             var migrated = try JSONDecoder().decode(SoundProject.self, from: JSONEncoder().encode(old))
             expectTrue(migrated.normalize().contains(SoundProject.migrationNotice))
-            expectEqual(migrated.schemaVersion, 3); expectEqual(migrated.cues[0]?.id, cue.id)
+            expectEqual(migrated.schemaVersion, 4); expectEqual(migrated.cues[0]?.id, cue.id)
         }
     }
     @Test func continuousClockFiresWithoutUITimerUnderWorkerLoad() async throws {

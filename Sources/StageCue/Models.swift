@@ -93,8 +93,9 @@ extension Cue {
 }
 
 struct SoundProject: Codable, Equatable, Sendable {
-    static let migrationNotice = "Project upgraded to schema 3"
-    var schemaVersion = 3
+    static let migrationNotice = "Project upgraded to schema 4"
+    var schemaVersion = 4
+    var media = MediaManifest()
     var groups: [CueGroup] = []
     var sequences: [CueSequence] = []
     var additionalPages: [SoundboardPage] = []
@@ -118,8 +119,8 @@ struct SoundProject: Codable, Equatable, Sendable {
 
     @discardableResult mutating func normalize() -> [String] {
         var notes: [String] = []
-        if schemaVersion < 3 { notes.append(Self.migrationNotice) }
-        schemaVersion = 3
+        if schemaVersion < 4 { notes.append(Self.migrationNotice) }
+        schemaVersion = 4
         if cues.count != 32 { notes.append("Pad count adjusted to 32") }
         cues = Array(cues.prefix(32))
         cues += Array(repeating: nil, count: 32 - cues.count)
@@ -185,14 +186,16 @@ struct SoundProject: Codable, Equatable, Sendable {
 }
 
 extension SoundProject {
-    enum CodingKeys: String, CodingKey { case schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups, sequences, additionalPages, show }
+    enum CodingKeys: String, CodingKey { case media, schemaVersion, title, cues, busDB, masterDB, manualFadeSeconds, padKeys, backgroundPath, groups, sequences, additionalPages, show }
     init(from decoder: Decoder) throws {
         self.init()
         let c = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
-        guard (1...3).contains(schemaVersion) else {
+        guard (1...4).contains(schemaVersion) else {
             throw DecodingError.dataCorruptedError(forKey: .schemaVersion, in: c, debugDescription: "Unsupported project version")
         }
+        media = try c.decodeIfPresent(MediaManifest.self, forKey: .media) ?? MediaManifest()
+        guard media.version == 1 else { throw DecodingError.dataCorruptedError(forKey: .media, in: c, debugDescription: "Unsupported media manifest version") }
         additionalPages = try c.decodeIfPresent([SoundboardPage].self, forKey: .additionalPages) ?? []
         show = try c.decodeIfPresent(ShowConfiguration.self, forKey: .show) ?? ShowConfiguration()
         sequences = try c.decodeIfPresent([CueSequence].self, forKey: .sequences) ?? []
