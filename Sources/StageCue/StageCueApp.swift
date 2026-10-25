@@ -550,6 +550,8 @@ struct MainView: View {
                 Button(state.checking ? "Checking…" : "Preflight") { state.check() }.disabled(state.checking)
                 Button("FADE AUDIO") { state.fadeAudio() }
                     .help("Fade and stop audio cues only; visual output and visual automation continue")
+                Button("FADE ALL") { state.fadeAll() }
+                    .help("Fade and stop all audio and video and cancel show automation")
                 Button("STOP ALL") { state.stopAll() }.tint(.red).buttonStyle(.borderedProminent)
                     .help("Emergency: stop all audio and video and cancel show automation")
             }

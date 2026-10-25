@@ -11,7 +11,7 @@ The held picture remains until a new video/image or an explicit visual cut/fade/
 ## Fade controls
 
 - **FADE AUDIO**, also Performance > Fade Audio & Stop and Command-Shift-F, fades and stops audio cues only. It overrides their existing audio automation without canceling visual ownership or pending explicit visual actions.
-- **Performance > Fade All Media & Stop** remains the explicitly combined fade. It affects audio/video and cancels show automation.
+- **FADE ALL**, also Performance > Fade All Media & Stop, is available beside FADE AUDIO in the main window. It retains the previous combined behavior: fade audio/video and cancel show automation.
 - **STOP ALL**, Command-period, and the configured Emergency Stop All shortcut remain explicitly combined emergency controls. They immediately stop both audio and visual playback and cancel automation. Their tooltip identifies the scope.
 - Selected audio-pad arrows, fade-and-stop, and Stop remain audio-only. Selected visual-pad controls remain visual controls. Group Stop follows that group's explicitly configured playback ownership and stop behavior.
 
