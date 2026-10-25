@@ -117,6 +117,11 @@ struct VisualDissolve: Equatable {
     private var timer: Timer?
     private var pausedAt: Double?
     var currentCue: Cue? { current.flatMap { slots[$0].cue } }
+#if STAGECUE_PROFILING
+    // Decoded output PTS, before compositor/physical display presentation.
+    var profileFrame: ((UUID, Double, Double) -> Void)?
+    var profileTransitionStart: Double? { dissolve?.start }
+#endif
     var holdingLastFrame: Bool { current.map { slots[$0].holdingEnd } ?? false }
     var retainedPlayerItems: Int { slots.filter { $0.player.currentItem != nil }.count }
     var currentSoundtrackVolume: Float { current.map { slots[$0].player.volume } ?? 0 }
@@ -208,11 +213,15 @@ struct VisualDissolve: Equatable {
         guard !slot.holdingEnd || completingHold else { return }
         guard let output = slot.output else { return }
         let time = slot.player.currentTime()
-        if output.hasNewPixelBuffer(forItemTime: time), let buffer = output.copyPixelBuffer(forItemTime: time, itemTimeForDisplay: nil) {
+        var displayedTime = CMTime.invalid
+        if output.hasNewPixelBuffer(forItemTime: time), let buffer = output.copyPixelBuffer(forItemTime: time, itemTimeForDisplay: &displayedTime) {
             autoreleasepool {
                 let image = CIImage(cvPixelBuffer: buffer).transformed(by: slot.transform)
                 if let decoded = context.createCGImage(image, from: image.extent) { slot.frame = decoded }
             }
+#if STAGECUE_PROFILING
+            if let id = slot.cue?.id { profileFrame?(id, displayedTime.seconds, CACurrentMediaTime()) }
+#endif
         }
     }
     private func freezeFrame(_ slot: Slot) {

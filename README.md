@@ -119,3 +119,7 @@ In a video pad's settings, enable Hold last frame when finished, then trigger th
 Cue Groups, Cue Sequences and optional Show Mode extend the existing soundboard. Original audio/video projects migrate to schema 3 in memory; Export a new copy. Autosave is separate (autosave-v0.3.json). Development uses feature/show-control-0.3; local v0.2 preserves the prior working app.
 
 Start with [Show Control operator guide](Docs/SHOW_CONTROL.md), [architecture](Docs/SHOW_CONTROL_ARCHITECTURE.md) and [validation](Docs/SHOW_CONTROL_VALIDATION.md). The earlier sections describe the 0.1/0.2 workflows retained in 0.3.
+
+## Performance baseline
+
+See the [25 October 2026 performance and architecture audit](Docs/PERFORMANCE_AUDIT.md) for measured audio/video startup, large-show memory, simultaneous-playback CPU, video cadence/transitions, scheduler timing, raw samples, and the opt-in reproduction procedure.

@@ -2,6 +2,19 @@ import Foundation
 import AVFoundation
 import Combine
 
+#if STAGECUE_PROFILING
+// Opt-in benchmark hook. Not compiled into ordinary application builds.
+extension SoundEngine {
+    func profileOutput(_ callback: @escaping @Sendable (AVAudioPCMBuffer, AVAudioTime) -> Void) {
+        engine.mainMixerNode.installTap(onBus: 0, bufferSize: 256, format: nil) { buffer, time in callback(buffer, time) }
+    }
+    var profileAudioConfiguration: [String: Double] {
+        ["outputSampleRate": engine.outputNode.outputFormat(forBus: 0).sampleRate, "outputPresentationLatencySeconds": engine.outputNode.presentationLatency]
+    }
+    func removeProfileOutput() { engine.mainMixerNode.removeTap(onBus: 0) }
+}
+#endif
+
 struct MediaIssue: LocalizedError {
     let message: String
     var errorDescription: String? { message }
@@ -51,6 +64,9 @@ actor MediaLoader {
 /// One output, six stereo virtual buses. All graph and voice mutation stays on MainActor.
 /// Live fades use a common-mode control timer; offline tests drive the same envelopes from sample time.
 @MainActor final class SoundEngine: ObservableObject {
+#if STAGECUE_PROFILING
+    var profilePhase: ((UUID, String) -> Void)?
+#endif
     @Published private(set) var active: Set<UUID> = []
     @Published private(set) var paused: Set<UUID> = []
     @Published private(set) var failed: Set<UUID> = []
@@ -174,15 +190,31 @@ actor MediaLoader {
         loading.insert(cue.id)
         let task = Task { [weak self, loader] in
             do {
+#if STAGECUE_PROFILING
+                self?.profilePhase?(cue.id, "inspectBegin")
+#endif
                 let size = try await loader.size(cue.filePath)
                 guard !Task.isCancelled, let self, self.pending[cue.id]?.0 == token else { return }
+#if STAGECUE_PROFILING
+                self.profilePhase?(cue.id, "inspectComplete")
+#endif
                 guard self.retainedBytes + self.reservations.values.reduce(0, +) + size <= self.maximumActiveBytes else {
                     throw MediaIssue(message: "Active and loading audio exceed the decoded memory budget")
                 }
                 self.reservations[cue.id] = size
+#if STAGECUE_PROFILING
+                self.profilePhase?(cue.id, "decodeBegin")
+#endif
                 let media = try await loader.load(cue.filePath, expectedBytes: size)
                 guard !Task.isCancelled, self.pending[cue.id]?.0 == token else { return }
+#if STAGECUE_PROFILING
+                self.profilePhase?(cue.id, "decodeComplete")
+                self.profilePhase?(cue.id, "graphBegin")
+#endif
                 try self.start(cue, media: media)
+#if STAGECUE_PROFILING
+                self.profilePhase?(cue.id, "graphComplete")
+#endif
                 self.pending.removeValue(forKey: cue.id)
                 self.reservations.removeValue(forKey: cue.id)
                 self.loading.remove(cue.id)
