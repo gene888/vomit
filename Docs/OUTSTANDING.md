@@ -27,3 +27,8 @@ No video playback, video routing, HDMI/projector output or video preview was imp
 ## Version 0.3 follow-up priorities
 
 The 0.1 list above is historical. Groups, sequences, Show Mode and soundboard pages now exist. Remaining priorities: real interface/projector acceptance and hot-plug checks; extended-show Instruments CPU/GPU/memory profiling; media preloading and synchronized starts; portable media/security bookmarks; timeline seeking; page deletion/undo and richer copy/edit tooling; explicit sleep/suspension recovery rather than dispatching overdue actions. Existing video soundtrack bus-routing and 30 fps SDR limitations remain. No out-of-scope network/MIDI/OSC/DMX features are added.
+
+
+### 0.5D resource update
+
+Concurrent voices now share immutable PCM for one unchanged filesystem source, with unique allocation/reservation accounting and no strong inactive cache. Project JSON capacity is 16 MiB. Long-form streaming, an armed/prepared cache, sample-synchronized starts, physical interface/projector acceptance and extended-show leak profiling remain separate future work; see [0.5D measurements](RESOURCE_EFFICIENCY_0.5D.md).

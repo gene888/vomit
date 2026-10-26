@@ -19,7 +19,7 @@ private final class VoiceOnsets: @unchecked Sendable {
     static func measure(root: URL, state: ShowState, short: URL, long: URL, compressed: URL, movie: URL, onset: Onset, operatorWindow: NSWindow) async throws {
         let sound = state.sound
         var result: [String: Any] = ["status": "running", "date": ISO8601DateFormatter().string(from: Date()),
-            "configuration": "Release -O -enable-testing STAGECUE_PROFILING; actual MainView plus two additional canvases; no PCM cache", "audioConfiguration": sound.profileAudioConfiguration,
+            "configuration": "Release -O -enable-testing STAGECUE_PROFILING; actual MainView plus two additional canvases; no inactive PCM cache; concurrent reuse when supported", "audioConfiguration": sound.profileAudioConfiguration,
             "memoryBefore": memory(), "sampleEndpoint": "First nonzero main-mixer render timestamp; physical output and input-event delivery excluded from automatic trials"]
         var rows: [[String: Any]] = []
         func save() throws {
@@ -94,16 +94,22 @@ private final class VoiceOnsets: @unchecked Sendable {
             sound.stopAll()
             result["memoryAfter"] = memory(); result["audioNodesAfterStop"] = sound.attachedNodeCount
             result["audioErrors"] = sound.errors; result["videoError"] = state.video.error
-            result["cache"] = ["implemented": false]; result["status"] = "complete"; try save(); return
+            result["cache"] = ["inactiveCacheImplemented": false, "activeBufferSharing": true]; result["status"] = "complete"; try save(); return
         }
         if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "audio-probe" {
             try await single("relay-normal-direct", [shortCue], path: "engine")
             state.profileSuppressAudioPublications = true
             try await single("relay-suppressed-direct", [shortCue], path: "engine")
             state.profileSuppressAudioPublications = false; state.objectWillChange.send()
+            // The final trial is still playing. Actually stop it before reporting
+            // post-stop nodes; the old probe incorrectly labelled 19 as "after stop".
+            sound.stopAll(); try await Task.sleep(for: .milliseconds(200))
+            let pool = await sound.resourceSnapshot()
+            result["uniquePCMBytesAfterStop"] = pool.uniqueBytes
+            result["reservedBytesAfterStop"] = pool.reservedBytes
             result["memoryAfter"] = memory(); result["audioNodesAfterStop"] = sound.attachedNodeCount
             result["audioErrors"] = sound.errors; result["videoError"] = state.video.error
-            result["cache"] = ["implemented": false]
+            result["cache"] = ["inactiveCacheImplemented": false, "activeBufferSharing": true]
             result["status"] = "complete"; try save(); return
         }
         try await single("short-state", [shortCue], path: "state")
@@ -170,7 +176,7 @@ private final class VoiceOnsets: @unchecked Sendable {
         }
         result["memoryAfter"] = memory(); result["audioNodesAfterStop"] = sound.attachedNodeCount
         result["audioErrors"] = sound.errors; result["videoError"] = state.video.error
-        result["cache"] = ["implemented": false, "hitRate": NSNull(), "preparationOverheadMs": 0] as [String: Any]
+        result["cache"] = ["inactiveCacheImplemented": false, "activeBufferSharing": true, "hitRate": NSNull(), "preparationOverheadMs": 0] as [String: Any]
         result["status"] = "complete"; try save()
         print("AUDIO PROFILE: finished"); fflush(stdout)
     }

@@ -86,3 +86,8 @@ The project JSON is the authoritative saved media registry. MediaManifest.json i
 ## Transfer acceptance check
 
 For a meaningful rehearsal, copy the portable folder to a genuinely different parent directory, make the original media location unavailable, and open the copied Project.stagecue. Confirm every asset connects without relinking and play representative audio, video, and stills. Merely reopening the export beside its original media does not prove portability.
+
+
+### 0.5D capacity update
+
+Project JSON is now bounded to **16 MiB**, including `Project.stagecue` inside a portable folder. Collected media files remain separate from this metadata limit. Schema 4 / manifest 1 and cross-root portability are unchanged. Projects over 2 MiB require 0.5D or newer; older builds retain their smaller size ceiling.

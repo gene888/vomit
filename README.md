@@ -1,4 +1,6 @@
-# StageCue 0.5C
+# StageCue 0.5D
+
+The [0.5D resource milestone](Docs/RESOURCE_EFFICIENCY_0.5D.md) shares immutable PCM among concurrent users of one unchanged audio source and raises bounded project JSON capacity to 16 MiB. No inactive PCM cache or streaming engine is introduced.
 
 The [0.5C video loop milestone](Docs/VIDEO_LOOPS_0.5C.md) retains 30 Hz output and uses native queue looping within the existing two transition slots. Atmospheric and motion-sensitive clips are measured separately.
 
@@ -73,7 +75,7 @@ Autosave is debounced and stored at `~/Library/Application Support/StageCue/auto
 
 Malformed/future-version JSON is rejected. Older projects without the version field or optional settings are accepted; pad/bus counts and invalid settings are repaired, duplicate cue IDs replaced, and legacy unsupported Hold modes converted to One-shot. A corrupt autosave is not overwritten by ordinary edits or quitting; open a valid project or explicitly Save to resume normal saving. Errors are shown in the app. Shutdown makes a final synchronous autosave attempt because the process may exit before queued asynchronous work completes; an I/O failure during termination cannot be surfaced in a closed window.
 
-Media references remain absolute paths. Projects save references, not copied audio. Moved/missing media is reported; use Browse to relink it. Audio cues support nonempty mono/stereo files decodable by AVAudioFile. Each decoded clip is capped at 512 MiB; active voices plus reserved loads are capped at 1 GiB. This accounts for decoded PCM, not total process memory: the loader, preflight, framework nodes and temporary canceled work use additional memory. The loader serializes decoding. No buffers are cached; first-trigger decoding has latency. Long clips must be shortened or converted until streaming/preloading is implemented.
+Media references remain absolute paths. Projects save references, not copied audio. Moved/missing media is reported; use Browse to relink it. Audio cues support nonempty mono/stereo files decodable by AVAudioFile. Each decoded clip is capped at 512 MiB. A 1 GiB budget counts unique live PCM buffers plus decode reservations, including buffers still retiring in native callbacks. Concurrent users of the same unchanged source share immutable PCM while keeping separate players, fades and routing. No inactive PCM is held alive by a cache; the first trigger after all owners release still decodes afresh. Graph/framework allocations are outside this PCM budget. Full-file decoding remains; files exceeding the clip limit must be shortened. Project JSON is bounded to 16 MiB, independently of media-file size and existing model-count limits.
 
 ## Architecture
 

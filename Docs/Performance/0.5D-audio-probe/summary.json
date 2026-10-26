@@ -1,0 +1,14 @@
+{
+  "relay-normal-direct": {
+    "count": 20,
+    "medianMs": 53.343249834142625,
+    "p95Ms": 55.72454142384231,
+    "maxMs": 56.53920792974532
+  },
+  "relay-suppressed-direct": {
+    "count": 20,
+    "medianMs": 53.46358323004097,
+    "p95Ms": 57.16708302497864,
+    "maxMs": 57.67166637815535
+  }
+}

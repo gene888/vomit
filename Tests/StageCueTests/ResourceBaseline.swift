@@ -4,6 +4,29 @@ import AVFoundation
 import SwiftUI
 @testable import StageCue
 
+/// Samples this process without touching project/UI state. Shorter peaks can be missed.
+private final class ResourceMemoryPeak: @unchecked Sendable {
+    private let lock = NSLock()
+    private var peak = memory()
+    private let timer: DispatchSourceTimer
+    init() {
+        timer = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "StageCue.capacity-memory", qos: .utility))
+        timer.schedule(deadline: .now(), repeating: .milliseconds(5))
+        timer.setEventHandler { [weak self] in self?.observe() }
+        timer.resume()
+    }
+    private func observe() {
+        let current = memory()
+        lock.lock(); defer { lock.unlock() }
+        for (key, value) in current { peak[key] = max(peak[key] ?? 0, value) }
+    }
+    func finish() -> [String: Double] {
+        timer.cancel(); observe()
+        lock.lock(); defer { lock.unlock() }; return peak
+    }
+    deinit { timer.cancel() }
+}
+
 @MainActor enum ResourceBaseline {
     static func project(root: URL, count: Int, bookmarkBytes: Int) -> SoundProject {
         var p = SoundProject(title: "Resource capacity fixture")
@@ -36,7 +59,12 @@ import SwiftUI
             if !FileManager.default.fileExists(atPath: url.path) { try FileManager.default.copyItem(at: source, to: url) }
             files.append(url)
         }
-        let state = ShowState(autosaveURL: root.appendingPathComponent("resource-autosave.json")), sound = state.sound
+        let autosave = root.appendingPathComponent("resource-autosave.json")
+        // Match the original empty-project baseline. Reusing yesterday's test
+        // autosave would trigger background media resolution during measurements.
+        if FileManager.default.fileExists(atPath: autosave.path) { try FileManager.default.removeItem(at: autosave) }
+        result["freshIsolatedAutosave"] = true
+        let state = ShowState(autosaveURL: autosave), sound = state.sound
         defer { state.scheduler.reset(); state.sequence.emergencyCancel(); sound.shutdown(); state.video.shutdown(); state.output.close() }
         state.project.masterDB = -48; sound.applyMix(state.project)
         let window = NSWindow(contentRect: NSRect(x: 20, y: 20, width: 1220, height: 960), styleMask: [.titled], backing: .buffered, defer: false)
@@ -72,7 +100,11 @@ import SwiftUI
                 "firstMixerRenderMs": (first.render-began)*1000, "resources": sound.profileResources, "decodedBytes": sound.decodedBytes, "memoryBefore": before, "memoryActive": memory(),
                 "cpuPercentOneCore": (processCPU()-cpu)/(stamp()-start)*100,
                 "actualDecodeReads": phases.filter { $0.1 == "loader.read.begin" }.count])
+            let pool = await sound.resourceSnapshot()
+            audio[audio.count-1]["pool"] = ["liveUniqueBytes":pool.uniqueBytes,"buffers":pool.liveBuffers,"reservedBytes":pool.reservedBytes,"peakBytes":pool.peakBytes,"hits":pool.hits,"misses":pool.misses,"decodes":pool.decodes,"budgetRejections":pool.budgetRejections,"inactiveCacheBytes":0]
             sound.stopAll(); try await Task.sleep(for: .milliseconds(200))
+            let stopped = await sound.resourceSnapshot()
+            audio[audio.count-1]["poolAfterStop"] = ["uniqueBytes":stopped.uniqueBytes,"buffers":stopped.liveBuffers,"reservedBytes":stopped.reservedBytes]
             audio[audio.count-1]["afterStop"] = sound.profileResources; audio[audio.count-1]["memoryAfterStop"] = memory()
             result["audio"] = audio; try save()
         }
@@ -87,6 +119,7 @@ import SwiftUI
         result["cycles"] = cycles
         var capacities: [[String: Any]] = []
         for (count, bookmarks) in [(32,0),(256,0),(1024,0),(1024,512),(1024,2048)] {
+            let peak = ResourceMemoryPeak()
             let p = project(root: root, count: count, bookmarkBytes: bookmarks)
             let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted,.sortedKeys]
             let t = stamp(); let bytes = try encoder.encode(p); let encodeEnd = stamp()
@@ -99,9 +132,34 @@ import SwiftUI
             do {
                 let a=stamp(); try ProjectStore.save(p,to:url); let b=stamp(); let loaded=try ProjectStore.load(from:url).0
                 row["saveMs"]=(b-a)*1000; row["loadMs"]=(stamp()-b)*1000;row["roundTripEqual"]=loaded==p
+                var expected = p
+                for i in expected.media.assets.indices { expected.media.assets[i].relativePath = MediaPaths.relative(URL(fileURLWithPath: expected.media.assets[i].originalPath), root: root) }
+                row["restorationEquivalent"] = loaded == expected
             } catch { row["error"]=error.localizedDescription; row["errorDomain"]=(error as NSError).domain;row["errorCode"]=(error as NSError).code }
+            row["sampledPeakMemory"] = peak.finish(); row["memorySamplingIntervalMs"] = 5
             capacities.append(row); result["capacity"]=capacities;try save()
         }
+        let movie = try await VideoLoopBaseline.movie(root: root, atmosphere: false, seconds: 4)
+        let audioCues = (0..<4).map { Cue(filePath:source.path,gainDB:-18,bus:$0,loop:true) }
+        for (i,c) in audioCues.enumerated() { state.project.cues[i]=c; sound.play(c) }
+        await sound.waitForLoads()
+        state.video.play(Cue(filePath:movie.path,loop:true,kind:.video,transition:.cut));await state.video.waitForLoad()
+        let group = CueGroup(actions:(0..<3).map { GroupAction(kind:.bus,delay:Double($0)*0.2,levelDB:-18+Double($0),bus:$0) })
+        state.project.groups=[group]
+        let sequence = CueSequence(steps:(0..<32).map { SequenceStep(title:"Step \($0)",target:.group,groupID:group.id,advancement:.timed,delay:2) })
+        state.sequence.select(sequence);state.sequence.go()
+        var commandMs:[Double]=[], samples:[[String:Double]]=[]
+        let stressStart=stamp(),stressCPU=processCPU();var n=0
+        while stamp()-stressStart<60 {
+            let t=stamp();_=try state.execute(GroupAction(kind:.bus,levelDB:Double(n%12)-24,bus:n%6));commandMs.append((stamp()-t)*1000)
+            if n%50==0 { var m=memory();m["elapsed"]=stamp()-stressStart;m["uniqueDecodedBytes"]=Double(sound.decodedBytes);m["voices"]=Double(sound.voiceCount);m["nodes"]=Double(sound.attachedNodeCount);samples.append(m) }
+            n += 1;try await Task.sleep(for:.milliseconds(100))
+        }
+        let stressDuration=stamp()-stressStart
+        result["avShowControlStress"]=["seconds":stressDuration,"cpuPercentOneCore":(processCPU()-stressCPU)/stressDuration*100,"mixerCommandMs":commandMs,"memory":samples,"sequenceCurrent":state.sequence.current,"audioErrors":sound.errors,"videoError":state.video.error,"videoItems":state.video.retainedPlayerItems]
+        state.stopAll();try await Task.sleep(for:.milliseconds(200))
+        let finalPool=await sound.resourceSnapshot()
+        result["finalResources"]=["uniqueBytes":finalPool.uniqueBytes,"buffers":finalPool.liveBuffers,"reservedBytes":finalPool.reservedBytes,"nodes":sound.attachedNodeCount,"videoItems":state.video.retainedPlayerItems]
         result["status"]="complete";try save(); print("RESOURCES: complete");fflush(stdout)
     }
 }

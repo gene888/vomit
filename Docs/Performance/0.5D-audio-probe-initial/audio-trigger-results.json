@@ -1,0 +1,4628 @@
+{
+  "audioConfiguration" : {
+    "outputPresentationLatencySeconds" : 0.00029166666666666669,
+    "outputSampleRate" : 48000
+  },
+  "audioErrors" : [
+
+  ],
+  "audioNodesAfterStop" : 19,
+  "cache" : {
+    "implemented" : false
+  },
+  "configuration" : "Release -O -enable-testing STAGECUE_PROFILING; actual MainView plus two additional canvases; no inactive PCM cache; concurrent reuse when supported",
+  "date" : "2026-10-26T18:42:06Z",
+  "memoryAfter" : {
+    "footprintMiB" : 86.719871520996094,
+    "residentMiB" : 168.78125
+  },
+  "memoryBefore" : {
+    "footprintMiB" : 192.9229736328125,
+    "residentMiB" : 164.921875
+  },
+  "sampleEndpoint" : "First nonzero main-mixer render timestamp; physical output and input-event delivery excluded from automatic trials",
+  "status" : "complete",
+  "trials" : [
+    {
+      "callbackMs" : 85.481999907642603,
+      "events" : [
+        {
+          "ms" : 0.00087497755885124207,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.054874923080205917,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.11370819993317127,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.12974999845027924,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.15083327889442444,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.15145819634199142,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.19137491472065449,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.20483322441577911,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.68429159000515938,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.70683332160115242,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.7077499758452177,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.72616664692759514,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.7649583276361227,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.94354152679443359,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.99095818586647511,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.2462083250284195,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.3823749031871557,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.3963750097900629,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.3983750250190496,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.7837916277348995,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.8475415892899036,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.8477916494011879,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.8557500336319208,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.8558748308569193,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.837874840945005,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.844958247616887,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.544458001852036,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.15158322639763355,
+      "trial" : 0
+    },
+    {
+      "callbackMs" : 45.022416859865189,
+      "events" : [
+        {
+          "ms" : 0.00062515027821063995,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0041667371988296509,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.027166679501533508,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.034833326935768127,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.038125086575746536,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.038291793316602707,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.055000185966491699,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.070916721597313881,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.4856667947024107,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.50104176625609398,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.50129182636737823,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.5192500539124012,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.57183345779776573,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.78825000673532486,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.84175006486475468,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 0.98245847038924694,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.0309584904462099,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.0447916574776173,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.0469583794474602,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.273916732519865,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.285458380356431,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.2855417337268591,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.2934167645871639,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.2935417946428061,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.984958477318287,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.989250011742115,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.817624786868691,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.038416823372244835,
+      "trial" : 1
+    },
+    {
+      "callbackMs" : 119.9622917920351,
+      "events" : [
+        {
+          "ms" : 0.00066682696342468262,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0041250605136156082,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.024375040084123611,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.031416770070791245,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.034166732802987099,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.034291762858629227,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.051375012844800949,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.076916767284274101,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.47104177065193653,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.48745842650532722,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.48775016330182552,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.50570839084684849,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.54837507195770741,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.74004172347486019,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.78612519428133965,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 0.91279181651771069,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 0.95304171554744244,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 0.96679176203906536,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 0.9687917772680521,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.039249986410141,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.050874987617135,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.0510000176727772,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.0600834395736456,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.0602084696292877,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 2.4584583006799221,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 2.4654583539813757,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 45.309374807402492,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.034375116229057312,
+      "trial" : 2
+    },
+    {
+      "callbackMs" : 38.618958322331309,
+      "events" : [
+        {
+          "ms" : 0.00058324076235294342,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0070414971560239792,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.049166614189743996,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.060541555285453796,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.063916668295860291,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.064083142206072807,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.087958294898271561,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.10620825923979282,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.66474988125264645,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.68241660483181477,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.68270810879766941,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.70666661486029625,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.76570827513933182,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.1135416571050882,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.1742082424461842,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.3588748406618834,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.417333260178566,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.4360831119120121,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.4389583375304937,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.912124851718545,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.9276665300130844,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.9279165901243687,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.936916658654809,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.9369997791945934,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 6.6156249959021807,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 6.6245831549167633,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 49.355916446074843,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.064166495576500893,
+      "trial" : 3
+    },
+    {
+      "callbackMs" : 101.07987490482628,
+      "events" : [
+        {
+          "ms" : 0.0017082784324884415,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0067916698753833771,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.041041523218154907,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.051041599363088608,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.054833246394991875,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.054958276450634003,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.075999880209565163,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.093000009655952454,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.61245821416378021,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.62783318571746349,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.62791653908789158,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.64591667614877224,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.691958237439394,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.88804168626666069,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.94066653400659561,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.0885000228881836,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.1370414867997169,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.1518748942762613,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.1545415036380291,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.3099582176655531,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.3231667000800371,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.3232081439346075,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.3336666636168957,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.3338748142123222,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 5.1104165613651276,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 5.1183749455958605,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 47.935124719515443,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.055041629821062088,
+      "trial" : 4
+    },
+    {
+      "callbackMs" : 129.66883345507085,
+      "events" : [
+        {
+          "ms" : 0.00079185701906681061,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.011416850611567497,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.039291800931096077,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.051750103011727333,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.056083314120769501,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.056250020861625671,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.080166850239038467,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.10716682299971581,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.74033346027135849,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.76212501153349876,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.76250010170042515,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.78350002877414227,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.84125017747282982,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.1072917841374874,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.1671667452901602,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.3504168018698692,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.4098333194851875,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.427041832357645,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.4295834116637707,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.9086251743137836,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.9212918598204851,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.9217083938419819,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.9318751767277718,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.9320833273231983,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.4034583568573,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.411166680976748,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.132791632786393,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.056333374232053757,
+      "trial" : 5
+    },
+    {
+      "callbackMs" : 46.961041633039713,
+      "events" : [
+        {
+          "ms" : 0.001125037670135498,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0054168049246072769,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.040208455175161362,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.051291659474372864,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.054958276450634003,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.055041629821062088,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.076666707172989845,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.09425007738173008,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.63166674226522446,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.65216678194701672,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.65241660922765732,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.66899997182190418,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.72104157879948616,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.94762491062283516,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.0113334283232689,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.1895417701452971,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.2873751111328602,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.3090416323393583,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.3119999784976244,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.9622500296682119,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.9900833033025265,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.9903333634138107,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.0097917187958956,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.0099167488515377,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 4.2097917757928371,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 4.2222084011882544,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 47.05591662786901,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.055208336561918259,
+      "trial" : 6
+    },
+    {
+      "callbackMs" : 127.53187492489815,
+      "events" : [
+        {
+          "ms" : 0.00041653402149677277,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0034582335501909256,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.02641649916768074,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.031499890610575676,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.033958349376916885,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.033999793231487274,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.048166606575250626,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.063083134591579437,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.44937478378415108,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.45816646888852119,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.45829149894416332,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.46824989840388298,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.49941660836338997,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.61291665770113468,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.65208319574594498,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 0.74662500992417336,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 0.77929161489009857,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 0.78816665336489677,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 0.7891249842941761,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 1.4577081892639399,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 1.4654998667538166,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 1.4657082501798868,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 1.4707499649375677,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 1.4707916416227818,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.21549990400672,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.237999958917499,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.081207908689976,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.034041469916701317,
+      "trial" : 7
+    },
+    {
+      "callbackMs" : 140.16454177908599,
+      "events" : [
+        {
+          "ms" : 0.0008333008736371994,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0046251807361841202,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.038791680708527565,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.049583381041884422,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.053083524107933044,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.053166644647717476,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.082291662693023682,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.099666649475693703,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.62816683202981949,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.65104174427688122,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.65145851112902164,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.66908332519233227,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.72437501512467861,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.0247917380183935,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.0919584892690182,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.2775417417287827,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.4725835062563419,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.4961666893213987,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.498708501458168,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 3.1100001651793718,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 3.1435417477041483,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 3.1440833117812872,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.1630001030862331,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.1633335165679455,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.104875175282359,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.11970834992826,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.010958109050989,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.053333351388573647,
+      "trial" : 8
+    },
+    {
+      "callbackMs" : 40.87341669946909,
+      "events" : [
+        {
+          "ms" : 0.0010000076144933701,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0050833914428949356,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.034666620194911957,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.0447083730250597,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.048083486035466194,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.048166606575250626,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.072333263233304024,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.083916820585727692,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.585583271458745,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.60508330352604389,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.60529168695211411,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.62345829792320728,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.67204167135059834,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.90724998153746128,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.97066676244139671,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.143833389505744,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.2324582785367966,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.2483333703130484,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.2515000998973846,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.6110417675226927,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.6417500339448452,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.6419167406857014,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.6534167118370533,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.6535000652074814,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 8.7972916662693024,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 8.8150417432188988,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 51.593958167359233,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.048333313316106796,
+      "trial" : 9
+    },
+    {
+      "callbackMs" : 100.55416682735085,
+      "events" : [
+        {
+          "ms" : 0.00054179690778255463,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0040417071431875229,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.024708453565835953,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.030791852623224258,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.033208401873707771,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.033291755244135857,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.048416666686534882,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.072333496063947678,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.43779169209301472,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.45337504707276821,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.45379181392490864,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.47195842489600182,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.51958346739411354,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.75020850636065006,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.81008346751332283,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 0.96654170192778111,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.0144584812223911,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.0302083101123571,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.0329168289899826,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.2116249892860651,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.225333359092474,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.2254583891481161,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.2335834801197052,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.2337085101753473,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 4.5171251986175776,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 4.5219585299491882,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 47.326374799013138,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.033375108614563942,
+      "trial" : 10
+    },
+    {
+      "callbackMs" : 138.6440834030509,
+      "events" : [
+        {
+          "ms" : 0.0008333008736371994,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0060000456869602203,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.045750057324767113,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.054750125855207443,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.058041652664542198,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.058125006034970284,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.078333308920264244,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.09241676889359951,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.56695844978094101,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.58037508279085159,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.5806249100714922,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.5970001220703125,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.64662494696676731,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.83762500435113907,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.89600007049739361,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.0414584539830685,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.0932916775345802,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.1057916563004255,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.1078333482146263,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.2380000445991755,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.2520832717418671,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.2522499784827232,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.2613750770688057,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.2614584304392338,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.638083331286907,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.667083319276571,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.362541366368532,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.058375066146254539,
+      "trial" : 11
+    },
+    {
+      "callbackMs" : 130.15441666357219,
+      "events" : [
+        {
+          "ms" : 0.0013334210962057114,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0064999330788850784,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.040000071749091148,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.050749862566590309,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.054958276450634003,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.055041629821062088,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.084708211943507195,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.099958386272192001,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.64970832318067551,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.67104166373610497,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.67154155112802982,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.68270834162831306,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.72799995541572571,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.96695823594927788,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.0411667171865702,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.2212083674967289,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.3050832785665989,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.3386665377765894,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.3414584100246429,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 3.0169582460075617,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 3.0370831955224276,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 3.0372915789484978,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.054208355024457,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.0543333850800991,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.820708332583308,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.838083319365978,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.501499678939581,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.055250013247132301,
+      "trial" : 12
+    },
+    {
+      "callbackMs" : 129.90212510339916,
+      "events" : [
+        {
+          "ms" : 0.0022083986550569534,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.013416865840554237,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.06137508898973465,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.07358333095908165,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.080750091001391411,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.080833444371819496,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.11975015513598919,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.13908348046243191,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.0807916987687349,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.1162918526679277,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.1167917400598526,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.1368750128895044,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.2199168559163809,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.6357500571757555,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.8875417299568653,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.1772501058876514,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.4195418227463961,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.4491250514984131,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.4530834052711725,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.4715418480336666,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.5030417386442423,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.5032084453850985,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.5312917791306973,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.5314584858715534,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.603708542883396,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.619125191122293,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.34025002270937,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.08120853453874588,
+      "trial" : 13
+    },
+    {
+      "callbackMs" : 129.03054151684046,
+      "events" : [
+        {
+          "ms" : 0.0010000076144933701,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0054999254643917084,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.039750011637806892,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.049708178266882896,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.05291658453643322,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.053041614592075348,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.076791504397988319,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.086333369836211205,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.55991671979427338,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.57145836763083935,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.57166651822626591,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.58112503029406071,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.62558334320783615,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.83741662092506886,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.90124993585050106,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.1898749507963657,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.290041720494628,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.3097499031573534,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.3125415425747633,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.7158332522958517,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.7331248857080936,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.7333332691341639,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.7429582551121712,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.7430832851678133,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 11.71716651879251,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 11.731874896213412,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 54.542499827221036,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.053208321332931519,
+      "trial" : 14
+    },
+    {
+      "callbackMs" : 39.978791493922472,
+      "events" : [
+        {
+          "ms" : 0.0012081582099199295,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0076249707490205765,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.059666577726602554,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.077749835327267647,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.083124963566660881,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.083374790847301483,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.12608314864337444,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.15720818191766739,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.71487482637166977,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.73024979792535305,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.73070824146270752,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.74349995702505112,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.79129147343337536,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.0287498589605093,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.0897081810981035,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.2430832721292973,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.3570415321737528,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.3907081447541714,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.3960415963083506,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.9917082283645868,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 3.0077914707362652,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 3.0079581774771214,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.018541494384408,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.0187082011252642,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 7.9442914575338364,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 7.9635833390057087,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 50.751874689012766,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.083624850958585739,
+      "trial" : 15
+    },
+    {
+      "callbackMs" : 108.20491681806743,
+      "events" : [
+        {
+          "ms" : 0.00070827081799507141,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0052084214985370636,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.034833326935768127,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.044625019654631615,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.047958455979824066,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.048083486035466194,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.067458488047122955,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.080875121057033539,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.5417501088231802,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.55845850147306919,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.55891671217978001,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.56929164566099644,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.62904180958867073,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.0125001426786184,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.0999166406691074,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.350833335891366,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.5985416248440742,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.6221250407397747,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.6256249509751797,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 3.555250121280551,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 3.5752917174249887,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 3.575541777536273,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.5965417046099901,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.5966667346656322,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.310958467423916,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.32958328910172,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.072791641578078,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.048208283260464668,
+      "trial" : 16
+    },
+    {
+      "callbackMs" : 127.67533329315484,
+      "events" : [
+        {
+          "ms" : 0.001125037670135498,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0052915420383214951,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.037416582927107811,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.047833193093538284,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.051041599363088608,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.051166629418730736,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.073416624218225479,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.085375038906931877,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.5725417286157608,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.59270835481584072,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.59316656552255154,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.6055834237486124,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.64995838329195976,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.90304156765341759,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 0.96945837140083313,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.1190415825694799,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.1893333867192268,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.2129582464694977,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.2146667577326298,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.5084165390580893,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.5241249240934849,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.524249954149127,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 2.5371666997671127,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 2.5372917298227549,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.349833406507969,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.372958378866315,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.169833030551672,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.051333336159586906,
+      "trial" : 17
+    },
+    {
+      "callbackMs" : 36.96920839138329,
+      "events" : [
+        {
+          "ms" : 0.00079162418842315674,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0052498653531074524,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.039666658267378807,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.049874885007739067,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.053083291277289391,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.053166644647717476,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.096458243206143379,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.12137484736740589,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.60495827347040176,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.62329159118235111,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.6236666813492775,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.63395826146006584,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.6777916569262743,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 0.96399988979101181,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.0749166831374168,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.4104582369327545,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.5349166933447123,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.5739165246486664,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.5788332093507051,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.5068333856761456,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.537499975413084,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.538124892860651,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.5644165948033333,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.5647083315998316,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 4.9570000264793634,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 4.9693332985043526,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 47.826208174228668,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.053333351388573647,
+      "trial" : 18
+    },
+    {
+      "callbackMs" : 95.766500104218721,
+      "events" : [
+        {
+          "ms" : 0.0011667143553495407,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0068333465605974197,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.041833380237221718,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.052875140681862831,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.057083321735262871,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.057208351790904999,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.088999979197978973,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.10125013068318367,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.68704178556799889,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.71129179559648037,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.71154185570776463,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.72737503796815872,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.79537509009242058,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.0945000685751438,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.1672500986605883,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.3609584420919418,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.4612500090152025,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.4925834257155657,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.4955000951886177,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 2.9794166330248117,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 2.9967501759529114,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 2.9970833566039801,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.0077083501964808,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.0078750569373369,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.414291638880968,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.427333414554596,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.194499807432294,
+      "scenario" : "relay-normal-direct",
+      "synchronousSubmitMs" : 0.057375058531761169,
+      "trial" : 19
+    },
+    {
+      "callbackMs" : 41.288541629910469,
+      "events" : [
+        {
+          "ms" : 0.0013334210962057114,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0066249631345272064,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.039499951526522636,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.052249990403652191,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.060583464801311493,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.06074993871152401,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.087083317339420319,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.10433327406644821,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 0.72908331640064716,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 0.75095845386385918,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 0.75150001794099808,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 0.76820841059088707,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 0.83245825953781605,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.1260416358709335,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.1998750269412994,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 1.4008749276399612,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 1.4858751092106104,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 1.5116250142455101,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 1.5135416761040688,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 3.1121666543185711,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 3.1312499195337296,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 3.1314583029597998,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 3.1452083494514227,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 3.1453750561922789,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 9.3323334585875273,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 9.3439584597945213,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 52.050958154723048,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.060833292081952095,
+      "trial" : 0
+    },
+    {
+      "callbackMs" : 128.13029158860445,
+      "events" : [
+        {
+          "ms" : 0.0010000076144933701,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0081667676568031311,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.041624996811151505,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.060624908655881882,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.074625015258789062,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.074875075370073318,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.11270842514932156,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.13783341273665428,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.218416728079319,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.2592084240168333,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.2602084316313267,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.2801249977201223,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.3831250835210085,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.8907082267105579,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.0367917604744434,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.3692082613706589,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.5666665751487017,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.5973750744014978,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.6019583456218243,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.9690832383930683,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.9970417749136686,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.9974166322499514,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.0278750713914633,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.0280417781323195,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.729375062510371,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.749124921858311,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.452374879270792,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.075291609391570091,
+      "trial" : 1
+    },
+    {
+      "callbackMs" : 126.81904155761003,
+      "events" : [
+        {
+          "ms" : 0.0010833609849214554,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0065416097640991211,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.031375093385577202,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.046374974772334099,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.054791569709777832,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.05491659976541996,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.078458338975906372,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.095583265647292137,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.0939999483525753,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.1150415521115065,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.115541672334075,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.12941674888134,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.2016249820590019,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.5842083375900984,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.89362489618361,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.2106666583567858,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.424333244562149,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.4608334060758352,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.46412493288517,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.4206250458955765,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.4659583363682032,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.4663334265351295,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.4899582862854004,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.4900833163410425,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 9.4100416172295809,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 9.4404167030006647,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 52.16270824894309,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.055124983191490173,
+      "trial" : 2
+    },
+    {
+      "callbackMs" : 117.47341649606824,
+      "events" : [
+        {
+          "ms" : 0.0013748649507761002,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010083196684718132,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.05108327604830265,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.068333232775330544,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.080541707575321198,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.080666504800319672,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.11062482371926308,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.13033323921263218,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.1571249924600124,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.1817915365099907,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.1823750101029873,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.2010415084660053,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.2877499684691429,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.659041503444314,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.7974998336285353,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.099333330988884,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.2883748169988394,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.320833271369338,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.3252915125340223,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.6776665840297937,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.704624880105257,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.7049582935869694,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.72995825111866,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.7301666345447302,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.674416553229094,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.685749817639589,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.446166217327118,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.081041594967246056,
+      "trial" : 3
+    },
+    {
+      "callbackMs" : 106.45995824597776,
+      "events" : [
+        {
+          "ms" : 0.0015832483768463135,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010166782885789871,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.04954170435667038,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.062208389863371849,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.084124971181154251,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.084250001236796379,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.12729177251458168,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.18633343279361725,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.030083280056715,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.0847083758562803,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.0849584359675646,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.1447500437498093,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.2714583426713943,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.8834583461284637,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.0446667913347483,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.3942918051034212,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.5842499453574419,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.6395833119750023,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.6430001016706228,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.0639999099075794,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.0962499808520079,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.096416687592864,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.1382500678300858,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.1384167745709419,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.401916690170765,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.414166608825326,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.082166472449899,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.08458341471850872,
+      "trial" : 4
+    },
+    {
+      "callbackMs" : 106.01795837283134,
+      "events" : [
+        {
+          "ms" : 0.0017085112631320953,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0094168353825807571,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.043041771277785301,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.054958509281277657,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.081541715189814568,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.081625068560242653,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.12091686949133873,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.17375010065734386,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.2549583334475756,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.3260000851005316,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.3265418820083141,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.3897500466555357,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.5343751292675734,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.2231251932680607,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.4024166632443666,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.7532917447388172,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.945000072941184,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.0200001783668995,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.0232083518058062,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.3135417401790619,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.3402918856590986,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.3405417129397392,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.3846251685172319,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.3848335519433022,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.042958427220583,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.057166684418917,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 52.684375084936619,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.082000158727169037,
+      "trial" : 5
+    },
+    {
+      "callbackMs" : 117.27804155088961,
+      "events" : [
+        {
+          "ms" : 0.0018749851733446121,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010374933481216431,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.045291613787412643,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.055833254009485245,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.083375023677945137,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.083458377048373222,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.12958329170942307,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.18904171884059906,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.3566666748374701,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.4234583359211683,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.4238748699426651,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.4900416135787964,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.6482917126268148,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.355541568249464,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.5168750435113907,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.9181665740907192,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 3.1353749800473452,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.2035831827670336,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.2068332657217979,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.4872916080057621,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.5953748524188995,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.59579161927104,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.6309583596885204,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.6310833897441626,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.587291559204459,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.606749914586544,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.264791378751397,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.083833234384655952,
+      "trial" : 6
+    },
+    {
+      "callbackMs" : 102.06241672858596,
+      "events" : [
+        {
+          "ms" : 0.0018333084881305695,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0096249859780073166,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.045374967157840729,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.056333374232053757,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.084291677922010422,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.08441670797765255,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.14208327047526836,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.2012916374951601,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.2440416030585766,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.2989998795092106,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.2995833531022072,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.342166680842638,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.4590416103601456,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.0247083157300949,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.1568748634308577,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.5143749080598354,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.7043332811444998,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.778458409011364,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.7818332891911268,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.0570415332913399,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.0817499868571758,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.0820834003388882,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.1087082829326391,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.1088333129882812,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 6.0589583590626717,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 6.074999924749136,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 48.775874776765704,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.084749888628721237,
+      "trial" : 7
+    },
+    {
+      "callbackMs" : 108.99375006556511,
+      "events" : [
+        {
+          "ms" : 0.001375097781419754,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010583316907286644,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.046541681513190269,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.057583441957831383,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.078958459198474884,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.079083489254117012,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.11879182420670986,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.16729184426367283,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.412541838362813,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.4741667546331882,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.4747916720807552,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.544916769489646,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.6949167475104332,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.6088750455528498,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.766291843727231,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 3.1474584247916937,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 3.3605834469199181,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.443125169724226,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.447333350777626,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.7735000737011433,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.8010835200548172,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.8012083172798157,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.8447916526347399,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.844958359375596,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 13.054291717708111,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 13.066416839137673,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.709458189085126,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.079458346590399742,
+      "trial" : 8
+    },
+    {
+      "callbackMs" : 103.44825009815395,
+      "events" : [
+        {
+          "ms" : 0.0017916318029165268,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010333489626646042,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.0447083730250597,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.05854177288711071,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.087166670709848404,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.087250024080276489,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.13604178093373775,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.17612497322261333,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.1002083774656057,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.186583423987031,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.1869999580085278,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.2616249732673168,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.3824168127030134,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.9821666646748781,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.1058749407529831,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.4670001585036516,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.6495417114347219,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.7065416797995567,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.7098334394395351,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.5251667033880949,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.5546668116003275,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.5551250223070383,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.569333279505372,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.5694583095610142,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 7.3672500438988209,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 7.3880834970623255,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 50.171041628345847,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.087583437561988831,
+      "trial" : 9
+    },
+    {
+      "callbackMs" : 105.30141671188176,
+      "events" : [
+        {
+          "ms" : 0.0014167744666337967,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010041752830147743,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.050458358600735664,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.063916668295860291,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.09241676889359951,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.092583475634455681,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.14233333058655262,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.20208349451422691,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.5690834261476994,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.6489583067595959,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.6495001036673784,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.7291251569986343,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.8855833914130926,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.5977084878832102,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.7663332875818014,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 3.1416250858455896,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 3.3325834665447474,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.4074999857693911,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.4112085122615099,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.7435000780969858,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.7686667423695326,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.7691249530762434,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.8155001606792212,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.8156249579042196,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 9.269083384424448,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 9.2786250170320272,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 51.957583287730813,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.092916656285524368,
+      "trial" : 10
+    },
+    {
+      "callbackMs" : 111.74883344210684,
+      "events" : [
+        {
+          "ms" : 0.001500127837061882,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010791700333356857,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.045541673898696899,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.057708472013473511,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.085541745647788048,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.085625099018216133,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.13266666792333126,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.21704169921576977,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.3009584508836269,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.3714584056288004,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.3717918191105127,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.4169584028422832,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.5584167558699846,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.2786250337958336,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.4201667401939631,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.7861667331308126,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.9826250392943621,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.0618333257734776,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.0650834087282419,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.6805417407304049,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.7105417363345623,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.7107917964458466,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.7582501322031021,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.7584999594837427,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 15.940166776999831,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 15.962416771799326,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 58.561666635796428,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.085958512499928474,
+      "trial" : 11
+    },
+    {
+      "callbackMs" : 124.49570838361979,
+      "events" : [
+        {
+          "ms" : 0.0015415716916322708,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0094582792371511459,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.041416613385081291,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.056333374232053757,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.078874872997403145,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.078999903053045273,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.1227082684636116,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.1765834167599678,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.2844167649745941,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.3506249524652958,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.3511250726878643,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.3899167533963919,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.5326249413192272,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.2270416375249624,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.3698334116488695,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.7535832487046719,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.9440834186971188,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.0071248766034842,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.0104583129286766,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.2881666924804449,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.3115834016352892,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.3117498755455017,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.3473333828151226,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.3475417662411928,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 7.1326666511595249,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 7.1470416150987148,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 49.838624894618988,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.079333316534757614,
+      "trial" : 12
+    },
+    {
+      "callbackMs" : 105.76820839196444,
+      "events" : [
+        {
+          "ms" : 0.0018333084881305695,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0088750384747982025,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.044750049710273743,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.058125006034970284,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.069083180278539658,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.069166533648967743,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.10195840150117874,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.11616665869951248,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.109750010073185,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.1414582841098309,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.1417916975915432,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.1672498658299446,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.2662082444876432,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.7773332074284554,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.9049583934247494,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.2190832532942295,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.3926666472107172,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.4437499232590199,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.4470833595842123,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.6428749337792397,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.6701249666512012,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.6705000568181276,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.7092917375266552,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.7093748580664396,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 9.7755417227745056,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 9.7914165817201138,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 52.478249883279204,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.069499947130680084,
+      "trial" : 13
+    },
+    {
+      "callbackMs" : 126.62183330394328,
+      "events" : [
+        {
+          "ms" : 0.0015415716916322708,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0095416326075792313,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.11087488383054733,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.12458325363695621,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.1463333610445261,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.14645839110016823,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.18858327530324459,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.2476666122674942,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.3882082421332598,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.4536250382661819,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.4541666023433208,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.5195000451058149,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.6575416084378958,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.4129166267812252,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.5852082762867212,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.960041631013155,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 3.1847916543483734,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.2709583174437284,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.2737082801759243,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.5977916345000267,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.6219582911580801,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.6221666745841503,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.6666666641831398,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.6669998448342085,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 9.3164583668112755,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 9.3265832401812077,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 52.011291496455669,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.14695827849209309,
+      "trial" : 14
+    },
+    {
+      "callbackMs" : 106.59437510184944,
+      "events" : [
+        {
+          "ms" : 0.001250067725777626,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0087916851043701172,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.070458510890603065,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.082375016063451767,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.10804180055856705,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.10812515392899513,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.18137507140636444,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.24245842359960079,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.3269167393445969,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.3875833246856928,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.3879167381674051,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.4397082850337029,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.5788751188665628,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.2133335005491972,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.3509166203439236,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.6945001445710659,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.8840417508035898,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.9302083421498537,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.9337084852159023,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.2168334368616343,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.2445000037550926,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.2446667104959488,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.2735833451151848,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.273791728541255,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.621750028803945,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.634999955072999,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.211041493341327,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.10845833458006382,
+      "trial" : 15
+    },
+    {
+      "callbackMs" : 106.54795821756124,
+      "events" : [
+        {
+          "ms" : 0.0017082784324884415,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0097083393484354019,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.049583148211240768,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.061624916270375252,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.080624828115105629,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.080708181485533714,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.12120814062654972,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.24954159744083881,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.5887082554399967,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.6194165218621492,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.6198332887142897,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.6614166088402271,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.7964998260140419,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.4227083195000887,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.5549998972564936,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.9140831902623177,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 3.1154165044426918,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.1895833089947701,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.1928331591188908,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.4086665622889996,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.4353747982531786,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.4357082117348909,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.4782081861048937,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.4782915394753218,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 10.431208182126284,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 10.448083281517029,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 53.127499762922525,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.081041594967246056,
+      "trial" : 16
+    },
+    {
+      "callbackMs" : 108.42125001363456,
+      "events" : [
+        {
+          "ms" : 0.0019583385437726974,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.011416617780923843,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.05254172720015049,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.069499947130680084,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.094666844233870506,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.09479164145886898,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.14116661623120308,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.23837503977119923,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.6785417683422565,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.743291737511754,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.7440416850149632,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.7923749983310699,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.9256668165326118,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.666916698217392,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.8445001225918531,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 3.1967917457222939,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 3.4454583656042814,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 3.4885001368820667,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 3.4914168063551188,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.7237499859184027,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.7512500789016485,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.7513751089572906,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.7970418129116297,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.7971668429672718,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 12.240958400070667,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 12.256083311513066,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 55.033083306625485,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.095125054940581322,
+      "trial" : 17
+    },
+    {
+      "callbackMs" : 114.00587507523596,
+      "events" : [
+        {
+          "ms" : 0.0020000152289867401,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.0095833092927932739,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.048500020056962967,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.061291735619306564,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.087666558101773262,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.087749911472201347,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.13233325444161892,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.1779582817107439,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.2402499560266733,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.3006250374019146,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.3010415714234114,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.357208238914609,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.4922083355486393,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 2.1605000365525484,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 2.3096250370144844,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.6684582699090242,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.8566250111907721,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.9197500552982092,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.9228748753666878,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 5.26570831425488,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 5.2929583471268415,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 5.2931250538676977,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 5.3325833287090063,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 5.3327083587646484,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 7.4268749449402094,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 7.436791667714715,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 50.172999734058976,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.088083324953913689,
+      "trial" : 18
+    },
+    {
+      "callbackMs" : 124.09762502647936,
+      "events" : [
+        {
+          "ms" : 0.0024167820811271667,
+          "phase" : "engine.play.enter"
+        },
+        {
+          "ms" : 0.010125106200575829,
+          "phase" : "engine.cleanup.begin"
+        },
+        {
+          "ms" : 0.045583350583910942,
+          "phase" : "engine.cleanup.end"
+        },
+        {
+          "ms" : 0.056999968364834785,
+          "phase" : "engine.task.create"
+        },
+        {
+          "ms" : 0.068708322942256927,
+          "phase" : "engine.task.stored"
+        },
+        {
+          "ms" : 0.068833352997899055,
+          "phase" : "engine.play.return"
+        },
+        {
+          "ms" : 0.11004181578755379,
+          "phase" : "engine.task.enter"
+        },
+        {
+          "ms" : 0.12558349408209324,
+          "phase" : "loader.inspect.enter"
+        },
+        {
+          "ms" : 1.0766666382551193,
+          "phase" : "loader.inspect.exit"
+        },
+        {
+          "ms" : 1.1133749503642321,
+          "phase" : "engine.inspect.return"
+        },
+        {
+          "ms" : 1.1138750705868006,
+          "phase" : "engine.load.submit"
+        },
+        {
+          "ms" : 1.1308332905173302,
+          "phase" : "loader.load.enter"
+        },
+        {
+          "ms" : 1.2289166916161776,
+          "phase" : "loader.open.begin"
+        },
+        {
+          "ms" : 1.7352916765958071,
+          "phase" : "loader.open.end"
+        },
+        {
+          "ms" : 1.8844583537429571,
+          "phase" : "loader.read.begin"
+        },
+        {
+          "ms" : 2.173958346247673,
+          "phase" : "loader.read.end"
+        },
+        {
+          "ms" : 2.3827084805816412,
+          "phase" : "loader.load.exit"
+        },
+        {
+          "ms" : 2.406291663646698,
+          "phase" : "engine.load.return"
+        },
+        {
+          "ms" : 2.4094583932310343,
+          "phase" : "engine.graph.begin"
+        },
+        {
+          "ms" : 4.2905416339635849,
+          "phase" : "engine.active.publish.begin"
+        },
+        {
+          "ms" : 4.3078335002064705,
+          "phase" : "engine.active.publish.end"
+        },
+        {
+          "ms" : 4.307999974116683,
+          "phase" : "engine.buffer.schedule.begin"
+        },
+        {
+          "ms" : 4.3256666976958513,
+          "phase" : "engine.buffer.schedule.end"
+        },
+        {
+          "ms" : 4.3257083743810654,
+          "phase" : "engine.player.play.begin"
+        },
+        {
+          "ms" : 6.7872917279601097,
+          "phase" : "engine.player.play.end"
+        },
+        {
+          "ms" : 6.7979167215526104,
+          "phase" : "engine.graph.end"
+        }
+      ],
+      "file" : "one-second.wav",
+      "path" : "engine",
+      "renderMs" : 49.475791631266475,
+      "scenario" : "relay-suppressed-direct",
+      "synchronousSubmitMs" : 0.069166766479611397,
+      "trial" : 19
+    }
+  ],
+  "videoError" : ""
+}

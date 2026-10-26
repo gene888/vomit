@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-26T18:12:56Z",
+  "status": "complete",
+  "configuration": "native AppKit Release -O; actual MainView; stereo Float32 48kHz; 30Hz video; no physical latency claim",
+  "audio": {
+    "eight-shared-file": {
+      "uniqueDecodedBytes": [
+        184320000
+      ],
+      "perVoiceReferencedBytes": [
+        184320000
+      ],
+      "actualDecodeReads": [
+        8,
+        8
+      ],
+      "activeFootprintMiB": {
+        "count": 2,
+        "median": 261.80594635009766,
+        "p95": 263.20438385009766,
+        "maximum": 263.20438385009766,
+        "minimum": 260.40750885009766
+      },
+      "activeResidentMiB": {
+        "count": 2,
+        "median": 341.6015625,
+        "p95": 343.6875,
+        "maximum": 343.6875,
+        "minimum": 339.515625
+      },
+      "loadAndGraphMs": {
+        "count": 2,
+        "median": 232.15799999888986,
+        "p95": 253.09162493795156,
+        "maximum": 253.09162493795156,
+        "minimum": 211.22437505982816
+      },
+      "firstMixerRenderMs": {
+        "count": 2,
+        "median": 170.4152290476486,
+        "p95": 190.21145813167095,
+        "maximum": 190.21145813167095,
+        "minimum": 150.61899996362627
+      },
+      "cpuPercentOneCore": {
+        "count": 2,
+        "median": 17.89252650099308,
+        "p95": 18.392654666761093,
+        "maximum": 18.392654666761093,
+        "minimum": 17.392398335225067
+      },
+      "nodes": [
+        40,
+        40
+      ],
+      "voices": [
+        8,
+        8
+      ]
+    },
+    "eight-unique-files": {
+      "uniqueDecodedBytes": [
+        184320000
+      ],
+      "perVoiceReferencedBytes": [
+        184320000
+      ],
+      "actualDecodeReads": [
+        8,
+        8
+      ],
+      "activeFootprintMiB": {
+        "count": 2,
+        "median": 261.69657135009766,
+        "p95": 262.75125885009766,
+        "maximum": 262.75125885009766,
+        "minimum": 260.64188385009766
+      },
+      "activeResidentMiB": {
+        "count": 2,
+        "median": 339.875,
+        "p95": 340,
+        "maximum": 340,
+        "minimum": 339.75
+      },
+      "loadAndGraphMs": {
+        "count": 2,
+        "median": 211.412979173474,
+        "p95": 212.54720841534436,
+        "maximum": 212.54720841534436,
+        "minimum": 210.27874993160367
+      },
+      "firstMixerRenderMs": {
+        "count": 2,
+        "median": 151.81624982506037,
+        "p95": 156.99566644616425,
+        "maximum": 156.99566644616425,
+        "minimum": 146.63683320395648
+      },
+      "cpuPercentOneCore": {
+        "count": 2,
+        "median": 18.231731555922373,
+        "p95": 18.44314182279665,
+        "maximum": 18.44314182279665,
+        "minimum": 18.02032128904809
+      },
+      "nodes": [
+        40,
+        40
+      ],
+      "voices": [
+        8,
+        8
+      ]
+    }
+  },
+  "capacity": [
+    {
+      "assets": 32,
+      "bookmarkBytesPerAsset": 0,
+      "cues": 32,
+      "encodedBytes": 111530,
+      "encodeMs": 1.208083238452673,
+      "loadMs": 6.545833311975002,
+      "memoryAfterParsing": {
+        "footprintMiB": 86.17301940917969,
+        "residentMiB": 164.375
+      },
+      "memoryBefore": {
+        "footprintMiB": 86.12614440917969,
+        "residentMiB": 164.328125
+      },
+      "normalizeMs": 0.025625107809901237,
+      "parseMs": 1.0231249034404755,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "saveMs": 2.6197500992566347
+    },
+    {
+      "assets": 256,
+      "bookmarkBytesPerAsset": 0,
+      "cues": 256,
+      "encodedBytes": 1627329,
+      "encodeMs": 13.02970852702856,
+      "loadMs": 49.111624946817756,
+      "memoryAfterParsing": {
+        "footprintMiB": 101.15739440917969,
+        "residentMiB": 179.390625
+      },
+      "memoryBefore": {
+        "footprintMiB": 97.14176940917969,
+        "residentMiB": 175.375
+      },
+      "normalizeMs": 0.38145831786096096,
+      "parseMs": 11.31595834158361,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "saveMs": 21.7162084300071
+    },
+    {
+      "assets": 1024,
+      "bookmarkBytesPerAsset": 0,
+      "cues": 1024,
+      "encodedBytes": 2752399,
+      "encodeMs": 19.179041730239987,
+      "error": "The file couldn\u2019t be saved because there isn\u2019t enough space.",
+      "errorCode": 640,
+      "errorDomain": "NSCocoaErrorDomain",
+      "memoryAfterParsing": {
+        "footprintMiB": 111.59491729736328,
+        "residentMiB": 189.8125
+      },
+      "memoryBefore": {
+        "footprintMiB": 110.50116729736328,
+        "residentMiB": 188.71875
+      },
+      "normalizeMs": 0.707416795194149,
+      "parseMs": 18.14770814962685,
+      "restoredEqual": true
+    },
+    {
+      "assets": 1024,
+      "bookmarkBytesPerAsset": 512,
+      "cues": 1024,
+      "encodedBytes": 3478415,
+      "encodeMs": 20.42720839381218,
+      "error": "The file couldn\u2019t be saved because there isn\u2019t enough space.",
+      "errorCode": 640,
+      "errorDomain": "NSCocoaErrorDomain",
+      "memoryAfterParsing": {
+        "footprintMiB": 119.65741729736328,
+        "residentMiB": 197.9375
+      },
+      "memoryBefore": {
+        "footprintMiB": 118.92304229736328,
+        "residentMiB": 197.203125
+      },
+      "normalizeMs": 0.6821667775511742,
+      "parseMs": 18.5910000000149,
+      "restoredEqual": true
+    },
+    {
+      "assets": 1024,
+      "bookmarkBytesPerAsset": 2048,
+      "cues": 1024,
+      "encodedBytes": 5575567,
+      "encodeMs": 24.58666660822928,
+      "error": "The file couldn\u2019t be saved because there isn\u2019t enough space.",
+      "errorCode": 640,
+      "errorDomain": "NSCocoaErrorDomain",
+      "memoryAfterParsing": {
+        "footprintMiB": 138.89179229736328,
+        "residentMiB": 217.171875
+      },
+      "memoryBefore": {
+        "footprintMiB": 136.20429229736328,
+        "residentMiB": 214.484375
+      },
+      "normalizeMs": 0.6569165270775557,
+      "parseMs": 19.902041647583246,
+      "restoredEqual": true
+    }
+  ]
+}

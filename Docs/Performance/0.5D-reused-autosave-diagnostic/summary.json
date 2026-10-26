@@ -1,0 +1,366 @@
+{
+  "date": "2026-10-26T18:35:56Z",
+  "status": "complete",
+  "configuration": "native AppKit Release -O; actual MainView; stereo Float32 48kHz; 30Hz video; no physical latency claim",
+  "audio": {
+    "eight-shared-file": {
+      "uniqueDecodedBytes": [
+        23040000
+      ],
+      "perVoiceReferencedBytes": [
+        184320000
+      ],
+      "actualDecodeReads": [
+        1,
+        1
+      ],
+      "activeFootprintMiB": {
+        "count": 2,
+        "median": 151.34496307373047,
+        "p95": 152.65746307373047,
+        "maximum": 152.65746307373047,
+        "minimum": 150.03246307373047
+      },
+      "activeResidentMiB": {
+        "count": 2,
+        "median": 231.7734375,
+        "p95": 233.78125,
+        "maximum": 233.78125,
+        "minimum": 229.765625
+      },
+      "loadAndGraphMs": {
+        "count": 2,
+        "median": 194.81893756892532,
+        "p95": 200.40099998004735,
+        "maximum": 200.40099998004735,
+        "minimum": 189.2368751578033
+      },
+      "firstMixerRenderMs": {
+        "count": 2,
+        "median": 162.7680624369532,
+        "p95": 168.31866651773453,
+        "maximum": 168.31866651773453,
+        "minimum": 157.21745835617185
+      },
+      "cpuPercentOneCore": {
+        "count": 2,
+        "median": 18.552432789852624,
+        "p95": 18.91482530862241,
+        "maximum": 18.91482530862241,
+        "minimum": 18.19004027108284
+      },
+      "nodes": [
+        40,
+        40
+      ],
+      "voices": [
+        8,
+        8
+      ]
+    },
+    "eight-unique-files": {
+      "uniqueDecodedBytes": [
+        184320000
+      ],
+      "perVoiceReferencedBytes": [
+        184320000
+      ],
+      "actualDecodeReads": [
+        8,
+        8
+      ],
+      "activeFootprintMiB": {
+        "count": 2,
+        "median": 304.23567962646484,
+        "p95": 304.37630462646484,
+        "maximum": 304.37630462646484,
+        "minimum": 304.09505462646484
+      },
+      "activeResidentMiB": {
+        "count": 2,
+        "median": 383.90625,
+        "p95": 384.046875,
+        "maximum": 384.046875,
+        "minimum": 383.765625
+      },
+      "loadAndGraphMs": {
+        "count": 2,
+        "median": 217.80739596579224,
+        "p95": 224.66525016352534,
+        "maximum": 224.66525016352534,
+        "minimum": 210.94954176805913
+      },
+      "firstMixerRenderMs": {
+        "count": 2,
+        "median": 152.05237490590662,
+        "p95": 159.6903749741614,
+        "maximum": 159.6903749741614,
+        "minimum": 144.41437483765185
+      },
+      "cpuPercentOneCore": {
+        "count": 2,
+        "median": 18.89648628751382,
+        "p95": 19.00155987423364,
+        "maximum": 19.00155987423364,
+        "minimum": 18.791412700794
+      },
+      "nodes": [
+        40,
+        40
+      ],
+      "voices": [
+        8,
+        8
+      ]
+    }
+  },
+  "capacity": [
+    {
+      "assets": 32,
+      "bookmarkBytesPerAsset": 0,
+      "cues": 32,
+      "encodedBytes": 111530,
+      "encodeMs": 1.0921666398644447,
+      "loadMs": 5.84779167547822,
+      "memoryAfterParsing": {
+        "footprintMiB": 129.54808807373047,
+        "residentMiB": 208.3125
+      },
+      "memoryBefore": {
+        "footprintMiB": 129.51683807373047,
+        "residentMiB": 208.28125
+      },
+      "memorySamplingIntervalMs": 5,
+      "normalizeMs": 0.025791814550757408,
+      "parseMs": 0.9385417215526104,
+      "restorationEquivalent": true,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "sampledPeakMemory": {
+        "footprintMiB": 129.61058807373047,
+        "residentMiB": 208.375
+      },
+      "saveMs": 2.8858333826065063
+    },
+    {
+      "assets": 256,
+      "bookmarkBytesPerAsset": 0,
+      "cues": 256,
+      "encodedBytes": 1627329,
+      "encodeMs": 12.381749926134944,
+      "loadMs": 49.7577500063926,
+      "memoryAfterParsing": {
+        "footprintMiB": 141.31373596191406,
+        "residentMiB": 220.0625
+      },
+      "memoryBefore": {
+        "footprintMiB": 138.75123596191406,
+        "residentMiB": 217.5
+      },
+      "memorySamplingIntervalMs": 5,
+      "normalizeMs": 0.3397916443645954,
+      "parseMs": 11.314458446577191,
+      "restorationEquivalent": true,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "sampledPeakMemory": {
+        "footprintMiB": 145.28248596191406,
+        "residentMiB": 224.03125
+      },
+      "saveMs": 21.692249923944473
+    },
+    {
+      "assets": 1024,
+      "bookmarkBytesPerAsset": 0,
+      "cues": 1024,
+      "encodedBytes": 2752399,
+      "encodeMs": 19.334083190187812,
+      "loadMs": 168.01079153083265,
+      "memoryAfterParsing": {
+        "footprintMiB": 150.93873596191406,
+        "residentMiB": 229.6875
+      },
+      "memoryBefore": {
+        "footprintMiB": 149.71998596191406,
+        "residentMiB": 228.46875
+      },
+      "memorySamplingIntervalMs": 5,
+      "normalizeMs": 0.706416554749012,
+      "parseMs": 17.783416667953134,
+      "restorationEquivalent": true,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "sampledPeakMemory": {
+        "footprintMiB": 153.76686096191406,
+        "residentMiB": 232.515625
+      },
+      "saveMs": 54.95333345606923
+    },
+    {
+      "assets": 1024,
+      "bookmarkBytesPerAsset": 512,
+      "cues": 1024,
+      "encodedBytes": 3478415,
+      "encodeMs": 20.88704169727862,
+      "loadMs": 166.94566677324474,
+      "memoryAfterParsing": {
+        "footprintMiB": 159.93873596191406,
+        "residentMiB": 238.71875
+      },
+      "memoryBefore": {
+        "footprintMiB": 159.20436096191406,
+        "residentMiB": 237.984375
+      },
+      "memorySamplingIntervalMs": 5,
+      "normalizeMs": 0.7068749982863665,
+      "parseMs": 18.85049999691546,
+      "restorationEquivalent": true,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "sampledPeakMemory": {
+        "footprintMiB": 163.98561096191406,
+        "residentMiB": 242.765625
+      },
+      "saveMs": 56.87849991954863
+    },
+    {
+      "assets": 1024,
+      "bookmarkBytesPerAsset": 2048,
+      "cues": 1024,
+      "encodedBytes": 5575567,
+      "encodeMs": 26.047208346426487,
+      "loadMs": 170.54800014011562,
+      "memoryAfterParsing": {
+        "footprintMiB": 111.65748596191406,
+        "residentMiB": 246.390625
+      },
+      "memoryBefore": {
+        "footprintMiB": 108.96998596191406,
+        "residentMiB": 243.703125
+      },
+      "memorySamplingIntervalMs": 5,
+      "normalizeMs": 0.6967918016016483,
+      "parseMs": 19.963999977335334,
+      "restorationEquivalent": true,
+      "restoredEqual": true,
+      "roundTripEqual": false,
+      "sampledPeakMemory": {
+        "footprintMiB": 171.36061096191406,
+        "residentMiB": 260.296875
+      },
+      "saveMs": 62.89549986831844
+    }
+  ],
+  "stress": {
+    "audioErrors": [],
+    "cpuPercentOneCore": 88.9386268218636,
+    "memory": [
+      {
+        "elapsed": 3.283331170678139e-05,
+        "footprintMiB": 233.39190673828125,
+        "nodes": 28,
+        "residentMiB": 301.484375,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 5.65016920841299,
+        "footprintMiB": 250.01690673828125,
+        "nodes": 28,
+        "residentMiB": 318.40625,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 11.16461145831272,
+        "footprintMiB": 250.45440673828125,
+        "nodes": 28,
+        "residentMiB": 318.921875,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 16.67396662500687,
+        "footprintMiB": 258.45442962646484,
+        "nodes": 28,
+        "residentMiB": 326.90625,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 22.230699999956414,
+        "footprintMiB": 238.78255462646484,
+        "nodes": 28,
+        "residentMiB": 307.78125,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 27.707561208400875,
+        "footprintMiB": 246.79817962646484,
+        "nodes": 28,
+        "residentMiB": 315.859375,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 33.22883554175496,
+        "footprintMiB": 212.12628173828125,
+        "nodes": 28,
+        "residentMiB": 297.296875,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 38.64779629162513,
+        "footprintMiB": 220.12635040283203,
+        "nodes": 28,
+        "residentMiB": 305.234375,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 44.10126941674389,
+        "footprintMiB": 212.37630462646484,
+        "nodes": 28,
+        "residentMiB": 297.515625,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 49.610313000157475,
+        "footprintMiB": 220.28255462646484,
+        "nodes": 28,
+        "residentMiB": 305.4375,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      },
+      {
+        "elapsed": 55.0765646668151,
+        "footprintMiB": 220.36070251464844,
+        "nodes": 28,
+        "residentMiB": 305.5,
+        "uniqueDecodedBytes": 23040000,
+        "voices": 4
+      }
+    ],
+    "seconds": 60.09252099995501,
+    "sequenceCurrent": 29,
+    "videoError": "",
+    "videoItems": 3,
+    "mixerCommandMs": {
+      "count": 546,
+      "median": 0.06052094977349043,
+      "p95": 0.10512513108551502,
+      "maximum": 0.13104151003062725,
+      "minimum": 0.019791536033153534
+    }
+  },
+  "finalResources": {
+    "buffers": 0,
+    "nodes": 16,
+    "reservedBytes": 0,
+    "uniqueBytes": 0,
+    "videoItems": 0
+  }
+}

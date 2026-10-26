@@ -1,0 +1,5 @@
+PROFILE HOST: AppKit launched; loading benchmark off main thread
+PROFILE HOST: starting main-actor workload
+PROFILE: generating local fixtures
+AUDIO PROFILE: relay-normal-direct
+AUDIO PROFILE: relay-suppressed-direct

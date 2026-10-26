@@ -1,0 +1,306 @@
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite PersistenceTests started.
+◇ Suite ShowControlReliabilityTests started.
+◇ Suite DropAssignmentTests started.
+◇ Suite ProjectCapacityTests started.
+◇ Suite RuntimePublicationTests started.
+◇ Suite SharedMediaTests started.
+◇ Suite ShowModeTests started.
+◇ Suite PortabilityTests started.
+◇ Suite PadLayoutTests started.
+◇ Test emptyPadGetsFilenameAndDoesNotAutoplay() started.
+◇ Suite SafetyAudioTests started.
+◇ Suite AudioTests started.
+◇ Suite ModelTests started.
+◇ Test aboveFormerLimitRoundTripsHundredsOfUniqueAssetsAndAutomation() started.
+◇ Test testProjectRoundTripPreservesEverySettingAndMediaReference() started.
+◇ Suite SequenceTests started.
+◇ Test simultaneousSameFileFitsOneBufferBudgetAndKeepsEightNodesIndependent() started.
+◇ Suite ShowControlTests started.
+◇ Suite VideoTests started.
+◇ Test historyRetirementPreservesErroredOwnershipAndCurrentFollow() started.
+◇ Test modeAndPageSwitchesKeepAudioAndVisualPlaybackAlive() started.
+◇ Suite MixerTests started.
+◇ Test portableExportMovesBetweenDifferentHomesWithOriginalsRemoved() started.
+◇ Test fadesDuringLoadApplyAfterDecode() started.
+◇ Test simultaneousAndDelayedActionsHaveStableOrder() started.
+◇ Test selectionIsImmediateAndOneBurstPublishesLatestStateOnce() started.
+◇ Test testMemoryBudgetRejectsAdditionalCueWithoutInterruptingExistingCue() started.
+◇ Test queuedVisualFadeAndFadeFromBlackSurviveReadiness() started.
+◇ Test incrementalBusAndMasterProduceExpectedPCMWithoutGraphChanges() started.
+◇ Test testGainConversionAndBounds() started.
+◇ Test allPadsSupportDistinctKeysAndLegacyDefaults() started.
+◇ Test manualGoDisplaysCurrentAndNextAndDoesNotStopOtherPlayback() started.
+✔ Test allPadsSupportDistinctKeysAndLegacyDefaults() passed after 0.001 seconds.
+◇ Test conflictingReservedAndMalformedKeysAreRepaired() started.
+✔ Test conflictingReservedAndMalformedKeysAreRepaired() passed after 0.001 seconds.
+◇ Test swappingPreservesEverySettingAndPositionShortcuts() started.
+✔ Test swappingPreservesEverySettingAndPositionShortcuts() passed after 0.001 seconds.
+◇ Test movingLiveCuesKeepsPlaybackAndCancelsStaleDrop() started.
+✔ Test testGainConversionAndBounds() passed after 0.001 seconds.
+◇ Test testNormalizationRepairsMalformedSettingsAndIDs() started.
+✔ Test testNormalizationRepairsMalformedSettingsAndIDs() passed after 0.001 seconds.
+◇ Test testOversizedProjectIsTruncated() started.
+✔ Test testOversizedProjectIsTruncated() passed after 0.001 seconds.
+◇ Test testFadeEndpointsMonotonicityAndBounds() started.
+✔ Test testFadeEndpointsMonotonicityAndBounds() passed after 0.001 seconds.
+◇ Test testEqualPowerComplementaryCurves() started.
+✔ Test testProjectRoundTripPreservesEverySettingAndMediaReference() passed after 0.004 seconds.
+◇ Test testLegacyAndPartialProjectDefaults() started.
+✔ Test testEqualPowerComplementaryCurves() passed after 0.001 seconds.
+◇ Test testInterruptedFadeIsContinuousAndZeroDurationIsImmediate() started.
+✔ Test testLegacyAndPartialProjectDefaults() passed after 0.001 seconds.
+◇ Test testCorruptAndFutureProjectsRejectedWithoutRewriting() started.
+✔ Test testInterruptedFadeIsContinuousAndZeroDurationIsImmediate() passed after 0.001 seconds.
+◇ Test testShortClipFadesFitDurationAndLoopsHaveNoTail() started.
+✔ Test testShortClipFadesFitDurationAndLoopsHaveNoTail() passed after 0.001 seconds.
+✔ Suite ModelTests passed after 0.005 seconds.
+✔ Test testCorruptAndFutureProjectsRejectedWithoutRewriting() passed after 0.001 seconds.
+◇ Test testOversizedProjectRejected() started.
+✔ Test testOversizedProjectRejected() passed after 0.004 seconds.
+◇ Test testWriteFailurePreservesExistingFile() started.
+✔ Test portableExportMovesBetweenDifferentHomesWithOriginalsRemoved() passed after 0.029 seconds.
+◇ Test ordinaryProjectCanReferenceOutsideMediaAndRelativeInsideMedia() started.
+✔ Test ordinaryProjectCanReferenceOutsideMediaAndRelativeInsideMedia() passed after 0.002 seconds.
+◇ Test traversalAndEscapingSymlinksAreRejected() started.
+✔ Test traversalAndEscapingSymlinksAreRejected() passed after 0.001 seconds.
+◇ Test missingAndCopyFailureNeverPublishOrDamageOriginals() started.
+✔ Test missingAndCopyFailureNeverPublishOrDamageOriginals() passed after 0.002 seconds.
+◇ Test cancellationAndExistingDestinationAreSafe() started.
+✔ Test cancellationAndExistingDestinationAreSafe() passed after 0.001 seconds.
+◇ Test batchRelinkWithoutSpotlightRejectsWrongContentAndPersists() started.
+✔ Test batchRelinkWithoutSpotlightRejectsWrongContentAndPersists() passed after 0.007 seconds.
+◇ Test duplicateNamesChooseContentIdentityAndLegacyNamesNeedReview() started.
+✔ Test duplicateNamesChooseContentIdentityAndLegacyNamesNeedReview() passed after 0.003 seconds.
+◇ Test validRelativePathWinsOverOriginalMacAndChangedFileIsFlagged() started.
+✔ Test validRelativePathWinsOverOriginalMacAndChangedFileIsFlagged() passed after 0.003 seconds.
+◇ Test realAudioVideoAndBackgroundPlayAfterSourceRootIsRemoved() started.
+2026-10-26 11:33:30.583 swiftpm-testing-helper[5740:21550015] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+✔ Test testWriteFailurePreservesExistingFile() passed after 0.173 seconds.
+◇ Test testAutosaveWriterRejectsStaleRevision() started.
+✔ Test testAutosaveWriterRejectsStaleRevision() passed after 0.001 seconds.
+✔ Suite PersistenceTests passed after 0.184 seconds.
+✔ Test simultaneousAndDelayedActionsHaveStableOrder() passed after 0.293 seconds.
+◇ Test cancelPreventsStaleActionsAndEmergencyCancelsAll() started.
+✔ Test manualGoDisplaysCurrentAndNextAndDoesNotStopOtherPlayback() passed after 0.293 seconds.
+◇ Test timedAdvancementAndPauseResumeDoNotConsumePausedTime() started.
+✔ Test emptyPadGetsFilenameAndDoesNotAutoplay() passed after 0.342 seconds.
+◇ Test replacementPreservesSettingsAndStopsOnlyAffectedCue() started.
+✔ Test movingLiveCuesKeepsPlaybackAndCancelsStaleDrop() passed after 0.361 seconds.
+◇ Test duplicateAndReservedShortcutChangesAreRejected() started.
+✔ Test modeAndPageSwitchesKeepAudioAndVisualPlaybackAlive() passed after 0.373 seconds.
+◇ Test assigningMediaToGroupPadClearsTheGroupReference() started.
+✔ Test incrementalBusAndMasterProduceExpectedPCMWithoutGraphChanges() passed after 0.375 seconds.
+◇ Test boundsAttenuationRestoreAndEngineRestartUseTheSameMixerValues() started.
+✔ Test fadesDuringLoadApplyAfterDecode() passed after 0.406 seconds.
+◇ Test individualPauseAndArbitraryFadePreserveAudioContinuity() started.
+✔ Test duplicateAndReservedShortcutChangesAreRejected() passed after 0.073 seconds.
+✔ Suite PadLayoutTests passed after 0.437 seconds.
+2026-10-26 11:33:30.860 swiftpm-testing-helper[5740:21550015] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+✔ Test selectionIsImmediateAndOneBurstPublishesLatestStateOnce() passed after 0.479 seconds.
+◇ Test continuousRuntimeChangesDoNotPostponePublicationUntilTheEnd() started.
+✔ Test aboveFormerLimitRoundTripsHundredsOfUniqueAssetsAndAutomation() passed after 0.520 seconds.
+◇ Test exactCapacityBoundaryIsAcceptedAndOneByteMoreIsRejectedWithoutReplacement() started.
+✔ Test cancelPreventsStaleActionsAndEmergencyCancelsAll() passed after 0.230 seconds.
+✔ Test timedAdvancementAndPauseResumeDoNotConsumePausedTime() passed after 0.230 seconds.
+◇ Test naturalFollowWaitsForCompletion() started.
+◇ Test pauseResumePreservesRelativeDeadlinesAndOwnedMedia() started.
+✔ Test queuedVisualFadeAndFadeFromBlackSurviveReadiness() passed after 0.524 seconds.
+◇ Test schemaMigratesAudioAndRoundTripsVisualSettings() started.
+✔ Test schemaMigratesAudioAndRoundTripsVisualSettings() passed after 0.001 seconds.
+◇ Test dissolveCalculationsAndVisualNormalization() started.
+✔ Test dissolveCalculationsAndVisualNormalization() passed after 0.001 seconds.
+◇ Test imagesCutCrossfadePauseFadeBlackoutAndMissingMedia() started.
+✔ Test simultaneousSameFileFitsOneBufferBudgetAndKeepsEightNodesIndependent() passed after 0.528 seconds.
+◇ Test stoppingAndEvictingOneOwnerCannotDisposeOfAnotherVoicesPCM() started.
+✔ Test assigningMediaToGroupPadClearsTheGroupReference() passed after 0.202 seconds.
+◇ Test groupPadTriggersAcrossPagesAndReferencesRemainStable() started.
+2026-10-26 11:33:31.019 swiftpm-testing-helper[5740:21550015] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+✔ Test individualPauseAndArbitraryFadePreserveAudioContinuity() passed after 0.220 seconds.
+◇ Test testSimultaneousCuesClipBusAndMasterGain() started.
+✔ Test pauseResumePreservesRelativeDeadlinesAndOwnedMedia() passed after 0.104 seconds.
+✔ Test naturalFollowWaitsForCompletion() passed after 0.104 seconds.
+◇ Test stopModesAndSurvivorsAffectOnlyOwnedPlayback() started.
+◇ Test explicitFollowTimeAdvancesWhileLoopContinues() started.
+✔ Test replacementPreservesSettingsAndStopsOnlyAffectedCue() passed after 0.314 seconds.
+◇ Test invalidFileAndInvalidDropsLeaveExistingCueUnchanged() started.
+✔ Test testMemoryBudgetRejectsAdditionalCueWithoutInterruptingExistingCue() passed after 0.672 seconds.
+◇ Test testSimultaneousLoadsReserveMemoryBeforeDecode() started.
+✔ Test groupPadTriggersAcrossPagesAndReferencesRemainStable() passed after 0.127 seconds.
+◇ Test showShortcutsPersistRejectDuplicatesAndEmergencyStopsEverything() started.
+✔ Test boundsAttenuationRestoreAndEngineRestartUseTheSameMixerValues() passed after 0.331 seconds.
+◇ Test rapidUpdatesAcrossSixBusesDoNotResetClipFadesOrSilence() started.
+2026-10-26 11:33:31.136 swiftpm-testing-helper[5740:21550015] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+✔ Test stopModesAndSurvivorsAffectOnlyOwnedPlayback() passed after 0.120 seconds.
+✔ Test explicitFollowTimeAdvancesWhileLoopContinues() passed after 0.120 seconds.
+◇ Test replacementOwnershipProtectsOtherGroups() started.
+◇ Test stopResetAndRestartCancelTimersAndOnlyOwnedMedia() started.
+✔ Test testSimultaneousCuesClipBusAndMasterGain() passed after 0.126 seconds.
+◇ Test testPositiveClipBusAndMasterGain() started.
+✔ Test exactCapacityBoundaryIsAcceptedAndOneByteMoreIsRejectedWithoutReplacement() passed after 0.236 seconds.
+◇ Test errorKindsDistinguishMalformedUnsupportedSerializationAndFileAccess() started.
+✔ Test errorKindsDistinguishMalformedUnsupportedSerializationAndFileAccess() passed after 0.001 seconds.
+◇ Test portableLargeProjectWorksAfterMovingToUnrelatedRoot() started.
+✔ Test portableLargeProjectWorksAfterMovingToUnrelatedRoot() passed after 0.016 seconds.
+✔ Suite ProjectCapacityTests passed after 0.774 seconds.
+✔ Test imagesCutCrossfadePauseFadeBlackoutAndMissingMedia() passed after 0.250 seconds.
+◇ Test movAndMP4LoopPauseConcurrentAudioAndCleanup() started.
+✔ Test rapidUpdatesAcrossSixBusesDoNotResetClipFadesOrSilence() passed after 0.092 seconds.
+◇ Test groupRampsRespectPauseManualOverrideCancellationAndNewRuns() started.
+✔ Test testSimultaneousLoadsReserveMemoryBeforeDecode() passed after 0.138 seconds.
+◇ Test testSparseOversizedClipIsRejectedBeforeAllocation() started.
+✔ Test replacementOwnershipProtectsOtherGroups() passed after 0.065 seconds.
+✔ Test stopResetAndRestartCancelTimersAndOnlyOwnedMedia() passed after 0.065 seconds.
+◇ Test manualOverrideSuppressesOldAutomationButAllowsNewGroup() started.
+◇ Test skipAndBackDoNotStopPlayingMediaOrAutoplay() started.
+✔ Test testPositiveClipBusAndMasterGain() passed after 0.071 seconds.
+◇ Test testEachOfSixBusesRoutesIndependently() started.
+✔ Test testSparseOversizedClipIsRejectedBeforeAllocation() passed after 0.016 seconds.
+◇ Test testLiveCompletionAndTimerFadesUsingSilentAudio() started.
+✔ Test groupRampsRespectPauseManualOverrideCancellationAndNewRuns() passed after 0.097 seconds.
+◇ Test productionManualOverrideAndSequenceMixerActionsKeepProjectStateConsistent() started.
+✔ Test stoppingAndEvictingOneOwnerCannotDisposeOfAnotherVoicesPCM() passed after 0.372 seconds.
+◇ Test samePathReplacementAndRelinkKeepExistingPCMUnchanged() started.
+✔ Test manualOverrideSuppressesOldAutomationButAllowsNewGroup() passed after 0.089 seconds.
+◇ Test waitsCompletionAndMissingReferences() started.
+✔ Test skipAndBackDoNotStopPlayingMediaOrAutoplay() passed after 0.109 seconds.
+◇ Test missingReferenceAndLoadFailureBecomeErrors() started.
+✔ Test invalidFileAndInvalidDropsLeaveExistingCueUnchanged() passed after 0.301 seconds.
+◇ Test newerDropWinsAndClearedPadCannotBeRepopulatedByOldValidation() started.
+✔ Test showShortcutsPersistRejectDuplicatesAndEmergencyStopsEverything() passed after 0.263 seconds.
+◇ Test automatedPageAndBusActionsAndManualOverrides() started.
+✔ Test realAudioVideoAndBackgroundPlayAfterSourceRootIsRemoved() passed after 0.933 seconds.
+◇ Test manifestVersionAndLegacyMissingReferencesArePreserved() started.
+✔ Test manifestVersionAndLegacyMissingReferencesArePreserved() passed after 0.001 seconds.
+◇ Test sameNamesRemainDistinctAndInterruptedSecondCopyCleansUp() started.
+✔ Test sameNamesRemainDistinctAndInterruptedSecondCopyCleansUp() passed after 0.010 seconds.
+◇ Test mediaChoicesAreStagedAndStaleApplyCannotOverwriteEdits() started.
+✔ Test testEachOfSixBusesRoutesIndependently() passed after 0.184 seconds.
+◇ Test testFadeToSilenceKeepsLoopAndFadeInRestoresIt() started.
+✔ Test waitsCompletionAndMissingReferences() passed after 0.141 seconds.
+✔ Test missingReferenceAndLoadFailureBecomeErrors() passed after 0.121 seconds.
+◇ Test nestedGroupCycleIsRejectedAndParentStopCancelsChildren() started.
+◇ Test persistenceAndDuplicateIDsNormalize() started.
+✔ Test productionManualOverrideAndSequenceMixerActionsKeepProjectStateConsistent() passed after 0.158 seconds.
+◇ Test autosavePersistsFinalGainAndProjectLoadRestoresActualAudio() started.
+✔ Test automatedPageAndBusActionsAndManualOverrides() passed after 0.141 seconds.
+◇ Test pendingAssignmentCanceledOnPageChange() started.
+✔ Test continuousRuntimeChangesDoNotPostponePublicationUntilTheEnd() passed after 0.640 seconds.
+◇ Test loadingCancellationAndErrorsRemainImmediatelyReadable() started.
+2026-10-26 11:33:31.546 swiftpm-testing-helper[5740:21550015] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+✔ Test pendingAssignmentCanceledOnPageChange() passed after 0.042 seconds.
+◇ Test manualOverridePropagatesToDelayedChildrenAndAutomaticSequenceSteps() started.
+✔ Test testFadeToSilenceKeepsLoopAndFadeInRestoresIt() passed after 0.172 seconds.
+◇ Test testIndependentFadesAndFadeStopDetachOnlyTarget() started.
+✔ Test persistenceAndDuplicateIDsNormalize() passed after 0.139 seconds.
+✔ Test nestedGroupCycleIsRejectedAndParentStopCancelsChildren() passed after 0.139 seconds.
+◇ Test concurrentGroupsUseDeadlineThenLaunchOrder() started.
+◇ Test persistentCueAndGroupFollowRequireExplicitCompletion() started.
+✔ Test newerDropWinsAndClearedPadCannotBeRepopulatedByOldValidation() passed after 0.234 seconds.
+✔ Suite DropAssignmentTests passed after 1.194 seconds.
+✔ Test manualOverridePropagatesToDelayedChildrenAndAutomaticSequenceSteps() passed after 0.061 seconds.
+◇ Test audioDeviceChangeCancelsPendingAutomation() started.
+2026-10-26 11:33:31.669 swiftpm-testing-helper[5740:21550015] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+✔ Test concurrentGroupsUseDeadlineThenLaunchOrder() passed after 0.092 seconds.
+◇ Test schemaThreePreservesGroupsAndOlderIDs() started.
+✔ Test persistentCueAndGroupFollowRequireExplicitCompletion() passed after 0.096 seconds.
+✔ Suite SequenceTests passed after 1.281 seconds.
+✔ Test samePathReplacementAndRelinkKeepExistingPCMUnchanged() passed after 0.388 seconds.
+◇ Test symlinkUsesCanonicalSourceAndShutdownDoesNotRetainIdleMedia() started.
+✔ Test testIndependentFadesAndFadeStopDetachOnlyTarget() passed after 0.111 seconds.
+◇ Test testAutomaticInAndNaturalEndOut() started.
+✔ Test mediaChoicesAreStagedAndStaleApplyCannotOverwriteEdits() passed after 0.339 seconds.
+◇ Test applicationExportLeavesWorkingProjectUnchangedAndOpenRebases() started.
+✔ Test schemaThreePreservesGroupsAndOlderIDs() passed after 0.060 seconds.
+◇ Test continuousClockFiresWithoutUITimerUnderWorkerLoad() started.
+✔ Test testAutomaticInAndNaturalEndOut() passed after 0.080 seconds.
+◇ Test testShortClipWithOverlappingConfiguredFadesIsAudible() started.
+✔ Test loadingCancellationAndErrorsRemainImmediatelyReadable() passed after 0.262 seconds.
+◇ Test closingWithPendingUIWorkDoesNotRetainProjectOrSchedulePlayback() started.
+✔ Test audioDeviceChangeCancelsPendingAutomation() passed after 0.221 seconds.
+✔ Suite ShowModeTests passed after 1.434 seconds.
+✔ Test testShortClipWithOverlappingConfiguredFadesIsAudible() passed after 0.087 seconds.
+◇ Test testManualFadeCancelsPreviousEnvelopeAndOwnsRemainingPlayback() started.
+✔ Test symlinkUsesCanonicalSourceAndShutdownDoesNotRetainIdleMedia() passed after 0.174 seconds.
+✔ Test closingWithPendingUIWorkDoesNotRetainProjectOrSchedulePlayback() passed after 0.079 seconds.
+✔ Suite RuntimePublicationTests passed after 1.463 seconds.
+◇ Test newlyStartedPlayerHasItsOwnPositionInSharedRamp() started.
+✔ Test applicationExportLeavesWorkingProjectUnchangedAndOpenRebases() passed after 0.168 seconds.
+◇ Test malformedManifestCannotAssociateOneCueWithDifferentAssets() started.
+✔ Test malformedManifestCannotAssociateOneCueWithDifferentAssets() passed after 0.001 seconds.
+✔ Suite PortabilityTests passed after 1.503 seconds.
+✔ Test testManualFadeCancelsPreviousEnvelopeAndOwnsRemainingPlayback() passed after 0.062 seconds.
+◇ Test testOneShotCompletionLoopingAndConfiguredToggleStop() started.
+✔ Test newlyStartedPlayerHasItsOwnPositionInSharedRamp() passed after 0.106 seconds.
+◇ Test oneShotCompletionDoesNotStopAnotherPlayerSharingItsBuffer() started.
+✔ Test autosavePersistsFinalGainAndProjectLoadRestoresActualAudio() passed after 0.530 seconds.
+◇ Test liveAudioAndVisualPixelsContinueDuringRapidMixerChanges() started.
+✔ Test testOneShotCompletionLoopingAndConfiguredToggleStop() passed after 0.065 seconds.
+◇ Test testRetriggerStopAllAndPendingLoadCancellation() started.
+✔ Test continuousClockFiresWithoutUITimerUnderWorkerLoad() passed after 0.292 seconds.
+✔ Suite ShowControlTests passed after 1.630 seconds.
+✔ Test oneShotCompletionDoesNotStopAnotherPlayerSharingItsBuffer() passed after 0.073 seconds.
+◇ Test replacingProjectReleasesSharedPlaybackAndPendingOwnership() started.
+✔ Test historyRetirementPreservesErroredOwnershipAndCurrentFollow() passed after 1.649 seconds.
+◇ Test preflightDetectsMissingTargetsAndCyclesWithoutMediaCopies() started.
+✔ Test preflightDetectsMissingTargetsAndCyclesWithoutMediaCopies() passed after 0.031 seconds.
+◇ Test childFailurePropagatesToParentAndErrorStopCancelsOwnedMedia() started.
+✔ Test testRetriggerStopAllAndPendingLoadCancellation() passed after 0.115 seconds.
+◇ Test testInvalidMediaAndPreflightReportErrorsWithoutVoices() started.
+✔ Test childFailurePropagatesToParentAndErrorStopCancelsOwnedMedia() passed after 0.028 seconds.
+◇ Test controlAdvanceAndEmergencyNeverExecuteStaleCommands() started.
+✔ Test replacingProjectReleasesSharedPlaybackAndPendingOwnership() passed after 0.090 seconds.
+◇ Test nativePCMLifetimeRemainsChargedAfterWrapperAndLookupAreGone() started.
+✔ Test controlAdvanceAndEmergencyNeverExecuteStaleCommands() passed after 0.028 seconds.
+◇ Test allPageIDsAndShowKeysNormalizeAndRoundTrip() started.
+✔ Test allPageIDsAndShowKeysNormalizeAndRoundTrip() passed after 0.002 seconds.
+◇ Test priorSequenceAdvanceDoesNotAdvanceNewCurrentRow() started.
+✔ Test testInvalidMediaAndPreflightReportErrorsWithoutVoices() passed after 0.035 seconds.
+✔ Test priorSequenceAdvanceDoesNotAdvanceNewCurrentRow() passed after 0.001 seconds.
+◇ Test testRepeatedRetriggersReleaseNodesAndDecodedBuffers() started.
+✔ Suite ShowControlReliabilityTests passed after 1.740 seconds.
+✔ Test nativePCMLifetimeRemainsChargedAfterWrapperAndLookupAreGone() passed after 0.015 seconds.
+◇ Test replacementDuringDecodeIsRejectedBeforePublication() started.
+✔ Test replacementDuringDecodeIsRejectedBeforePublication() passed after 0.015 seconds.
+◇ Test cancelledDecoderCannotBypassUniqueReservationOrCancelAnotherCaller() started.
+✔ Test cancelledDecoderCannotBypassUniqueReservationOrCancelAnotherCaller() passed after 0.017 seconds.
+✔ Suite SharedMediaTests passed after 1.783 seconds.
+✔ Test liveAudioAndVisualPixelsContinueDuringRapidMixerChanges() passed after 0.228 seconds.
+✔ Suite MixerTests passed after 1.814 seconds.
+✔ Test testRepeatedRetriggersReleaseNodesAndDecodedBuffers() passed after 0.126 seconds.
+◇ Test testMixedSampleRatesAndMonoStereoAreFinite() started.
+✔ Test testMixedSampleRatesAndMonoStereoAreFinite() passed after 0.026 seconds.
+◇ Test testConfigurationChangeStopsWithoutUnexpectedRestart() started.
+✔ Test testLiveCompletionAndTimerFadesUsingSilentAudio() passed after 1.080 seconds.
+✔ Suite SafetyAudioTests passed after 1.909 seconds.
+✔ Test testConfigurationChangeStopsWithoutUnexpectedRestart() passed after 0.019 seconds.
+◇ Test testMixBoundaryAcceptsShortArraysAndInvalidNumbers() started.
+✔ Test testMixBoundaryAcceptsShortArraysAndInvalidNumbers() passed after 0.005 seconds.
+✔ Suite AudioTests passed after 1.918 seconds.
+✔ Test movAndMP4LoopPauseConcurrentAudioAndCleanup() passed after 3.148 seconds.
+◇ Test repeatedLoopsKeepProgramPixelsAndRespectOperatorControls() started.
+✔ Test repeatedLoopsKeepProgramPixelsAndRespectOperatorControls() passed after 6.270 seconds.
+◇ Test soundtrackLoopsAndTwoSlotCrossfadesKeepAudioIndependent() started.
+✔ Test soundtrackLoopsAndTwoSlotCrossfadesKeepAudioIndependent() passed after 4.281 seconds.
+◇ Test loopEndCancellationCannotRestartStoppedOrReplacementMedia() started.
+✔ Test loopEndCancellationCannotRestartStoppedOrReplacementMedia() passed after 2.660 seconds.
+◇ Test staleLoadsAndMixedMediaAssignmentsAreSafe() started.
+✔ Test staleLoadsAndMixedMediaAssignmentsAreSafe() passed after 0.092 seconds.
+◇ Test displayPolicyNeverUsesOperatorAndClosesOnDisconnect() started.
+✔ Test displayPolicyNeverUsesOperatorAndClosesOnDisconnect() passed after 0.001 seconds.
+◇ Test oneShotEndsAndRepeatedStillTransitionsReleaseSlots() started.
+✔ Test oneShotEndsAndRepeatedStillTransitionsReleaseSlots() passed after 2.640 seconds.
+◇ Test backgroundAndPendingCueStopDoNotInterruptCurrentVisual() started.
+✔ Test backgroundAndPendingCueStopDoNotInterruptCurrentVisual() passed after 0.017 seconds.
+◇ Test mixedPreflightCompletesWhileMovieIsPlaying() started.
+✔ Test mixedPreflightCompletesWhileMovieIsPlaying() passed after 0.305 seconds.
+◇ Test heldFinalFrameSurvivesEndBlackoutAndCanCrossfadeOrStop() started.
+✔ Test heldFinalFrameSurvivesEndBlackoutAndCanCrossfadeOrStop() passed after 5.010 seconds.
+◇ Test heldProgramPixelsSurviveAudioPadsGroupsSequencesAndPages() started.
+✔ Test heldProgramPixelsSurviveAudioPadsGroupsSequencesAndPages() passed after 6.326 seconds.
+◇ Test audioFadeLeavesExplicitVisualAutomationRunning() started.
+✔ Test audioFadeLeavesExplicitVisualAutomationRunning() passed after 0.267 seconds.
+✔ Suite VideoTests passed after 31.801 seconds.
+✔ Test run with 132 tests in 16 suites passed after 31.802 seconds.
