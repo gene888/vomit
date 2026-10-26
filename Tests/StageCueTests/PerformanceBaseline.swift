@@ -58,6 +58,9 @@ final class Onset: @unchecked Sendable {
 /// Deliberately excluded from normal builds/tests. Run Scripts/prepare-performance-profile.sh.
 @MainActor enum PerformanceBaseline {
     static func measure() async throws {
+        if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] ?.hasPrefix("video-loop") == true {
+            try await VideoLoopBaseline.measure(); return
+        }
         let root = URL(fileURLWithPath: ProcessInfo.processInfo.environment["STAGECUE_PROFILE_ROOT"]!)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         var result: [String: Any] = ["date": ISO8601DateFormatter().string(from: Date()), "pid": ProcessInfo.processInfo.processIdentifier,

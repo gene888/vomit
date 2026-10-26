@@ -10,6 +10,9 @@ import CoreGraphics
     private let frontLayer = CALayer()
     private let blackoutLayer = CALayer()
     private var changes: AnyCancellable?
+#if STAGECUE_PROFILING
+    var profilePresentation: ((CGImage?, Double) -> Void)?
+#endif
     private weak var engine: VideoEngine?
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -43,6 +46,9 @@ import CoreGraphics
         contentLayer.opacity = Float(engine.level)
         blackoutLayer.isHidden = !engine.blackout
         CATransaction.commit()
+#if STAGECUE_PROFILING
+        profilePresentation?(engine.frontFrame, CACurrentMediaTime())
+#endif
     }
     override func layout() {
         super.layout()

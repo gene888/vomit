@@ -1,0 +1,11 @@
+PROFILE HOST: AppKit launched; loading benchmark off main thread
+PROFILE HOST: starting main-actor workload
+LOOP: generating 30 fps fixtures
+2026-10-26 07:53:46.766 ProfileHost[127:21279642] Audio files cannot be non-interleaved. Ignoring setting AVLinearPCMIsNonInterleaved YES.
+LOOP: case 0 atmosphere-4s.mp4
+LOOP: case 1 motion-4s.mp4
+LOOP: case 2 motion-32s.mp4
+LOOP: case 3 motion-soundtrack.mp4
+LOOP: case 4 atmosphere-4s.mp4
+LOOP: case 5 motion-4s.mp4
+LOOP: complete

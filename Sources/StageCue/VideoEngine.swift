@@ -120,6 +120,8 @@ struct VisualDissolve: Equatable {
 #if STAGECUE_PROFILING
     // Decoded output PTS, before compositor/physical display presentation.
     var profileFrame: ((UUID, Double, Double) -> Void)?
+    var profileDecodedImage: ((CGImage, Double, Double) -> Void)?
+    var profileLoop: ((String, Double, Double) -> Void)?
     var profileTransitionStart: Double? { dissolve?.start }
 #endif
     var holdingLastFrame: Bool { current.map { slots[$0].holdingEnd } ?? false }
@@ -221,6 +223,7 @@ struct VisualDissolve: Equatable {
             }
 #if STAGECUE_PROFILING
             if let id = slot.cue?.id { profileFrame?(id, displayedTime.seconds, CACurrentMediaTime()) }
+            if let image = slot.frame { profileDecodedImage?(image, displayedTime.seconds, CACurrentMediaTime()) }
 #endif
         }
     }
@@ -238,10 +241,17 @@ struct VisualDissolve: Equatable {
         guard slot.player.currentItem === item, index == current || index == outgoing, let cue = slot.cue else { return }
         guard !slot.holdingEnd else { return }
         if cue.loop {
+#if STAGECUE_PROFILING
+            let began = CACurrentMediaTime()
+            profileLoop?("seekBegin", began, 0)
+#endif
             slot.seekInProgress = true
             slot.player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] finished in
                 Task { @MainActor in
                     guard let self, self.slots[index].player.currentItem === item else { return }
+#if STAGECUE_PROFILING
+                    self.profileLoop?("seekComplete", CACurrentMediaTime(), CACurrentMediaTime() - began)
+#endif
                     self.slots[index].seekInProgress = false
                     if finished && !self.paused { self.slots[index].player.play() }
                 }

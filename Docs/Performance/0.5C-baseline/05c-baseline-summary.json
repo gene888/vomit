@@ -1,0 +1,437 @@
+{
+  "date": "2026-10-26T14:53:41Z",
+  "status": "complete",
+  "cases": [
+    {
+      "name": "atmosphere-4s.mp4",
+      "index": 0,
+      "elapsed": 36.02823866670951,
+      "cpuPercentOneCore": 52.15430644230305,
+      "missingCanvasUpdates": 0,
+      "videoError": "",
+      "voices": 4,
+      "decoded": {
+        "frames": 1039,
+        "fps": 28.861801558866844,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1038,
+          "median": 33.3579583093524,
+          "p95": 45.528499875217676,
+          "maximum": 104.86112488433719
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 67.60733318515122,
+          "p95": 104.86112488433719,
+          "maximum": 104.86112488433719
+        },
+        "intervalsOver50ms": 42,
+        "sourceFramesSkippedWithinIterations": 29
+      },
+      "presented": {
+        "frames": 1039,
+        "fps": 28.85692109417574,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1038,
+          "median": 33.423458226025105,
+          "p95": 48.271958250552416,
+          "maximum": 106.3887916970998
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 69.3095417227596,
+          "p95": 106.3887916970998,
+          "maximum": 106.3887916970998
+        },
+        "intervalsOver50ms": 43,
+        "sourceFramesSkippedWithinIterations": 29
+      },
+      "seekMs": {
+        "n": 9,
+        "median": 10.599541710689664,
+        "p95": 54.89149992354214,
+        "maximum": 54.89149992354214
+      },
+      "canvasAfterDecodeMs": {
+        "n": 1039,
+        "median": 10.720708174631,
+        "p95": 12.27970840409398,
+        "maximum": 16.271125059574842
+      },
+      "memoryFirst": {
+        "footprintMiB": 310.50125885009766,
+        "host": 1348109.8531142087,
+        "items": 1,
+        "residentMiB": 217.765625
+      },
+      "memoryLast": {
+        "footprintMiB": 209.17315673828125,
+        "host": 1348144.870895917,
+        "items": 1,
+        "residentMiB": 227.078125
+      }
+    },
+    {
+      "name": "motion-4s.mp4",
+      "index": 1,
+      "elapsed": 36.00474183331244,
+      "cpuPercentOneCore": 52.12790328254743,
+      "missingCanvasUpdates": 0,
+      "videoError": "",
+      "voices": 4,
+      "decoded": {
+        "frames": 1042,
+        "fps": 28.964515778473068,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1041,
+          "median": 33.34799990989268,
+          "p95": 44.55200000666082,
+          "maximum": 98.53762504644692
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 67.56120850332081,
+          "p95": 98.53762504644692,
+          "maximum": 98.53762504644692
+        },
+        "intervalsOver50ms": 40,
+        "sourceFramesSkippedWithinIterations": 27
+      },
+      "presented": {
+        "frames": 1042,
+        "fps": 28.956417225188705,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1041,
+          "median": 33.4260833915323,
+          "p95": 43.348333332687616,
+          "maximum": 101.39904171228409
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 68.64516669884324,
+          "p95": 101.39904171228409,
+          "maximum": 101.39904171228409
+        },
+        "intervalsOver50ms": 42,
+        "sourceFramesSkippedWithinIterations": 27
+      },
+      "seekMs": {
+        "n": 9,
+        "median": 10.277749970555305,
+        "p95": 22.770041599869728,
+        "maximum": 22.770041599869728
+      },
+      "canvasAfterDecodeMs": {
+        "n": 1042,
+        "median": 10.697625111788511,
+        "p95": 12.257666792720556,
+        "maximum": 18.18945840932429
+      },
+      "memoryFirst": {
+        "footprintMiB": 202.09503173828125,
+        "host": 1348147.1554886254,
+        "items": 1,
+        "residentMiB": 220.15625
+      },
+      "memoryLast": {
+        "footprintMiB": 202.40753173828125,
+        "host": 1348182.178607542,
+        "items": 1,
+        "residentMiB": 220.359375
+      }
+    },
+    {
+      "name": "motion-32s.mp4",
+      "index": 2,
+      "elapsed": 70.01498658326454,
+      "cpuPercentOneCore": 52.38614586661517,
+      "missingCanvasUpdates": 0,
+      "videoError": "",
+      "voices": 4,
+      "decoded": {
+        "frames": 2062,
+        "fps": 29.462473924393205,
+        "wraps": 2,
+        "gapsMs": {
+          "n": 2061,
+          "median": 33.33516651764512,
+          "p95": 40.92637496069074,
+          "maximum": 103.52691658772528
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 2,
+          "median": 94.8273332323879,
+          "p95": 94.8273332323879,
+          "maximum": 94.8273332323879
+        },
+        "intervalsOver50ms": 54,
+        "sourceFramesSkippedWithinIterations": 36
+      },
+      "presented": {
+        "frames": 2062,
+        "fps": 29.460996278315648,
+        "wraps": 2,
+        "gapsMs": {
+          "n": 2061,
+          "median": 33.37654168717563,
+          "p95": 41.525375097990036,
+          "maximum": 95.90341686271131
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 2,
+          "median": 88.69174984283745,
+          "p95": 88.69174984283745,
+          "maximum": 88.69174984283745
+        },
+        "intervalsOver50ms": 49,
+        "sourceFramesSkippedWithinIterations": 36
+      },
+      "seekMs": {
+        "n": 2,
+        "median": 9.237874997779727,
+        "p95": 9.237874997779727,
+        "maximum": 9.237874997779727
+      },
+      "canvasAfterDecodeMs": {
+        "n": 2062,
+        "median": 10.662083281204104,
+        "p95": 12.32774998061359,
+        "maximum": 17.621291568502784
+      },
+      "memoryFirst": {
+        "footprintMiB": 203.72003173828125,
+        "host": 1348184.4289891669,
+        "items": 1,
+        "residentMiB": 221.671875
+      },
+      "memoryLast": {
+        "footprintMiB": 204.39190673828125,
+        "host": 1348249.444817792,
+        "items": 1,
+        "residentMiB": 222.234375
+      }
+    },
+    {
+      "name": "motion-soundtrack.mp4",
+      "index": 3,
+      "elapsed": 36.00072370842099,
+      "cpuPercentOneCore": 51.628301004550046,
+      "missingCanvasUpdates": 0,
+      "videoError": "",
+      "voices": 4,
+      "decoded": {
+        "frames": 1011,
+        "fps": 28.100127756938054,
+        "wraps": 8,
+        "gapsMs": {
+          "n": 1010,
+          "median": 33.3452916238457,
+          "p95": 53.12683340162039,
+          "maximum": 166.01537493988872
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 8,
+          "median": 137.0865418575704,
+          "p95": 166.01537493988872,
+          "maximum": 166.01537493988872
+        },
+        "intervalsOver50ms": 57,
+        "sourceFramesSkippedWithinIterations": 33
+      },
+      "presented": {
+        "frames": 1011,
+        "fps": 28.092644544361292,
+        "wraps": 8,
+        "gapsMs": {
+          "n": 1010,
+          "median": 33.412708435207605,
+          "p95": 53.38604166172445,
+          "maximum": 161.69016668573022
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 8,
+          "median": 146.3049165904522,
+          "p95": 161.69016668573022,
+          "maximum": 161.69016668573022
+        },
+        "intervalsOver50ms": 56,
+        "sourceFramesSkippedWithinIterations": 33
+      },
+      "seekMs": {
+        "n": 8,
+        "median": 12.338124914094806,
+        "p95": 29.823416844010353,
+        "maximum": 29.823416844010353
+      },
+      "canvasAfterDecodeMs": {
+        "n": 1011,
+        "median": 10.789749911054969,
+        "p95": 11.943541700020432,
+        "maximum": 21.900083171203732
+      },
+      "memoryFirst": {
+        "footprintMiB": 209.26697540283203,
+        "host": 1348255.7790101252,
+        "items": 1,
+        "residentMiB": 227.734375
+      },
+      "memoryLast": {
+        "footprintMiB": 211.68880462646484,
+        "host": 1348290.781116667,
+        "items": 1,
+        "residentMiB": 228.125
+      }
+    },
+    {
+      "name": "atmosphere-4s.mp4",
+      "index": 4,
+      "elapsed": 36.01733437506482,
+      "cpuPercentOneCore": 51.60163938413764,
+      "missingCanvasUpdates": 0,
+      "videoError": "",
+      "voices": 4,
+      "decoded": {
+        "frames": 1033,
+        "fps": 28.694486801996277,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1032,
+          "median": 33.33545848727226,
+          "p95": 50.32291659153998,
+          "maximum": 94.89337517879903
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 67.0584999024868,
+          "p95": 94.89337517879903,
+          "maximum": 94.89337517879903
+        },
+        "intervalsOver50ms": 52,
+        "sourceFramesSkippedWithinIterations": 36
+      },
+      "presented": {
+        "frames": 1032,
+        "fps": 28.6884932195363,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1031,
+          "median": 33.43637497164309,
+          "p95": 51.02016660384834,
+          "maximum": 89.97866651043296
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 68.44195839948952,
+          "p95": 89.97866651043296,
+          "maximum": 89.97866651043296
+        },
+        "intervalsOver50ms": 53,
+        "sourceFramesSkippedWithinIterations": 36
+      },
+      "seekMs": {
+        "n": 9,
+        "median": 10.59433352202177,
+        "p95": 53.12270834110677,
+        "maximum": 53.12270834110677
+      },
+      "canvasAfterDecodeMs": {
+        "n": 1032,
+        "median": 10.75887493789196,
+        "p95": 11.960458243265748,
+        "maximum": 17.830458469688892
+      },
+      "memoryFirst": {
+        "footprintMiB": 210.11070251464844,
+        "host": 1348293.0514217087,
+        "items": 1,
+        "residentMiB": 228.75
+      },
+      "memoryLast": {
+        "footprintMiB": 210.32942962646484,
+        "host": 1348328.078844667,
+        "items": 1,
+        "residentMiB": 228.953125
+      }
+    },
+    {
+      "name": "motion-4s.mp4",
+      "index": 5,
+      "elapsed": 36.016492624999955,
+      "cpuPercentOneCore": 51.37733757882824,
+      "missingCanvasUpdates": 0,
+      "videoError": "",
+      "voices": 4,
+      "decoded": {
+        "frames": 1032,
+        "fps": 28.685499638533635,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1031,
+          "median": 33.34320825524628,
+          "p95": 49.32870832271874,
+          "maximum": 125.86129177361727
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 67.41825002245605,
+          "p95": 125.86129177361727,
+          "maximum": 125.86129177361727
+        },
+        "intervalsOver50ms": 50,
+        "sourceFramesSkippedWithinIterations": 35
+      },
+      "presented": {
+        "frames": 1032,
+        "fps": 28.68455952171301,
+        "wraps": 9,
+        "gapsMs": {
+          "n": 1031,
+          "median": 33.40687486343086,
+          "p95": 49.6352082118392,
+          "maximum": 122.080291621387
+        },
+        "boundaryMaximumPerWrapMs": {
+          "n": 9,
+          "median": 68.53870837949216,
+          "p95": 122.080291621387,
+          "maximum": 122.080291621387
+        },
+        "intervalsOver50ms": 51,
+        "sourceFramesSkippedWithinIterations": 35
+      },
+      "seekMs": {
+        "n": 9,
+        "median": 10.527875041589141,
+        "p95": 53.63279161974788,
+        "maximum": 53.63279161974788
+      },
+      "canvasAfterDecodeMs": {
+        "n": 1032,
+        "median": 10.714916745200753,
+        "p95": 11.89708337187767,
+        "maximum": 13.516333419829607
+      },
+      "memoryFirst": {
+        "footprintMiB": 211.32942962646484,
+        "host": 1348330.3463372919,
+        "items": 1,
+        "residentMiB": 230.015625
+      },
+      "memoryLast": {
+        "footprintMiB": 211.54815673828125,
+        "host": 1348365.3580868337,
+        "items": 1,
+        "residentMiB": 230.25
+      }
+    }
+  ],
+  "itemsAfterStop": 0,
+  "memoryAfterStop": {
+    "footprintMiB": 114.43875885009766,
+    "residentMiB": 209.28125
+  }
+}
