@@ -118,6 +118,12 @@ private struct MixerSettings {
 /// Live fades use a common-mode control timer; offline tests drive the same envelopes from sample time.
 @MainActor final class SoundEngine: ObservableObject {
 #if STAGECUE_PROFILING
+    var profileResources: [String: Int] {
+        let media = Dictionary(voices.values.map { (ObjectIdentifier($0.media), $0.media) }, uniquingKeysWith: { a, _ in a })
+        return ["uniqueBuffers": media.count, "uniqueDecodedBytes": media.values.reduce(0) { $0 + $1.bytes },
+                "voiceReferencedBytes": voices.values.reduce(0) { $0 + $1.media.bytes }, "reservedBytes": reservations.values.reduce(0, +),
+                "voices": voiceCount, "nodes": attachedNodeCount]
+    }
     let triggerTrace = AudioTriggerTrace()
     var profileVoiceOutput: (@Sendable (UUID, AVAudioPCMBuffer, AVAudioTime) -> Void)?
     var profilePhase: ((UUID, String) -> Void)?

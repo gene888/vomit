@@ -1,0 +1,335 @@
+{
+  "audio" : [
+    {
+      "actualDecodeReads" : 8,
+      "afterStop" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      },
+      "cpuPercentOneCore" : 18.392654666761093,
+      "decodedBytes" : 184320000,
+      "firstMixerRenderMs" : 190.21145813167095,
+      "loadAndGraphMs" : 253.09162493795156,
+      "memoryActive" : {
+        "footprintMiB" : 263.20438385009766,
+        "residentMiB" : 343.6875
+      },
+      "memoryAfterStop" : {
+        "footprintMiB" : 87.266769409179688,
+        "residentMiB" : 164.078125
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 79.438621520996094,
+        "residentMiB" : 158.078125
+      },
+      "resources" : {
+        "nodes" : 40,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 8,
+        "uniqueDecodedBytes" : 184320000,
+        "voiceReferencedBytes" : 184320000,
+        "voices" : 8
+      },
+      "scenario" : "eight-shared-file"
+    },
+    {
+      "actualDecodeReads" : 8,
+      "afterStop" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      },
+      "cpuPercentOneCore" : 18.443141822796651,
+      "decodedBytes" : 184320000,
+      "firstMixerRenderMs" : 156.99566644616425,
+      "loadAndGraphMs" : 210.27874993160367,
+      "memoryActive" : {
+        "footprintMiB" : 262.75125885009766,
+        "residentMiB" : 340
+      },
+      "memoryAfterStop" : {
+        "footprintMiB" : 87.298019409179688,
+        "residentMiB" : 164.125
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 86.782394409179688,
+        "residentMiB" : 164.09375
+      },
+      "resources" : {
+        "nodes" : 40,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 8,
+        "uniqueDecodedBytes" : 184320000,
+        "voiceReferencedBytes" : 184320000,
+        "voices" : 8
+      },
+      "scenario" : "eight-unique-files"
+    },
+    {
+      "actualDecodeReads" : 8,
+      "afterStop" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      },
+      "cpuPercentOneCore" : 17.392398335225067,
+      "decodedBytes" : 184320000,
+      "firstMixerRenderMs" : 150.61899996362627,
+      "loadAndGraphMs" : 211.22437505982816,
+      "memoryActive" : {
+        "footprintMiB" : 260.40750885009766,
+        "residentMiB" : 339.515625
+      },
+      "memoryAfterStop" : {
+        "footprintMiB" : 84.954269409179688,
+        "residentMiB" : 163.640625
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 84.876144409179688,
+        "residentMiB" : 164.0625
+      },
+      "resources" : {
+        "nodes" : 40,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 8,
+        "uniqueDecodedBytes" : 184320000,
+        "voiceReferencedBytes" : 184320000,
+        "voices" : 8
+      },
+      "scenario" : "eight-shared-file"
+    },
+    {
+      "actualDecodeReads" : 8,
+      "afterStop" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      },
+      "cpuPercentOneCore" : 18.020321289048091,
+      "decodedBytes" : 184320000,
+      "firstMixerRenderMs" : 146.63683320395648,
+      "loadAndGraphMs" : 212.54720841534436,
+      "memoryActive" : {
+        "footprintMiB" : 260.64188385009766,
+        "residentMiB" : 339.75
+      },
+      "memoryAfterStop" : {
+        "footprintMiB" : 85.204269409179688,
+        "residentMiB" : 163.890625
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 85.032394409179688,
+        "residentMiB" : 163.71875
+      },
+      "resources" : {
+        "nodes" : 40,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 8,
+        "uniqueDecodedBytes" : 184320000,
+        "voiceReferencedBytes" : 184320000,
+        "voices" : 8
+      },
+      "scenario" : "eight-unique-files"
+    }
+  ],
+  "capacity" : [
+    {
+      "assets" : 32,
+      "bookmarkBytesPerAsset" : 0,
+      "cues" : 32,
+      "encodedBytes" : 111530,
+      "encodeMs" : 1.208083238452673,
+      "loadMs" : 6.5458333119750023,
+      "memoryAfterParsing" : {
+        "footprintMiB" : 86.173019409179688,
+        "residentMiB" : 164.375
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 86.126144409179688,
+        "residentMiB" : 164.328125
+      },
+      "normalizeMs" : 0.025625107809901237,
+      "parseMs" : 1.0231249034404755,
+      "restoredEqual" : true,
+      "roundTripEqual" : false,
+      "saveMs" : 2.6197500992566347
+    },
+    {
+      "assets" : 256,
+      "bookmarkBytesPerAsset" : 0,
+      "cues" : 256,
+      "encodedBytes" : 1627329,
+      "encodeMs" : 13.029708527028561,
+      "loadMs" : 49.111624946817756,
+      "memoryAfterParsing" : {
+        "footprintMiB" : 101.15739440917969,
+        "residentMiB" : 179.390625
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 97.141769409179688,
+        "residentMiB" : 175.375
+      },
+      "normalizeMs" : 0.38145831786096096,
+      "parseMs" : 11.31595834158361,
+      "restoredEqual" : true,
+      "roundTripEqual" : false,
+      "saveMs" : 21.7162084300071
+    },
+    {
+      "assets" : 1024,
+      "bookmarkBytesPerAsset" : 0,
+      "cues" : 1024,
+      "encodedBytes" : 2752399,
+      "encodeMs" : 19.179041730239987,
+      "error" : "The file couldn’t be saved because there isn’t enough space.",
+      "errorCode" : 640,
+      "errorDomain" : "NSCocoaErrorDomain",
+      "memoryAfterParsing" : {
+        "footprintMiB" : 111.59491729736328,
+        "residentMiB" : 189.8125
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 110.50116729736328,
+        "residentMiB" : 188.71875
+      },
+      "normalizeMs" : 0.70741679519414902,
+      "parseMs" : 18.147708149626851,
+      "restoredEqual" : true
+    },
+    {
+      "assets" : 1024,
+      "bookmarkBytesPerAsset" : 512,
+      "cues" : 1024,
+      "encodedBytes" : 3478415,
+      "encodeMs" : 20.42720839381218,
+      "error" : "The file couldn’t be saved because there isn’t enough space.",
+      "errorCode" : 640,
+      "errorDomain" : "NSCocoaErrorDomain",
+      "memoryAfterParsing" : {
+        "footprintMiB" : 119.65741729736328,
+        "residentMiB" : 197.9375
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 118.92304229736328,
+        "residentMiB" : 197.203125
+      },
+      "normalizeMs" : 0.68216677755117416,
+      "parseMs" : 18.591000000014901,
+      "restoredEqual" : true
+    },
+    {
+      "assets" : 1024,
+      "bookmarkBytesPerAsset" : 2048,
+      "cues" : 1024,
+      "encodedBytes" : 5575567,
+      "encodeMs" : 24.58666660822928,
+      "error" : "The file couldn’t be saved because there isn’t enough space.",
+      "errorCode" : 640,
+      "errorDomain" : "NSCocoaErrorDomain",
+      "memoryAfterParsing" : {
+        "footprintMiB" : 138.89179229736328,
+        "residentMiB" : 217.171875
+      },
+      "memoryBefore" : {
+        "footprintMiB" : 136.20429229736328,
+        "residentMiB" : 214.484375
+      },
+      "normalizeMs" : 0.65691652707755566,
+      "parseMs" : 19.902041647583246,
+      "restoredEqual" : true
+    }
+  ],
+  "configuration" : "native AppKit Release -O; actual MainView; stereo Float32 48kHz; 30Hz video; no physical latency claim",
+  "cycles" : [
+    {
+      "cycle" : 0,
+      "memory" : {
+        "footprintMiB" : 85.782394409179688,
+        "residentMiB" : 163.96875
+      },
+      "resources" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      }
+    },
+    {
+      "cycle" : 4,
+      "memory" : {
+        "footprintMiB" : 85.798019409179688,
+        "residentMiB" : 163.984375
+      },
+      "resources" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      }
+    },
+    {
+      "cycle" : 8,
+      "memory" : {
+        "footprintMiB" : 85.751144409179688,
+        "residentMiB" : 163.9375
+      },
+      "resources" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      }
+    },
+    {
+      "cycle" : 12,
+      "memory" : {
+        "footprintMiB" : 85.766769409179688,
+        "residentMiB" : 163.953125
+      },
+      "resources" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      }
+    },
+    {
+      "cycle" : 16,
+      "memory" : {
+        "footprintMiB" : 85.798019409179688,
+        "residentMiB" : 163.984375
+      },
+      "resources" : {
+        "nodes" : 16,
+        "reservedBytes" : 0,
+        "uniqueBuffers" : 0,
+        "uniqueDecodedBytes" : 0,
+        "voiceReferencedBytes" : 0,
+        "voices" : 0
+      }
+    }
+  ],
+  "date" : "2026-10-26T18:12:56Z",
+  "status" : "complete"
+}
