@@ -1,6 +1,7 @@
 import Foundation
 import AVFoundation
 import Combine
+import Darwin
 
 #if STAGECUE_PROFILING
 import QuartzCore
@@ -37,18 +38,39 @@ struct MediaIssue: LocalizedError {
 /// Decoded on a serial loader actor, then immutable. Only the audio engine reads this buffer.
 /// AVAudioPCMBuffer has no Sendable conformance; this wrapper never exposes a mutable cross-actor operation.
 final class LoadedMedia: @unchecked Sendable {
-    let buffer: AVAudioPCMBuffer
+    fileprivate let buffer: AVAudioPCMBuffer
     let bytes: Int
+    let sourceIdentity: String
+    var frameCount: AVAudioFrameCount { buffer.frameLength }
     var duration: Double { Double(buffer.frameLength) / buffer.format.sampleRate }
-    init(buffer: AVAudioPCMBuffer, bytes: Int) { self.buffer = buffer; self.bytes = bytes }
+    init(buffer: AVAudioPCMBuffer, bytes: Int, sourceIdentity: String) { self.buffer = buffer; self.bytes = bytes; self.sourceIdentity = sourceIdentity }
+}
+
+/// Observed allocations include media retained by voices, scheduled callbacks and
+/// async return values. Reuse index and allocation ledger contain only weak refs.
+struct AudioResourceSnapshot: Sendable {
+    var uniqueBytes: Int
+    var liveBuffers: Int
+    var reservedBytes: Int
+    var peakBytes: Int
+    var hits: Int
+    var misses: Int
+    var decodes: Int
+    var budgetRejections: Int
 }
 
 actor MediaLoader {
+#if DEBUG || STAGECUE_PROFILING
+    private var beforeRead: (@Sendable () throws -> Void)?
+    private var afterRead: (@Sendable () throws -> Void)?
+    func setReadHooks(before: (@Sendable () throws -> Void)? = nil, after: (@Sendable () throws -> Void)? = nil) {
+        beforeRead = before; afterRead = after
+    }
+#endif
 #if STAGECUE_PROFILING
     private var traceContext: (AudioTriggerTrace, UUID)?
     func profileSize(_ path: String, id: UUID, trace: AudioTriggerTrace) throws -> Int {
-        trace.mark(id, "loader.inspect.enter")
-        defer { trace.mark(id, "loader.inspect.exit") }
+        trace.mark(id, "loader.inspect.enter"); defer { trace.mark(id, "loader.inspect.exit") }
         return try size(path)
     }
     func profileLoad(_ path: String, expectedBytes: Int, id: UUID, trace: AudioTriggerTrace) throws -> LoadedMedia {
@@ -58,13 +80,31 @@ actor MediaLoader {
     }
 #endif
     static let maximumClipBytes = 512 * 1024 * 1024
+    private let maximumBytes: Int
+    private final class WeakMedia {
+        weak var value: LoadedMedia?
+        init(_ value: LoadedMedia) { self.value = value }
+    }
+    private struct Identity: Hashable {
+        let device: Int64, inode: UInt64, fileBytes: Int64
+        let modifiedSeconds: Int64, modifiedNanos: Int64, changedSeconds: Int64, changedNanos: Int64
+        let frames: Int64, rate: Double
+        let formatID: UInt32, flags: UInt32, channels: UInt32, bits: UInt32, bytesPerFrame: UInt32, layout: UInt32
+    }
+    private var reusable: [Identity: WeakMedia] = [:]
+    // Separate from lookup eligibility: evicting an index entry cannot erase a
+    // live allocation from budget accounting or shorten a voice's ownership.
+    private var allocations: [ObjectIdentifier: WeakMedia] = [:]
+    private var reservedBytes = 0
+    private var peakBytes = 0, hits = 0, misses = 0, decodes = 0, budgetRejections = 0
+    init(memoryBudgetBytes: Int = 1024 * 1024 * 1024) { maximumBytes = max(0, memoryBudgetBytes) }
+
     static func inspect(_ path: String) throws -> (AVAudioFile, Int) {
         guard !path.isEmpty else { throw MediaIssue(message: "No media assigned") }
         let file = try AVAudioFile(forReading: URL(fileURLWithPath: path))
         let format = file.processingFormat
         guard file.length > 0, file.length <= AVAudioFramePosition(UInt32.max),
-              format.sampleRate.isFinite, format.sampleRate > 0,
-              (1...2).contains(format.channelCount) else {
+              format.sampleRate.isFinite, format.sampleRate > 0, (1...2).contains(format.channelCount) else {
             throw MediaIssue(message: "Only nonempty mono/stereo audio is supported")
         }
         let bytes = Double(file.length) * (format.isInterleaved ? 1 : Double(format.channelCount)) * Double(format.streamDescription.pointee.mBytesPerFrame)
@@ -73,30 +113,95 @@ actor MediaLoader {
         }
         return (file, Int(bytes))
     }
+    private func sourceStamp(_ url: URL) throws -> String {
+        var info = stat()
+        guard url.withUnsafeFileSystemRepresentation({ Darwin.fstatat(AT_FDCWD, $0!, &info, 0) }) == 0 else { throw CocoaError(.fileReadUnknown) }
+        return "\(info.st_dev):\(info.st_ino):\(info.st_size):\(info.st_mtimespec.tv_sec):\(info.st_mtimespec.tv_nsec):\(info.st_ctimespec.tv_sec):\(info.st_ctimespec.tv_nsec)"
+    }
+    private func identity(_ url: URL, file: AVAudioFile) throws -> Identity {
+        let attributes = try url.resourceValues(forKeys: [.isRegularFileKey])
+        guard attributes.isRegularFile == true else { throw MediaIssue(message: "Audio source must be a regular local file") }
+        var info = stat()
+        guard url.withUnsafeFileSystemRepresentation({ Darwin.fstatat(AT_FDCWD, $0!, &info, 0) }) == 0 else { throw CocoaError(.fileReadUnknown) }
+        let f = file.processingFormat, asbd = f.streamDescription.pointee
+        return Identity(device: Int64(info.st_dev), inode: UInt64(info.st_ino), fileBytes: info.st_size,
+            modifiedSeconds: Int64(info.st_mtimespec.tv_sec), modifiedNanos: Int64(info.st_mtimespec.tv_nsec),
+            changedSeconds: Int64(info.st_ctimespec.tv_sec), changedNanos: Int64(info.st_ctimespec.tv_nsec),
+            frames: file.length, rate: f.sampleRate, formatID: asbd.mFormatID, flags: asbd.mFormatFlags,
+            channels: f.channelCount, bits: asbd.mBitsPerChannel, bytesPerFrame: asbd.mBytesPerFrame,
+            layout: f.channelLayout?.layoutTag ?? 0)
+    }
+    private func prune() {
+        reusable = reusable.filter { $0.value.value != nil }
+        allocations = allocations.filter { $0.value.value != nil }
+    }
+    func snapshot() -> AudioResourceSnapshot {
+        prune()
+        let live = allocations.values.compactMap(\.value)
+        return AudioResourceSnapshot(uniqueBytes: live.reduce(0) { $0 + $1.bytes }, liveBuffers: live.count,
+            reservedBytes: reservedBytes, peakBytes: peakBytes, hits: hits, misses: misses, decodes: decodes, budgetRejections: budgetRejections)
+    }
+    /// Eviction affects future reuse only. Active/scheduled references remain valid
+    /// and remain charged in allocations. There is no strong inactive cache.
+    func invalidateReuse() { reusable.removeAll(); prune() }
     func size(_ path: String) throws -> Int { try Self.inspect(path).1 }
     func load(_ path: String, expectedBytes: Int? = nil) throws -> LoadedMedia {
-        try Task.checkCancellation()
+        try Task.checkCancellation(); prune()
+        let url = URL(fileURLWithPath: path).standardizedFileURL.resolvingSymlinksInPath()
 #if STAGECUE_PROFILING
         if let (trace, id) = traceContext { trace.mark(id, "loader.open.begin") }
 #endif
-        let (file, bytes) = try Self.inspect(path)
+        let beforeOpen = try sourceStamp(url)
+        let (file, bytes) = try Self.inspect(url.path)
+        guard try sourceStamp(url) == beforeOpen else { throw MediaIssue(message: "Media changed while opening; retrigger") }
+        let key = try identity(url, file: file)
 #if STAGECUE_PROFILING
         if let (trace, id) = traceContext { trace.mark(id, "loader.open.end") }
 #endif
         if let expectedBytes, bytes != expectedBytes { throw MediaIssue(message: "Media changed while loading; retrigger") }
+        if let media = reusable[key]?.value {
+            hits += 1
+#if STAGECUE_PROFILING
+            if let (trace, id) = traceContext { trace.mark(id, "loader.shared.hit") }
+#endif
+            try Task.checkCancellation(); return media
+        }
+        misses += 1
+        // Synchronous decode does not suspend this actor. Every unique allocation
+        // reserves against all surviving owners before allocating, even if a
+        // caller on MainActor cancelled/removed its pending cue in the meantime.
+        let live = allocations.values.compactMap(\.value)
+        let used = live.reduce(0) { $0 + $1.bytes }
+        guard bytes <= maximumBytes - used - reservedBytes else {
+            budgetRejections += 1
+            throw MediaIssue(message: "Active and loading audio exceed the decoded memory budget")
+        }
+        reservedBytes += bytes; peakBytes = max(peakBytes, used + reservedBytes)
+        defer { reservedBytes -= bytes }
         guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)) else {
             throw MediaIssue(message: "Cannot allocate decoded audio")
         }
 #if STAGECUE_PROFILING
         if let (trace, id) = traceContext { trace.mark(id, "loader.read.begin") }
 #endif
-        try file.read(into: buffer)
+#if DEBUG || STAGECUE_PROFILING
+        try beforeRead?()
+#endif
+        try Task.checkCancellation()
+        try file.read(into: buffer); decodes += 1
+#if DEBUG || STAGECUE_PROFILING
+        try afterRead?()
+#endif
 #if STAGECUE_PROFILING
         if let (trace, id) = traceContext { trace.mark(id, "loader.read.end") }
 #endif
         try Task.checkCancellation()
         guard buffer.frameLength > 0 else { throw MediaIssue(message: "Empty audio file") }
-        return LoadedMedia(buffer: buffer, bytes: bytes)
+        guard try sourceStamp(url) == beforeOpen, try identity(url, file: file) == key else { throw MediaIssue(message: "Media changed while loading; retrigger") }
+        let media = LoadedMedia(buffer: buffer, bytes: bytes, sourceIdentity: String(describing: key))
+        let reference = WeakMedia(media)
+        reusable[key] = reference; allocations[ObjectIdentifier(media)] = reference
+        return media
     }
 }
 
@@ -121,7 +226,7 @@ private struct MixerSettings {
     var profileResources: [String: Int] {
         let media = Dictionary(voices.values.map { (ObjectIdentifier($0.media), $0.media) }, uniquingKeysWith: { a, _ in a })
         return ["uniqueBuffers": media.count, "uniqueDecodedBytes": media.values.reduce(0) { $0 + $1.bytes },
-                "voiceReferencedBytes": voices.values.reduce(0) { $0 + $1.media.bytes }, "reservedBytes": reservations.values.reduce(0, +),
+                "voiceReferencedBytes": voices.values.reduce(0) { $0 + $1.media.bytes }, "reservedBytes": 0,
                 "voices": voiceCount, "nodes": attachedNodeCount]
     }
     let triggerTrace = AudioTriggerTrace()
@@ -142,7 +247,7 @@ private struct MixerSettings {
     // Mixer outputVolume is documented as 0...1. A fixed +6 dB native gain stage lets
     // the user retain the -60...+6 dB range without relying on out-of-range mixer values.
     private let boostScale = amplitude(6)
-    private let loader = MediaLoader()
+    private let loader: MediaLoader
     private let offline: Bool
     private let mixFormat: AVAudioFormat
     private var controlTimer: Timer?
@@ -150,9 +255,7 @@ private struct MixerSettings {
     private var pending: [UUID: (UUID, Task<Void, Never>)] = [:]
     private let maximumActiveBytes: Int
     private var currentMix = MixerSettings()
-    private var retainedBytes = 0
     private var requestedFades: [UUID: (Float, Double, Bool, Bool)] = [:]
-    private var reservations: [UUID: Int] = [:]
 
     private final class Voice {
         let token = UUID()
@@ -179,7 +282,12 @@ private struct MixerSettings {
     var isRunning: Bool { engine.isRunning }
     var voiceCount: Int { voices.count }
     var attachedNodeCount: Int { engine.attachedNodes.count }
-    var decodedBytes: Int { retainedBytes }
+    var decodedBytes: Int {
+        Dictionary(voices.values.map { (ObjectIdentifier($0.media), $0.media.bytes) }, uniquingKeysWith: { a, _ in a }).values.reduce(0, +)
+    }
+    func retainedMedia(for id: UUID) -> LoadedMedia? { voices[id]?.media }
+    func resourceSnapshot() async -> AudioResourceSnapshot { await loader.snapshot() }
+    func invalidateDecodedReuse() async { await loader.invalidateReuse() }
     private var clock: Double {
         offline ? Double(engine.manualRenderingSampleTime) / mixFormat.sampleRate : ProcessInfo.processInfo.systemUptime
     }
@@ -187,6 +295,7 @@ private struct MixerSettings {
     init(offline: Bool = false, memoryBudgetBytes: Int = 1024 * 1024 * 1024) {
         self.offline = offline
         maximumActiveBytes = max(0, memoryBudgetBytes)
+        loader = MediaLoader(memoryBudgetBytes: memoryBudgetBytes)
         mixFormat = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 2)!
         do {
             if offline { try engine.enableManualRenderingMode(.offline, format: mixFormat, maximumFrameCount: 1024) }
@@ -304,10 +413,6 @@ private struct MixerSettings {
                 self.profilePhase?(cue.id, "inspectComplete")
                 self.triggerTrace.mark(cue.id, "engine.inspect.return")
 #endif
-                guard self.retainedBytes + self.reservations.values.reduce(0, +) + size <= self.maximumActiveBytes else {
-                    throw MediaIssue(message: "Active and loading audio exceed the decoded memory budget")
-                }
-                self.reservations[cue.id] = size
 #if STAGECUE_PROFILING
                 self.profilePhase?(cue.id, "decodeBegin")
 #endif
@@ -334,12 +439,10 @@ private struct MixerSettings {
                 self.profilePhase?(cue.id, "graphComplete")
 #endif
                 self.pending.removeValue(forKey: cue.id)
-                self.reservations.removeValue(forKey: cue.id)
                 self.loading.remove(cue.id)
             } catch {
                 guard let self, self.pending[cue.id]?.0 == token else { return }
                 self.pending.removeValue(forKey: cue.id)
-                self.reservations.removeValue(forKey: cue.id)
                 self.loading.remove(cue.id)
                 if !(error is CancellationError) { self.failed.insert(cue.id); self.report("\(cue.title): \(error.localizedDescription)") }
             }
@@ -357,9 +460,6 @@ private struct MixerSettings {
     }
 
     private func start(_ cue: Cue, media: LoadedMedia) throws {
-        guard retainedBytes + media.bytes <= maximumActiveBytes else {
-            throw MediaIssue(message: "Active audio exceeds the decoded memory budget")
-        }
         if !engine.isRunning { try engine.start(); applyMixerSettings(currentMix) }
         let voice = Voice(cue: cue, media: media, started: clock)
         engine.attach(voice.player)
@@ -374,7 +474,6 @@ private struct MixerSettings {
         voice.level = cue.autoFadeIn ? 0 : goal
         voice.mixer.outputVolume = voice.level / boostScale
         voices[cue.id] = voice
-        retainedBytes += media.bytes
 #if STAGECUE_PROFILING
         triggerTrace.mark(cue.id, "engine.active.publish.begin")
 #endif
@@ -395,7 +494,10 @@ private struct MixerSettings {
 #if STAGECUE_PROFILING
         triggerTrace.mark(cue.id, "engine.buffer.schedule.begin")
 #endif
-        voice.player.scheduleBuffer(media.buffer, at: nil, options: cue.loop ? [.loops] : [], completionCallbackType: .dataPlayedBack) { [weak self] _ in
+        voice.player.scheduleBuffer(media.buffer, at: nil, options: cue.loop ? [.loops] : [], completionCallbackType: .dataPlayedBack) { [weak self, media] _ in
+            // Keep the immutable buffer charged and alive through completion,
+            // including the interval after stop while native callbacks retire.
+            withExtendedLifetime(media) {}
             Task { @MainActor [weak self] in
                 guard let self, !cue.loop, !self.offline, self.voices[cue.id]?.token == token else { return }
                 self.detach(cue.id)
@@ -459,7 +561,6 @@ private struct MixerSettings {
     }
     func stop(_ id: UUID) {
         pending.removeValue(forKey: id)?.1.cancel()
-        reservations.removeValue(forKey: id)
         loading.remove(id)
         paused.remove(id)
         requestedFades.removeValue(forKey: id)
@@ -549,7 +650,6 @@ private struct MixerSettings {
         engine.detach(voice.player)
         engine.detach(voice.mixer)
         engine.detach(voice.boost)
-        retainedBytes -= voice.media.bytes
         active.remove(id)
         paused.remove(id)
         playingLevels.removeValue(forKey: id)
@@ -572,11 +672,12 @@ private struct MixerSettings {
         var warnings: [String] = []
         if !engine.isRunning { warnings.append("Audio engine is not running; check output before triggering") }
         var total = 0
+        var uniqueSources: Set<String> = []
         for cue in project.cues.compactMap({ $0 }) {
             do {
                 // File inspection and decode run on the loader actor, away from the performance UI.
                 let media = try await loader.load(cue.filePath)
-                total += media.bytes
+                if uniqueSources.insert(media.sourceIdentity).inserted { total += media.bytes }
             } catch { warnings.append("\(cue.title): \(error.localizedDescription)") }
         }
         if total > maximumActiveBytes { warnings.append("All assigned media together exceed the active audio memory budget") }

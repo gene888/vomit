@@ -1,15 +1,40 @@
 import Foundation
 
+enum ProjectFileIssue: LocalizedError, Equatable {
+    case capacity(Int), malformed, unsupportedVersion(Int), unsupportedManifest(Int), encoding
+    var errorDescription: String? {
+        switch self {
+        case .capacity(let bytes): return "Project exceeds the supported size of \(bytes / 1024 / 1024) MiB. Reduce project metadata or split the production into smaller projects."
+        case .malformed: return "Project data is malformed or contains invalid settings. The original file has not been changed."
+        case .unsupportedVersion(let version): return "Project format version \(version) is not supported by this StageCue build."
+        case .unsupportedManifest(let version): return "Media manifest version \(version) is not supported by this StageCue build."
+        case .encoding: return "Project could not be serialized. Check its media metadata and settings before saving again."
+        }
+    }
+}
+
 enum ProjectStore {
-    static let maximumBytes = 2 * 1024 * 1024
+    // Independent of model-count normalization; bounds input before JSON allocation.
+    static let maximumBytes = 16 * 1024 * 1024
     static func load(from url: URL) throws -> (SoundProject, [String]) {
         let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
         guard ((attributes[.size] as? NSNumber)?.intValue ?? Int.max) <= maximumBytes else {
-            throw CocoaError(.fileReadTooLarge)
+            throw ProjectFileIssue.capacity(maximumBytes)
         }
-        let data = try Data(contentsOf: url)
-        guard data.count <= maximumBytes else { throw CocoaError(.fileReadTooLarge) }
-        var project = try JSONDecoder().decode(SoundProject.self, from: data)
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var data = Data()
+        data.reserveCapacity(min(maximumBytes, (attributes[.size] as? NSNumber)?.intValue ?? 0))
+        // Bound the actual read too: a file can grow after the attributes check.
+        while data.count <= maximumBytes {
+            guard let chunk = try handle.read(upToCount: min(65536, maximumBytes + 1 - data.count)), !chunk.isEmpty else { break }
+            data.append(chunk)
+        }
+        guard data.count <= maximumBytes else { throw ProjectFileIssue.capacity(maximumBytes) }
+        var project: SoundProject
+        do { project = try JSONDecoder().decode(SoundProject.self, from: data) }
+        catch let error as ProjectFileIssue { throw error }
+        catch { throw ProjectFileIssue.malformed }
         var assetIDs: Set<UUID> = [], cueAssets: Set<UUID> = []
         guard project.media.assets.filter(\.background).count <= 1 else { throw MediaIssue(message: "Multiple background asset records") }
         for asset in project.media.assets {
@@ -46,8 +71,10 @@ enum ProjectStore {
         }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(validated)
-        guard data.count <= maximumBytes else { throw CocoaError(.fileWriteOutOfSpace) }
+        let data: Data
+        do { data = try encoder.encode(validated) }
+        catch { throw ProjectFileIssue.encoding }
+        guard data.count <= maximumBytes else { throw ProjectFileIssue.capacity(maximumBytes) }
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: url, options: .atomic)
     }

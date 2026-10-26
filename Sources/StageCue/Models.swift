@@ -192,10 +192,10 @@ extension SoundProject {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         guard (1...4).contains(schemaVersion) else {
-            throw DecodingError.dataCorruptedError(forKey: .schemaVersion, in: c, debugDescription: "Unsupported project version")
+            throw ProjectFileIssue.unsupportedVersion(schemaVersion)
         }
         media = try c.decodeIfPresent(MediaManifest.self, forKey: .media) ?? MediaManifest()
-        guard media.version == 1 else { throw DecodingError.dataCorruptedError(forKey: .media, in: c, debugDescription: "Unsupported media manifest version") }
+        guard media.version == 1 else { throw ProjectFileIssue.unsupportedManifest(media.version) }
         additionalPages = try c.decodeIfPresent([SoundboardPage].self, forKey: .additionalPages) ?? []
         show = try c.decodeIfPresent(ShowConfiguration.self, forKey: .show) ?? ShowConfiguration()
         sequences = try c.decodeIfPresent([CueSequence].self, forKey: .sequences) ?? []

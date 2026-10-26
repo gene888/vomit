@@ -298,7 +298,7 @@ struct SafetyAudioTests {
         let path = try silence(seconds: 0.1).path
         let engine = SoundEngine(offline: true, memoryBudgetBytes: 40_000); defer { engine.shutdown() }
         let first = Cue(filePath: path, loop: true)
-        let second = Cue(filePath: path, loop: true)
+        let second = Cue(filePath: try silence(seconds: 0.1).path, loop: true)
         engine.play(first)
         await engine.waitForLoads()
         expectTrue(engine.active.contains(first.id))
@@ -319,7 +319,11 @@ struct SafetyAudioTests {
     @Test @MainActor func testSimultaneousLoadsReserveMemoryBeforeDecode() async throws {
         let path = try silence(seconds: 0.1).path
         let engine = SoundEngine(offline: true, memoryBudgetBytes: 40_000); defer { engine.shutdown() }
-        for _ in 0..<8 { engine.play(Cue(filePath: path, loop: true)) }
+        for i in 0..<8 {
+            let copy = temporaryFiles.directory.appendingPathComponent("unique-budget-\(i).wav")
+            try FileManager.default.copyItem(at: URL(fileURLWithPath: path), to: copy)
+            engine.play(Cue(filePath: copy.path, loop: true))
+        }
         await engine.waitForLoads()
         expectEqual(engine.voiceCount, 1)
         expectTrue(engine.loading.isEmpty)
@@ -353,7 +357,7 @@ struct SafetyAudioTests {
         expectEqual(decodedSize, Int(smallerBytes) * 2)
         let decoded = try await MediaLoader().load(url.path)
         expectEqual(decoded.bytes, decodedSize)
-        expectTrue(decoded.buffer.frameLength > 0)
+        expectTrue(decoded.frameCount > 0)
     }
     @Test @MainActor func testLiveCompletionAndTimerFadesUsingSilentAudio() async throws {
         let engine = SoundEngine(); defer { engine.shutdown() }
