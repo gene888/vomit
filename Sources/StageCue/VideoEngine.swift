@@ -86,19 +86,37 @@ struct VisualDissolve: Equatable {
     @Published private(set) var level: Double = 1
     @Published private(set) var background: CGImage?
     private final class Slot {
-        let player = AVPlayer()
+        let player = AVQueuePlayer()
+        var looper: AVPlayerLooper?
+        // Outputs are not copied from AVPlayerLooper's template. Own one per
+        // replica and bind reads to currentItem; keep the last valid frame at wrap.
+        var loopOutputs: [(item: AVPlayerItem, output: AVPlayerItemVideoOutput)] = []
+        func refreshLoopOutputs() {
+            guard let looper else { return }
+            let replicas = looper.loopingPlayerItems
+            for pair in loopOutputs where !replicas.contains(where: { $0 === pair.item }) {
+                pair.item.remove(pair.output)
+            }
+            loopOutputs.removeAll { pair in !replicas.contains(where: { $0 === pair.item }) }
+            for item in replicas where !loopOutputs.contains(where: { $0.item === item }) {
+                let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
+                item.add(output); loopOutputs.append((item, output))
+            }
+            output = loopOutputs.first(where: { $0.item === player.currentItem })?.output
+        }
         var output: AVPlayerItemVideoOutput?
         var frame: CGImage?
         var transform = CGAffineTransform.identity
         var cue: Cue?
         var endObserver: NSObjectProtocol?
-        var seekInProgress = false
         var holdingEnd = false
         func clear() {
             if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
             endObserver = nil
-            player.pause(); player.replaceCurrentItem(with: nil)
-            output = nil; frame = nil; cue = nil; seekInProgress = false; holdingEnd = false
+            player.pause(); looper?.disableLooping(); looper = nil
+            for pair in loopOutputs { pair.item.remove(pair.output) }
+            loopOutputs.removeAll(); player.removeAllItems()
+            output = nil; frame = nil; cue = nil; holdingEnd = false
         }
         deinit { if let endObserver { NotificationCenter.default.removeObserver(endObserver) } }
     }
@@ -125,7 +143,9 @@ struct VisualDissolve: Equatable {
     var profileTransitionStart: Double? { dissolve?.start }
 #endif
     var holdingLastFrame: Bool { current.map { slots[$0].holdingEnd } ?? false }
-    var retainedPlayerItems: Int { slots.filter { $0.player.currentItem != nil }.count }
+    // Count all looper replicas, including one temporarily outside the queue.
+    var retainedPlayerItems: Int { slots.reduce(0) { $0 + ($1.looper?.loopingPlayerItems.count ?? $1.player.items().count) } }
+    var retainedVideoOutputs: Int { slots.reduce(0) { $0 + ($1.looper == nil ? ($1.output == nil ? 0 : 1) : $1.loopOutputs.count) } }
     var currentSoundtrackVolume: Float { current.map { slots[$0].player.volume } ?? 0 }
     var time: Double { current.map { slots[$0].player.currentTime().seconds } ?? 0 }
 
@@ -169,22 +189,32 @@ struct VisualDissolve: Equatable {
                     guard self.request == token else { return }
                     slot.transform = transform
                     let item = AVPlayerItem(url: URL(fileURLWithPath: cue.filePath))
-                    let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
-                    item.add(output); slot.output = output
                     slot.player.volume = 0
-                    slot.player.replaceCurrentItem(with: item)
+                    if cue.loop {
+                        slot.player.actionAtItemEnd = .advance
+                        slot.looper = AVPlayerLooper(player: slot.player, templateItem: item)
+                        slot.refreshLoopOutputs()
+                    } else {
+                        slot.player.actionAtItemEnd = .pause
+                        let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
+                        item.add(output); slot.output = output
+                        slot.player.replaceCurrentItem(with: item)
+                    }
                     slot.player.play()
                     let deadline = CACurrentMediaTime() + 10
                     while slot.frame == nil {
                         try Task.checkCancellation()
                         guard self.request == token else { return }
-                        if item.status == .failed { throw item.error ?? MediaIssue(message: "Video decoder failed") }
+                        if slot.looper?.status == .failed { throw slot.looper?.error ?? MediaIssue(message: "Video looper failed") }
+                        if let current = slot.player.currentItem, current.status == .failed { throw current.error ?? MediaIssue(message: "Video decoder failed") }
                         self.readFrame(slot)
                         if CACurrentMediaTime() > deadline { throw MediaIssue(message: "Video first-frame readiness timed out") }
                         try await Task.sleep(for: .milliseconds(20))
                     }
-                    slot.endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { [weak self] _ in
-                        Task { @MainActor in self?.didEnd(incoming, item: item) }
+                    if !cue.loop {
+                        slot.endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { [weak self] _ in
+                            Task { @MainActor in self?.didEnd(incoming, item: item) }
+                        }
                     }
                 }
                 guard self.request == token else { slot.clear(); return }
@@ -213,18 +243,27 @@ struct VisualDissolve: Equatable {
         // Completed video is persistent program content. Never poll its decoder
         // again because an unrelated audio start can change AVFoundation timing.
         guard !slot.holdingEnd || completingHold else { return }
+#if STAGECUE_PROFILING
+        let refreshStart = CACurrentMediaTime(), previousOutput = slot.output
+#endif
+        slot.refreshLoopOutputs()
+#if STAGECUE_PROFILING
+        if previousOutput !== slot.output { profileLoop?("queueOutputChange", CACurrentMediaTime(), CACurrentMediaTime() - refreshStart) }
+#endif
         guard let output = slot.output else { return }
         let time = slot.player.currentTime()
         var displayedTime = CMTime.invalid
         if output.hasNewPixelBuffer(forItemTime: time), let buffer = output.copyPixelBuffer(forItemTime: time, itemTimeForDisplay: &displayedTime) {
             autoreleasepool {
                 let image = CIImage(cvPixelBuffer: buffer).transformed(by: slot.transform)
-                if let decoded = context.createCGImage(image, from: image.extent) { slot.frame = decoded }
-            }
+                if let decoded = context.createCGImage(image, from: image.extent) {
+                    slot.frame = decoded
 #if STAGECUE_PROFILING
-            if let id = slot.cue?.id { profileFrame?(id, displayedTime.seconds, CACurrentMediaTime()) }
-            if let image = slot.frame { profileDecodedImage?(image, displayedTime.seconds, CACurrentMediaTime()) }
+                    if let id = slot.cue?.id { profileFrame?(id, displayedTime.seconds, CACurrentMediaTime()) }
+                    profileDecodedImage?(decoded, displayedTime.seconds, CACurrentMediaTime())
 #endif
+                }
+            }
         }
     }
     private func freezeFrame(_ slot: Slot) {
@@ -237,26 +276,14 @@ struct VisualDissolve: Equatable {
         if let retained = bitmap.makeImage() { slot.frame = retained }
     }
     private func didEnd(_ index: Int, item: AVPlayerItem) {
+#if STAGECUE_PROFILING
+        let handlerStart = CACurrentMediaTime()
+        defer { profileLoop?("endHandlerWork", CACurrentMediaTime(), CACurrentMediaTime() - handlerStart) }
+#endif
         let slot = slots[index]
         guard slot.player.currentItem === item, index == current || index == outgoing, let cue = slot.cue else { return }
         guard !slot.holdingEnd else { return }
-        if cue.loop {
-#if STAGECUE_PROFILING
-            let began = CACurrentMediaTime()
-            profileLoop?("seekBegin", began, 0)
-#endif
-            slot.seekInProgress = true
-            slot.player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] finished in
-                Task { @MainActor in
-                    guard let self, self.slots[index].player.currentItem === item else { return }
-#if STAGECUE_PROFILING
-                    self.profileLoop?("seekComplete", CACurrentMediaTime(), CACurrentMediaTime() - began)
-#endif
-                    self.slots[index].seekInProgress = false
-                    if finished && !self.paused { self.slots[index].player.play() }
-                }
-            }
-        } else if cue.holdLastFrame {
+        if cue.holdLastFrame {
             slot.holdingEnd = true
             slot.player.pause()
             freezeFrame(slot)
@@ -296,7 +323,7 @@ struct VisualDissolve: Equatable {
         let interval = CACurrentMediaTime() - (pausedAt ?? CACurrentMediaTime())
         dissolve?.start += interval; manualFade?.start += interval
         paused = false; pausedAt = nil
-        for index in [current, outgoing].compactMap({ $0 }) where slots[index].cue?.kind == .video && !slots[index].seekInProgress && !slots[index].holdingEnd { slots[index].player.play() }
+        for index in [current, outgoing].compactMap({ $0 }) where slots[index].cue?.kind == .video && !slots[index].holdingEnd { slots[index].player.play() }
     }
     func fadeCue(_ id: UUID, to target: Double, seconds: Double) {
         if loadingCueID == id { readyFade = (id, target, seconds); pauseWhenReady = false }
@@ -345,6 +372,12 @@ struct VisualDissolve: Equatable {
             }
         }
         if let current {
+            if let looper = slots[current].looper, looper.status == .failed {
+                failedCueID = slots[current].cue?.id
+                let message = "Video looping failed: \(looper.error?.localizedDescription ?? "Decoder error")"
+                if error != message { error = message }
+                slots[current].player.pause()
+            }
             if let item = slots[current].player.currentItem, item.status == .failed {
                 failedCueID = slots[current].cue?.id
                 let message = "Video playback failed: \(item.error?.localizedDescription ?? "Decoder error")"

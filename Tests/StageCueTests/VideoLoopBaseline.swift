@@ -50,6 +50,7 @@ import SwiftUI
         let root = URL(fileURLWithPath: ProcessInfo.processInfo.environment["STAGECUE_PROFILE_ROOT"]!)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         var result: [String: Any] = ["status": "running", "date": ISO8601DateFormatter().string(from: Date()), "pid": ProcessInfo.processInfo.processIdentifier,
+            "screens": NSScreen.screens.map { ["width": $0.frame.width, "height": $0.frame.height] },
             "configuration": "release -O native AppKit; 1080p30 H264; MainView preview plus 960x540 program canvas; software CALayer assignment, not physical scanout"]
         func save() throws { try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]).write(to: root.appendingPathComponent("video-loops.json"), options: .atomic) }
         try save()
@@ -87,7 +88,8 @@ import SwiftUI
         var cases: [[String: Any]] = []
         // Two repetitions of each type; total timed playback exceeds four minutes.
         let probe = ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "video-loop-probe"
-        let fixtures = probe ? [atmosphere, motion] : [atmosphere, motion, long, soundtrack, atmosphere, motion]
+        let soak = ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "video-loop-soak"
+        let fixtures = soak ? [motion] : (probe ? [atmosphere, motion] : [atmosphere, motion, long, soundtrack, atmosphere, motion])
         for (index, url) in fixtures.enumerated() {
             print("LOOP: case \(index) \(url.lastPathComponent)"); fflush(stdout)
             video.stop(); state.sound.stopAll(); state.scheduler.reset()
@@ -107,7 +109,7 @@ import SwiftUI
                 guard image !== lastImage else { return }; lastImage = image
                 if let latest, latest.0 === image { presented.append(["pts": latest.1, "host": host, "decodedHost": latest.2]) }
             }
-            let began = stamp(), cpu = processCPU(), duration = probe ? 20.0 : (url == long ? 70.0 : 36.0)
+            let began = stamp(), cpu = processCPU(), duration = soak ? 180.0 : (probe ? 20.0 : (url == long ? 70.0 : 36.0))
             var nextAutomation = began, nextSample = began
             while stamp() - began < duration {
                 if stamp() >= nextAutomation {
@@ -115,7 +117,7 @@ import SwiftUI
                     _ = state.scheduler.launch(group); nextAutomation += 3
                     state.changePage(1 - state.page)
                 }
-                if stamp() >= nextSample { var sample = memory(); sample["host"] = stamp(); sample["items"] = Double(video.retainedPlayerItems); samples.append(sample); nextSample += 5 }
+                if stamp() >= nextSample { var sample = memory(); sample["host"] = stamp(); sample["items"] = Double(video.retainedPlayerItems); sample["outputs"] = Double(video.retainedVideoOutputs); sample["soundtrackVolume"] = Double(video.currentSoundtrackVolume); sample["playerTime"] = video.time; samples.append(sample); nextSample += 5 }
                 try await Task.sleep(for: .milliseconds(20))
             }
             let elapsed = stamp() - began
@@ -126,7 +128,7 @@ import SwiftUI
             result["cases"] = cases; try save()
         }
         video.stop(); state.sound.stopAll(); try await Task.sleep(for: .seconds(2))
-        result["memoryAfterStop"] = memory(); result["itemsAfterStop"] = video.retainedPlayerItems
+        result["memoryAfterStop"] = memory(); result["itemsAfterStop"] = video.retainedPlayerItems; result["outputsAfterStop"] = video.retainedVideoOutputs
         result["status"] = "complete"; try save(); print("LOOP: complete"); fflush(stdout)
     }
 }

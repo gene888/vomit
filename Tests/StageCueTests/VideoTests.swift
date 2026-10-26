@@ -109,7 +109,8 @@ struct VideoTests {
         let first = Cue(filePath: mov.path, loop: true, kind: .video, transition: .cut, soundtrackDB: -18)
         video.play(first); await video.waitForLoad()
         expectTrue(video.error.isEmpty, video.error); expectTrue(video.frontFrame != nil)
-        expectEqual(video.retainedPlayerItems, 1)
+        expectTrue((1...3).contains(video.retainedPlayerItems))
+        expectEqual(video.retainedVideoOutputs, video.retainedPlayerItems)
         expectTrue(abs(video.currentSoundtrackVolume - amplitude(-18)) < 0.0001)
         video.pause(); let frozen = video.time
         try await Task.sleep(for: .milliseconds(100))
@@ -121,9 +122,123 @@ struct VideoTests {
         expectTrue(video.error.isEmpty, video.error); expectEqual(video.retainedPlayerItems, 1)
         expectTrue(audio.active.contains(sound.id))
         expectTrue(try audio.render(frames: 512).frameLength > 0)
-        video.stop(); expectEqual(video.retainedPlayerItems, 0)
+        video.stop(); expectEqual(video.retainedPlayerItems, 0); expectEqual(video.retainedVideoOutputs, 0)
         expectTrue(audio.active.contains(sound.id))
     }
+    @Test @MainActor func repeatedLoopsKeepProgramPixelsAndRespectOperatorControls() async throws {
+        let state = ShowState(autosaveURL: files.directory.appendingPathComponent("loop-controls.json"))
+        defer { state.stopAll(); state.sound.shutdown(); state.video.shutdown() }
+        let url = try await movie("LoopControls", mp4: true, finalFrameRed: true)
+        let cue = Cue(filePath: url.path, loop: true, kind: .video, transition: .cut, holdLastFrame: true)
+        state.project.cues[0] = cue
+        state.project.additionalPages = [SoundboardPage(title: "Other")]
+        let canvas = VisualCanvas(frame: CGRect(x: 0, y: 0, width: 64, height: 48))
+        canvas.connect(state.video); canvas.needsLayout = true; canvas.layoutSubtreeIfNeeded()
+        func pixel() -> [UInt8] {
+            var rgba = [UInt8](repeating: 0, count: 4)
+            rgba.withUnsafeMutableBytes { bytes in
+                let cg = CGContext(data: bytes.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                    space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+                cg.scaleBy(x: 1 / 64, y: 1 / 48); canvas.layer?.render(in: cg)
+            }
+            return rgba
+        }
+        state.trigger(0); await state.video.waitForLoad()
+        var previous = state.video.time, wraps = 0
+        // Observe actual source-time resets and rendered nonblack pixels over two
+        // boundaries, rather than treating an unchanged active-ID as proof of looping.
+        for n in 0..<52 {
+            try await Task.sleep(for: .milliseconds(100))
+            let time = state.video.time
+            if time < previous - 0.5 { wraps += 1 }; previous = time
+            expectTrue(state.video.frontFrame != nil)
+            expectTrue((1...3).contains(state.video.retainedPlayerItems))
+            expectEqual(state.video.retainedVideoOutputs, state.video.retainedPlayerItems)
+            expectTrue(!state.video.holdingLastFrame, "Loop takes precedence over hold-last-frame")
+            let rgba = pixel(); expectTrue(rgba[0] > 30 || rgba[2] > 100, "Loop canvas unexpectedly black")
+            if n == 15 { state.changePage(1); state.project.show.showMode = true }
+            if n == 25 { state.changePage(0); state.project.show.showMode = false }
+        }
+        expectTrue(wraps >= 2); expectTrue(state.video.error.isEmpty)
+        state.video.pause(); let frozen = state.video.frontFrame, time = state.video.time
+        try await Task.sleep(for: .milliseconds(150))
+        expectTrue(state.video.frontFrame === frozen); expectEqual(state.video.time, time, accuracy: 0.03)
+        state.video.blackout = true; try await Task.sleep(for: .milliseconds(60))
+        let black = pixel(); expectTrue(black[0] < 5 && black[2] < 5)
+        state.video.blackout = false; state.video.resume()
+        state.video.setSoundtrackDB(-18)
+        expectEqual(Double(state.video.currentSoundtrackVolume), Double(amplitude(-18)), accuracy: 0.0001)
+        let saved = files.directory.appendingPathComponent("loop-project.stagecue")
+        try ProjectStore.save(state.project, to: saved)
+        let reopened = try ProjectStore.load(from: saved).0
+        expectEqual(reopened.cues[0]?.loop, true); expectEqual(reopened.cues[0]?.id, cue.id)
+        state.video.play(Cue(filePath: try image("ReplaceLoop", color: .green).path, kind: .image, transition: .crossfade, videoFadeIn: 0.1))
+        await state.video.waitForLoad(); try await Task.sleep(for: .milliseconds(250))
+        expectEqual(state.video.currentCue?.kind, .image); expectTrue(state.video.backFrame == nil)
+        let green = pixel(); expectTrue(green[1] > 200 && green[2] < 80)
+        state.video.stop(); expectEqual(state.video.retainedPlayerItems, 0)
+    }
+
+    @Test @MainActor func soundtrackLoopsAndTwoSlotCrossfadesKeepAudioIndependent() async throws {
+        let fixture = AudioTests(), wav = try fixture.fixture(seconds: 2)
+        let source = AVURLAsset(url: try await movie("SoundtrackSource", mp4: true))
+        let audio = AVURLAsset(url: wav), composition = AVMutableComposition()
+        let vt = try await source.loadTracks(withMediaType: .video)[0]
+        let at = try await audio.loadTracks(withMediaType: .audio)[0]
+        let range = CMTimeRange(start: .zero, duration: CMTime(seconds: 2, preferredTimescale: 30))
+        try composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)!.insertTimeRange(range, of: vt, at: .zero)
+        try composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)!.insertTimeRange(range, of: at, at: .zero)
+        let url = files.directory.appendingPathComponent("soundtrack-loop.mp4")
+        let export = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality)!
+        export.outputURL = url; export.outputFileType = .mp4; await export.export()
+        if let error = export.error { throw error }
+        let video = VideoEngine(), sound = SoundEngine(offline: true)
+        defer { video.shutdown(); sound.shutdown() }
+        sound.applyMix(SoundProject()); let cue = Cue(filePath: wav.path, gainDB: 0, loop: true)
+        sound.play(cue); await sound.waitForLoads()
+        let first = Cue(filePath: url.path, loop: true, kind: .video, transition: .cut, soundtrackDB: -60)
+        video.play(first); await video.waitForLoad()
+        video.setSoundtrackDB(-18)
+        for _ in 0..<24 {
+            try await Task.sleep(for: .milliseconds(100))
+            expectEqual(Double(video.currentSoundtrackVolume), Double(amplitude(-18)), accuracy: 0.0001)
+            expectTrue((1...3).contains(video.retainedPlayerItems)); expectTrue(video.frontFrame != nil)
+        }
+        let next = Cue(filePath: url.path, loop: true, kind: .video, transition: .crossfade, videoFadeIn: 1, soundtrackDB: -24)
+        video.play(next); await video.waitForLoad()
+        expectEqual(video.activeIDs, Set([first.id, next.id])); expectTrue(video.backFrame != nil)
+        expectTrue((2...6).contains(video.retainedPlayerItems)); expectEqual(video.retainedVideoOutputs, video.retainedPlayerItems)
+        video.pause(); expectTrue(video.paused); video.resume()
+        try await Task.sleep(for: .milliseconds(1200))
+        expectEqual(video.activeIDs, Set([next.id])); expectTrue(video.backFrame == nil)
+        expectTrue((1...3).contains(video.retainedPlayerItems))
+        video.fade(to: 0, seconds: 0, stop: true)
+        expectEqual(video.retainedPlayerItems, 0); expectEqual(video.retainedVideoOutputs, 0)
+        expectEqual(video.currentSoundtrackVolume, 0)
+        expectTrue(sound.active.contains(cue.id))
+        var last: Float = 0
+        for _ in 0..<32 { let buffer = try sound.render(frames: 128); last = buffer.floatChannelData![0][127] }
+        expectEqual(last, 0.05, accuracy: 0.0003)
+    }
+
+    @Test @MainActor func loopEndCancellationCannotRestartStoppedOrReplacementMedia() async throws {
+        let video = VideoEngine(); defer { video.shutdown() }
+        let loop = Cue(filePath: try await movie("CancelLoop", mp4: true).path, loop: true, kind: .video, transition: .cut)
+        video.play(loop); await video.waitForLoad()
+        try await Task.sleep(for: .milliseconds(1900))
+        // Exercise cancellation close to end/seek completion, then rapidly reuse slots.
+        for _ in 0..<4 { video.play(loop); video.stop() }
+        let still = Cue(filePath: try image("ReplacementAfterLoop", color: .red).path, kind: .image, transition: .cut)
+        video.play(still); await video.waitForLoad()
+        let image = video.frontFrame
+        try await Task.sleep(for: .milliseconds(350))
+        expectEqual(video.currentCue?.id, still.id); expectTrue(video.frontFrame === image)
+        expectEqual(video.retainedPlayerItems, 0)
+        video.stop(); try await Task.sleep(for: .milliseconds(100))
+        expectTrue(video.frontFrame == nil); expectTrue(video.activeIDs.isEmpty)
+        expectEqual(video.retainedPlayerItems, 0)
+    }
+
     @Test @MainActor func staleLoadsAndMixedMediaAssignmentsAreSafe() async throws {
         let state = ShowState(autosaveURL: files.directory.appendingPathComponent("autosave.json"))
         defer { state.sound.shutdown(); state.video.shutdown(); state.output.close() }

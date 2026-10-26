@@ -672,7 +672,7 @@ struct MainView: View {
                 Text(state.mediaBusy ? state.mediaProgress : state.message).font(.caption).foregroundStyle(.secondary)
                 if state.mediaBusy { ProgressView().controlSize(.small); Button("Cancel Media Operation") { state.cancelMediaOperation() }.font(.caption) }
                 Spacer()
-                Text("StageCue 0.5B • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.5C • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
