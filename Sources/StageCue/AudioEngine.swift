@@ -35,16 +35,37 @@ struct MediaIssue: LocalizedError {
     var errorDescription: String? { message }
 }
 
+struct AudioFileStamp: Hashable, Sendable {
+    let device: Int64, inode: UInt64, fileBytes: Int64
+    let modifiedSeconds: Int64, modifiedNanos: Int64, changedSeconds: Int64, changedNanos: Int64
+}
+struct AudioMediaIdentity: Hashable, Sendable {
+    let source: AudioFileStamp
+    let frames: Int64, rate: Double
+    let formatID: UInt32, flags: UInt32, channels: UInt32, bits: UInt32, bytesPerFrame: UInt32, layout: UInt32
+}
+
 /// Decoded on a serial loader actor, then immutable. Only the audio engine reads this buffer.
 /// AVAudioPCMBuffer has no Sendable conformance; this wrapper never exposes a mutable cross-actor operation.
 final class LoadedMedia: @unchecked Sendable {
     fileprivate let buffer: AVAudioPCMBuffer
     let bytes: Int
-    let sourceIdentity: String
+    let sourceIdentity: AudioMediaIdentity
     var frameCount: AVAudioFrameCount { buffer.frameLength }
     var duration: Double { Double(buffer.frameLength) / buffer.format.sampleRate }
-    init(buffer: AVAudioPCMBuffer, bytes: Int, sourceIdentity: String) { self.buffer = buffer; self.bytes = bytes; self.sourceIdentity = sourceIdentity }
+    init(buffer: AVAudioPCMBuffer, bytes: Int, sourceIdentity: AudioMediaIdentity) { self.buffer = buffer; self.bytes = bytes; self.sourceIdentity = sourceIdentity }
 }
+
+#if DEBUG || STAGECUE_PROFILING
+// Tests can retain a PCM object beyond its wrapper without exposing sample mutation.
+final class PCMRetirementProbe: @unchecked Sendable {
+    fileprivate let buffer: AVAudioPCMBuffer
+    fileprivate init(_ buffer: AVAudioPCMBuffer) { self.buffer = buffer }
+}
+extension LoadedMedia {
+    func retainPCMForRetirementTest() -> PCMRetirementProbe { PCMRetirementProbe(buffer) }
+}
+#endif
 
 /// Observed allocations include media retained by voices, scheduled callbacks and
 /// async return values. Reuse index and allocation ledger contain only weak refs.
@@ -83,15 +104,15 @@ actor MediaLoader {
     private let maximumBytes: Int
     private final class WeakMedia {
         weak var value: LoadedMedia?
-        init(_ value: LoadedMedia) { self.value = value }
+        weak var buffer: AVAudioPCMBuffer?
+        let bytes: Int
+        init(_ value: LoadedMedia) { self.value = value; buffer = value.buffer; bytes = value.bytes }
     }
-    private struct Identity: Hashable {
-        let device: Int64, inode: UInt64, fileBytes: Int64
-        let modifiedSeconds: Int64, modifiedNanos: Int64, changedSeconds: Int64, changedNanos: Int64
-        let frames: Int64, rate: Double
-        let formatID: UInt32, flags: UInt32, channels: UInt32, bits: UInt32, bytesPerFrame: UInt32, layout: UInt32
-    }
+    private typealias Identity = AudioMediaIdentity
     private var reusable: [Identity: WeakMedia] = [:]
+    // Follow the PCM object itself too: AVFoundation may briefly retain it after
+    // the LoadedMedia wrapper/completion has retired. Key by buffer identity to
+    // prevent an old wrapper address being reused while its PCM is still alive.
     // Separate from lookup eligibility: evicting an index entry cannot erase a
     // live allocation from budget accounting or shorten a voice's ownership.
     private var allocations: [ObjectIdentifier: WeakMedia] = [:]
@@ -113,31 +134,26 @@ actor MediaLoader {
         }
         return (file, Int(bytes))
     }
-    private func sourceStamp(_ url: URL) throws -> String {
+    private func sourceStamp(_ url: URL) throws -> AudioFileStamp {
         var info = stat()
         guard url.withUnsafeFileSystemRepresentation({ Darwin.fstatat(AT_FDCWD, $0!, &info, 0) }) == 0 else { throw CocoaError(.fileReadUnknown) }
-        return "\(info.st_dev):\(info.st_ino):\(info.st_size):\(info.st_mtimespec.tv_sec):\(info.st_mtimespec.tv_nsec):\(info.st_ctimespec.tv_sec):\(info.st_ctimespec.tv_nsec)"
-    }
-    private func identity(_ url: URL, file: AVAudioFile) throws -> Identity {
-        let attributes = try url.resourceValues(forKeys: [.isRegularFileKey])
-        guard attributes.isRegularFile == true else { throw MediaIssue(message: "Audio source must be a regular local file") }
-        var info = stat()
-        guard url.withUnsafeFileSystemRepresentation({ Darwin.fstatat(AT_FDCWD, $0!, &info, 0) }) == 0 else { throw CocoaError(.fileReadUnknown) }
-        let f = file.processingFormat, asbd = f.streamDescription.pointee
-        return Identity(device: Int64(info.st_dev), inode: UInt64(info.st_ino), fileBytes: info.st_size,
+        guard info.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG) else { throw MediaIssue(message: "Audio source must be a regular local file") }
+        return AudioFileStamp(device: Int64(info.st_dev), inode: UInt64(info.st_ino), fileBytes: info.st_size,
             modifiedSeconds: Int64(info.st_mtimespec.tv_sec), modifiedNanos: Int64(info.st_mtimespec.tv_nsec),
-            changedSeconds: Int64(info.st_ctimespec.tv_sec), changedNanos: Int64(info.st_ctimespec.tv_nsec),
-            frames: file.length, rate: f.sampleRate, formatID: asbd.mFormatID, flags: asbd.mFormatFlags,
-            channels: f.channelCount, bits: asbd.mBitsPerChannel, bytesPerFrame: asbd.mBytesPerFrame,
-            layout: f.channelLayout?.layoutTag ?? 0)
+            changedSeconds: Int64(info.st_ctimespec.tv_sec), changedNanos: Int64(info.st_ctimespec.tv_nsec))
+    }
+    private func identity(_ source: AudioFileStamp, file: AVAudioFile) -> Identity {
+        let f = file.processingFormat, asbd = f.streamDescription.pointee
+        return Identity(source: source, frames: file.length, rate: f.sampleRate, formatID: asbd.mFormatID, flags: asbd.mFormatFlags,
+            channels: f.channelCount, bits: asbd.mBitsPerChannel, bytesPerFrame: asbd.mBytesPerFrame, layout: f.channelLayout?.layoutTag ?? 0)
     }
     private func prune() {
-        reusable = reusable.filter { $0.value.value != nil }
-        allocations = allocations.filter { $0.value.value != nil }
+        reusable = reusable.filter { $0.value.buffer != nil }
+        allocations = allocations.filter { $0.value.buffer != nil }
     }
     func snapshot() -> AudioResourceSnapshot {
         prune()
-        let live = allocations.values.compactMap(\.value)
+        let live = allocations.values.compactMap { entry in entry.buffer.map { (buffer: $0, bytes: entry.bytes) } }
         return AudioResourceSnapshot(uniqueBytes: live.reduce(0) { $0 + $1.bytes }, liveBuffers: live.count,
             reservedBytes: reservedBytes, peakBytes: peakBytes, hits: hits, misses: misses, decodes: decodes, budgetRejections: budgetRejections)
     }
@@ -154,12 +170,16 @@ actor MediaLoader {
         let beforeOpen = try sourceStamp(url)
         let (file, bytes) = try Self.inspect(url.path)
         guard try sourceStamp(url) == beforeOpen else { throw MediaIssue(message: "Media changed while opening; retrigger") }
-        let key = try identity(url, file: file)
+        let key = identity(beforeOpen, file: file)
 #if STAGECUE_PROFILING
         if let (trace, id) = traceContext { trace.mark(id, "loader.open.end") }
 #endif
         if let expectedBytes, bytes != expectedBytes { throw MediaIssue(message: "Media changed while loading; retrigger") }
-        if let media = reusable[key]?.value {
+        if let reference = reusable[key], let buffer = reference.buffer {
+            // A native schedule can outlive its wrapper. Rewrap that same
+            // immutable PCM allocation without copying or charging it twice.
+            let media = reference.value ?? LoadedMedia(buffer: buffer, bytes: reference.bytes, sourceIdentity: key)
+            reference.value = media
             hits += 1
 #if STAGECUE_PROFILING
             if let (trace, id) = traceContext { trace.mark(id, "loader.shared.hit") }
@@ -170,7 +190,7 @@ actor MediaLoader {
         // Synchronous decode does not suspend this actor. Every unique allocation
         // reserves against all surviving owners before allocating, even if a
         // caller on MainActor cancelled/removed its pending cue in the meantime.
-        let live = allocations.values.compactMap(\.value)
+        let live = allocations.values.compactMap { entry in entry.buffer.map { (buffer: $0, bytes: entry.bytes) } }
         let used = live.reduce(0) { $0 + $1.bytes }
         guard bytes <= maximumBytes - used - reservedBytes else {
             budgetRejections += 1
@@ -197,10 +217,10 @@ actor MediaLoader {
 #endif
         try Task.checkCancellation()
         guard buffer.frameLength > 0 else { throw MediaIssue(message: "Empty audio file") }
-        guard try sourceStamp(url) == beforeOpen, try identity(url, file: file) == key else { throw MediaIssue(message: "Media changed while loading; retrigger") }
-        let media = LoadedMedia(buffer: buffer, bytes: bytes, sourceIdentity: String(describing: key))
+        guard try sourceStamp(url) == beforeOpen else { throw MediaIssue(message: "Media changed while loading; retrigger") }
+        let media = LoadedMedia(buffer: buffer, bytes: bytes, sourceIdentity: key)
         let reference = WeakMedia(media)
-        reusable[key] = reference; allocations[ObjectIdentifier(media)] = reference
+        reusable[key] = reference; allocations[ObjectIdentifier(buffer)] = reference
         return media
     }
 }
@@ -672,7 +692,7 @@ private struct MixerSettings {
         var warnings: [String] = []
         if !engine.isRunning { warnings.append("Audio engine is not running; check output before triggering") }
         var total = 0
-        var uniqueSources: Set<String> = []
+        var uniqueSources: Set<AudioMediaIdentity> = []
         for cue in project.cues.compactMap({ $0 }) {
             do {
                 // File inspection and decode run on the loader actor, away from the performance UI.

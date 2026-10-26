@@ -144,6 +144,26 @@ private final class DecodeGate: @unchecked Sendable {
         expectEqual((await state.sound.resourceSnapshot()).uniqueBytes,0)
     }
 #if DEBUG || STAGECUE_PROFILING
+    @Test func nativePCMLifetimeRemainsChargedAfterWrapperAndLookupAreGone() async throws {
+        let fixture = AudioTests(), a = try fixture.fixture(seconds:1), b = try fixture.fixture(seconds:1)
+        let loader = MediaLoader(memoryBudgetBytes:384000)
+        var media: LoadedMedia? = try await loader.load(a.path)
+        weak var weakMedia = media
+        var nativeOwner: PCMRetirementProbe? = media!.retainPCMForRetirementTest()
+        defer { withExtendedLifetime(nativeOwner) {} }
+        media = nil
+        expectTrue(weakMedia == nil)
+        var rewrapped: LoadedMedia? = try await loader.load(a.path)
+        expectEqual(rewrapped?.bytes,384000);expectEqual((await loader.snapshot()).decodes,1)
+        rewrapped = nil
+        await loader.invalidateReuse()
+        expectEqual((await loader.snapshot()).uniqueBytes,384000)
+        do { _ = try await loader.load(b.path);Issue.record("Retiring PCM escaped budget accounting") } catch { expectTrue(error.localizedDescription.contains("memory budget")) }
+        nativeOwner = nil
+        expectEqual((await loader.snapshot()).uniqueBytes,0)
+        let next = try await loader.load(b.path)
+        expectEqual(next.bytes,384000)
+    }
     @Test func replacementDuringDecodeIsRejectedBeforePublication() async throws {
         let fixture = AudioTests(), a = try fixture.fixture(seconds: 1), b = try fixture.fixture(seconds: 1, value: 0.1)
         let loader = MediaLoader()
