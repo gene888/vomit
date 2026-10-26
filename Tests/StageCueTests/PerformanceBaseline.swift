@@ -149,7 +149,7 @@ final class Onset: @unchecked Sendable {
         defer { window.orderOut(nil); previewWindow.orderOut(nil) }
         try await Task.sleep(for: .seconds(1))
         result["memoryIdleEnginesAndCanvases"] = memory()
-        if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "audio" {
+        if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"]?.hasPrefix("audio") == true {
             try await AudioTriggerBaseline.measure(root: root, state: state, short: short, long: long, compressed: compressed, movie: v30, onset: onset, operatorWindow: operatorWindow)
             return
         }

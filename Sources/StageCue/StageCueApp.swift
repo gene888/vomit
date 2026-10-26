@@ -26,7 +26,9 @@ import Combine
         changePage(project.additionalPages.count)
     }
     @Published var editingShowKeys = false
-    @Published var selected = 0
+    // Runtime selection is immediately readable; rendering notifications share the
+    // bounded relay used for audio/scheduler status, rather than delaying control work.
+    var selected = 0 { didSet { if selected != oldValue { queueRuntimePublication() } } }
     var selectedCue: Cue? {
         guard pads.indices.contains(selected) else { return nil }
         return pads[selected]
@@ -60,6 +62,11 @@ import Combine
     private var autosaveTask: Task<Void, Never>?
     private var revision = 0
     private var saveOperation = UUID()
+    #if STAGECUE_PROFILING
+    var profileSuppressAudioPublications = false
+    #endif
+    private var runtimePublication: Task<Void, Never>?
+    private var terminating = false
     private var engineChanges: AnyCancellable?
     private var terminationObserver: NSObjectProtocol?
     private var keyboardMonitor: Any?
@@ -94,11 +101,11 @@ import Combine
                 self.sequence.advanceFromGroup(id)
             }
         }
-        sequenceChanges = sequence.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
+        sequenceChanges = sequence.objectWillChange.sink { [weak self] in self?.queueRuntimePublication() }
         sound.onConfigurationChange = { [weak self] in self?.sequence.emergencyCancel(); self?.scheduler.cancelAll() }
         scheduler.driver = self
         scheduler.groupLookup = { [weak self] id in self?.project.groups.first { $0.id == id } }
-        schedulerChanges = scheduler.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
+        schedulerChanges = scheduler.objectWillChange.sink { [weak self] in self?.queueRuntimePublication() }
         if let id = project.show.sequenceID, let item = project.sequences.first(where: { $0.id == id }) { sequence.select(item) }
         sound.applyMix(project)
         video.setBackground(project.backgroundPath)
@@ -124,11 +131,17 @@ import Combine
             }
             return handled ? nil : event
         }
-        // Forward nested engine changes so pads, loading indicators and errors update immediately.
-        engineChanges = sound.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }
+        // Forward the latest runtime state at most once per presentation frame; playback is never queued here.
+        engineChanges = sound.objectWillChange.sink { [weak self] in
+#if STAGECUE_PROFILING
+            if self?.profileSuppressAudioPublications == true { return }
+#endif
+            self?.queueRuntimePublication()
+        }
         terminationObserver = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
+                self.terminating = true; self.runtimePublication?.cancel(); self.runtimePublication = nil
                 self.autosaveTask?.cancel(); self.mediaTask?.cancel(); self.spotlightSearch.finish([])
                 if self.recoveredAutosave { try? ProjectStore.save(self.project, to: self.autosaveURL) }
                 self.sequence.emergencyCancel(); self.scheduler.cancelAll(); self.sound.shutdown(); self.video.shutdown(); self.output.close()
@@ -139,11 +152,25 @@ import Combine
         }
     }
     isolated deinit {
+        runtimePublication?.cancel()
         autosaveTask?.cancel()
         mediaTask?.cancel()
         for request in mediaAssignments.values { request.1.cancel() }
         if let terminationObserver { NotificationCenter.default.removeObserver(terminationObserver) }
         if let keyboardMonitor { NSEvent.removeMonitor(keyboardMonitor) }
+    }
+    /// Coalesce presentation invalidations only. No snapshot or playback work is queued.
+    /// The first event starts a fixed deadline; later events do not postpone it.
+    private func queueRuntimePublication() {
+        guard !terminating, runtimePublication == nil else { return }
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(1.0 / 60.0))
+        runtimePublication = Task { @MainActor [weak self] in
+            do { try await clock.sleep(until: deadline) } catch { return }
+            guard let self, !self.terminating else { return }
+            self.runtimePublication = nil
+            self.objectWillChange.send()
+        }
     }
     static var defaultURL: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -394,9 +421,9 @@ import Combine
 #if STAGECUE_PROFILING
         sound.triggerTrace.mark(cue.id, "state.cue.resolved")
 #endif
-        selected = index
+        if selected != index { selected = index }
 #if STAGECUE_PROFILING
-        sound.triggerTrace.mark(cue.id, "state.selected.published")
+        sound.triggerTrace.mark(cue.id, "state.selected.updated")
 #endif
         guard !unavailable(cue) else { message = "Media unavailable or changed; open Media to relink or confirm it"; return }
 #if STAGECUE_PROFILING
@@ -645,7 +672,7 @@ struct MainView: View {
                 Text(state.mediaBusy ? state.mediaProgress : state.message).font(.caption).foregroundStyle(.secondary)
                 if state.mediaBusy { ProgressView().controlSize(.small); Button("Cancel Media Operation") { state.cancelMediaOperation() }.font(.caption) }
                 Spacer()
-                Text("StageCue 0.5A • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
+                Text("StageCue 0.5B • 32 pads • configurable Option shortcuts • ⌘. = emergency stop")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -685,11 +712,14 @@ struct Pad: View {
 #if STAGECUE_PROFILING
                 if let id = cue?.id {
                     state.sound.triggerTrace.mark(id, "ui.pad.action")
-                    if let event = NSApp.currentEvent { state.sound.triggerTrace.mark(id, "ui.event.timestamp", at: event.timestamp) }
+                    if let event = NSApp.currentEvent, [.leftMouseUp, .keyDown].contains(event.type),
+                       abs(ProcessInfo.processInfo.systemUptime - event.timestamp) < 1 {
+                        state.sound.triggerTrace.mark(id, "ui.event.timestamp", at: event.timestamp)
+                    }
                 }
 #endif
-                state.selected = index
                 if cue != nil { state.trigger(index) }
+                else { state.selected = index }
             } label: {
                 VStack {
                     HStack {

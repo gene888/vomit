@@ -9,8 +9,8 @@ if r['status']!='complete': raise SystemExit('Audio workload has not completed')
 def stats(a):
  a=sorted(a)
  return dict(n=len(a),median=statistics.median(a),p95=a[math.ceil(.95*len(a))-1],maximum=max(a),minimum=min(a),mean=statistics.mean(a),stddev=statistics.pstdev(a))
-pairs={'cueResolution':('state.trigger.enter','state.cue.resolved'), 'selectionPublication':('state.cue.resolved','state.selected.published'),
- 'validation':('state.selected.published','state.validated'), 'manualOverrideAndSubmit':('state.validated','state.engine.submit'),
+pairs={'cueResolution':('state.trigger.enter','state.cue.resolved'), 'selectionUpdate':('state.cue.resolved','state.selected.updated'),
+ 'validation':('state.selected.updated','state.validated'), 'manualOverrideAndSubmit':('state.validated','state.engine.submit'),
  'engineEntryToTaskCreation':('engine.play.enter','engine.task.create'), 'cleanup':('engine.cleanup.begin','engine.cleanup.end'),
  'taskWait':('engine.task.stored','engine.task.enter'), 'loaderInspectQueue':('engine.task.enter','loader.inspect.enter'),
  'fileInspection':('loader.inspect.enter','loader.inspect.exit'), 'inspectActorReturn':('loader.inspect.exit','engine.inspect.return'),
@@ -24,13 +24,14 @@ s={'date':r['date'],'configuration':r['configuration'],'scenarios':{},'memoryBef
 for name in sorted({x['scenario'] for x in r['trials']}):
  rows=[x for x in r['trials'] if x['scenario']==name]
  out={'renderMs':stats([x['renderMs'] for x in rows])}
- for key in ['callbackMs','synchronousSubmitMs','lastVoiceRenderMs','onsetSpreadMs']:
+ for key in ['callbackMs','synchronousSubmitMs','lastVoiceRenderMs','onsetSpreadMs','eventToActionMs','eventToRenderMs']:
   if all(key in x for x in rows):out[key]=stats([x[key] for x in rows])
  phases=defaultdict(list)
  for row in rows:
   # Multi-voice timelines have more than one identity and are kept raw, not collapsed.
   if name=='four-voice-group':continue
   events={e['phase']:e['ms'] for e in row['events']}
+  if 'state.selected.published' in events: events['state.selected.updated']=events['state.selected.published']
   for key,(begin,end) in pairs.items():
    if begin in events and end in events:phases[key].append(events[end]-events[begin])
   if 'engine.player.play.end' in events:phases['playCommandToRender'].append(row['renderMs']-events['engine.player.play.end'])

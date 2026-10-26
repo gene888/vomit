@@ -70,6 +70,42 @@ private final class VoiceOnsets: @unchecked Sendable {
         let shortCue = Cue(title: "Profile short", filePath: short.path, gainDB: 0)
         state.setMasterGain(decibels: -60)
         try await assign([shortCue])
+        if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "audio-interactive" {
+            operatorWindow.makeKeyAndOrderFront(nil)
+            for trial in 0..<10 {
+                try await clear()
+                result["readyForClick"] = trial; try save()
+                print("AUDIO UI READY: \(trial)"); fflush(stdout)
+                let deadline = stamp() + 300
+                while onset.read() == nil {
+                    guard stamp() < deadline else { throw MediaIssue(message: "Waiting for actual pad click timed out") }
+                    try await Task.sleep(for: .milliseconds(5))
+                }
+                let events = sound.triggerTrace.take().filter { $0.0 == shortCue.id }
+                guard let action = events.first(where: { $0.1 == "ui.pad.action" })?.2 else { throw MediaIssue(message: "Expected actual Pad Button action") }
+                var row: [String: Any] = ["scenario": "actual-pad-click", "trial": trial, "renderMs": (onset.read()!.render-action)*1000,
+                    "events": events.map { ["phase": $0.1, "ms": ($0.2-action)*1000] as [String: Any] }]
+                if let received = events.first(where: { $0.1 == "ui.event.timestamp" })?.2 {
+                    row["eventToActionMs"] = (action-received)*1000
+                    row["eventToRenderMs"] = (onset.read()!.render-received)*1000
+                }
+                rows.append(row); result["readyForClick"] = NSNull(); try save()
+            }
+            sound.stopAll()
+            result["memoryAfter"] = memory(); result["audioNodesAfterStop"] = sound.attachedNodeCount
+            result["audioErrors"] = sound.errors; result["videoError"] = state.video.error
+            result["cache"] = ["implemented": false]; result["status"] = "complete"; try save(); return
+        }
+        if ProcessInfo.processInfo.environment["STAGECUE_PROFILE_MODE"] == "audio-probe" {
+            try await single("relay-normal-direct", [shortCue], path: "engine")
+            state.profileSuppressAudioPublications = true
+            try await single("relay-suppressed-direct", [shortCue], path: "engine")
+            state.profileSuppressAudioPublications = false; state.objectWillChange.send()
+            result["memoryAfter"] = memory(); result["audioNodesAfterStop"] = sound.attachedNodeCount
+            result["audioErrors"] = sound.errors; result["videoError"] = state.video.error
+            result["cache"] = ["implemented": false]
+            result["status"] = "complete"; try save(); return
+        }
         try await single("short-state", [shortCue], path: "state")
         try await single("short-pad-model", [shortCue], path: "pad")
         try await single("short-direct-engine", [shortCue], path: "engine")
@@ -92,7 +128,7 @@ private final class VoiceOnsets: @unchecked Sendable {
         let mixer = Task { @MainActor in
             var step = 0
             while !Task.isCancelled {
-                try? state.execute(GroupAction(kind: .bus, levelDB: Double(step%24)-24, bus: step%4))
+                _ = try? state.execute(GroupAction(kind: .bus, levelDB: Double(step%24)-24, bus: step%4))
                 step += 1
                 do { try await Task.sleep(for: .milliseconds(10)) } catch { return }
             }
