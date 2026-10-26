@@ -31,3 +31,11 @@
 - Added bounded incremental bus/master updates and a seven-value engine restore snapshot; removed project-wide normalization from live mixer control.
 - Preserved immediate gain application, synchronous project/UI consistency, existing 350 ms autosave debounce, manual precedence and audio/video separation.
 - Release build and 111 native tests pass. Median measured real-command cost fell about 97%; both performance runs and remaining timing/cadence limitations are documented in Docs/MIXER_AUTOMATION_0.5A.md.
+
+## 0.5B audio responsiveness
+
+- Profiled UI/model, direct-engine, scheduler, loader/graph, and first-render boundaries before optimizing.
+- Added bounded 60 Hz runtime presentation invalidation; engine/scheduler state remains immediate, project publication and autosave remain unchanged.
+- Removed redundant filled-pad selection; retained the decoder, memory reservations, playback tokens, graph and 0.5A mixer path.
+- Matched short-WAV median improved from 90.13 to 51.84 ms; P95 from 100.41 to 56.28 ms. All 115 regression tests pass.
+- No PCM cache/preparation/streaming system added; dense 100 Hz mixer/project publication remains a documented responsiveness limit.

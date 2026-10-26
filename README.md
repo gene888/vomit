@@ -1,4 +1,6 @@
-# StageCue 0.5A
+# StageCue 0.5B
+
+The [0.5B audio responsiveness milestone](Docs/AUDIO_TRIGGER_0.5B.md) coalesces runtime presentation notifications without delaying engine state or changing project persistence. Short WAV render latency improved from about 90 to 52 ms median in matched native profiling; no PCM cache or streaming engine was added.
 
 The [0.5A mixer optimization](Docs/MIXER_AUTOMATION_0.5A.md) adds targeted bus/master gain updates and removes whole-project normalization from mixer control. Engine changes remain immediate; UI publication and the existing debounced save behavior are preserved.
 
