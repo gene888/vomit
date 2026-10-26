@@ -1,0 +1,525 @@
+2026-10-26 08:13:40.552 xcodebuild[1822:21309090]  DVTFilePathFSEvents: Failed to start fs event stream.
+2026-10-26 08:13:40.733 xcodebuild[1822:21309087] [MT] DVTDeveloperPaths: Failed to get length of DARWIN_USER_CACHE_DIR from confstr(3), error = Error Domain=NSPOSIXErrorDomain Code=5 "Input/output error". Using NSCachesDirectory instead.
+2026-10-26 08:13:41.040 xcodebuild[1822:21309091] CoreSimulatorService connection became invalid.  Simulator services will no longer be available.
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project StageCue.xcodeproj -scheme StageCue -configuration Release -destination platform=macOS,arch=arm64 -derivedDataPath /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild CODE_SIGNING_ALLOWED=NO "OTHER_SWIFT_FLAGS=$(inherited) -disable-sandbox" build
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+    OTHER_SWIFT_FLAGS = $(inherited) -disable-sandbox
+
+2026-10-26 08:13:41.118 xcodebuild[1822:21309087] [MT] DVTAssertions: Warning in DVTFrameworks/DVTFoundation/FileTypes/DVTFileDataTypeDetection.m:80
+Details:  detectedTypeIdentifier (com.apple.binary-property-list) does not conform to matchedTypeIdentifier in MagicFileDataTypeDetector extenson com.apple.property-list. When both are specified, this conformance is required unless overridden by setting allowNonInheritance. extension.identifier:Xcode.MagicFileDataTypeDetector.BinaryPlist
+Object:   <DVTFileDataTypeDetectionMagicCache: 0x75239abb40>
+Method:   -initWithExtension:
+Thread:   <_NSMainThread: 0x101871340>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-10-26 08:13:41.118 xcodebuild[1822:21309087] [MT] DVTAssertions: Warning in DVTFrameworks/DVTFoundation/FileTypes/DVTFileDataTypeDetection.m:80
+Details:  detectedTypeIdentifier (com.apple.xml-property-list) does not conform to matchedTypeIdentifier in MagicFileDataTypeDetector extenson com.apple.property-list. When both are specified, this conformance is required unless overridden by setting allowNonInheritance. extension.identifier:Xcode.MagicFileDataTypeDetector.XMLPlist
+Object:   <DVTFileDataTypeDetectionMagicCache: 0x75239abb40>
+Method:   -initWithExtension:
+Thread:   <_NSMainThread: 0x101871340>{number = 1, name = main}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-10-26 08:13:41.192 xcodebuild[1822:21309091] Logging connecton invalid: <OS_xpc_error: <dictionary: 0x206014b60> { count = 1, transaction: 0, voucher = 0x0, contents =
+	"XPCErrorDescription" => <string: 0x206014ca0> { string cache = 0x0, length = 18, contents = "Connection invalid" }
+}>
+2026-10-26 08:13:41.192 xcodebuild[1822:21309158] Error opening log file (/Users/genewilliams/Library/Logs/CoreSimulator/CoreSimulator.com.apple.dt.xcodebuild.log): Operation not permitted
+[-[SimServiceContext initWithDeveloperDir:connectionType:error:]:499] WARN  : Unable to discover any Simulator runtimes. Developer Directory is /Applications/Xcode.app/Contents/Developer.
+[-[SimDiskImageManager init]:175] ERROR : Could not kickstart simdiskimaged; SimDiskImageManager services will not be available: Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort" UserInfo={NSLocalizedDescription=Error returned in reply from CoreSimulatorService: Connection invalid}
+[-[SimDiskImageManager _onQueue_checkConnection:]:239] ERROR : simdiskimaged returned error (invalid), marking disconnected.
+[-[SimServiceContext initWithDeveloperDir:connectionType:error:]_block_invoke:556] ERROR : Could not get list of trusted mount directories: Error Domain=com.apple.CoreSimulator.SimError Code=410 "The service used to manage runtime disk images (simdiskimaged) crashed or is not responding" UserInfo={NSLocalizedDescription=The service used to manage runtime disk images (simdiskimaged) crashed or is not responding}
+[-[SimDiskImageManager _onQueue_checkConnection:]:239] ERROR : simdiskimaged returned error (invalid), marking disconnected.
+[-[SimServiceContext sendRequest:reply:error:]:1982] ERROR : Unable to deliver request ({
+    request = "notification_subscription";
+    "set_path" = "/Users/genewilliams/Library/Developer/CoreSimulator/Devices";
+}) because we are not connected to CoreSimulatorService.
+2026-10-26 08:13:41.193 xcodebuild[1822:21309090] Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}
+[-[SimServiceContext sendRequest:reply:error:]:1982] ERROR : Unable to deliver request ({
+    request = "notification_subscription";
+    "set_path" = "/Users/genewilliams/Library/Developer/CoreSimulator/Devices";
+}) because we are not connected to CoreSimulatorService.
+2026-10-26 08:13:41.194 xcodebuild[1822:21309090]  IDESimulatorAvailability: startObservingSimulatorUpdates() FAILED to register SimDeviceSet observer
+2026-10-26 08:13:41.194 xcodebuild[1822:21309157] Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}
+2026-10-26 08:13:41.194 xcodebuild[1822:21309157]  iOSSimulator: [SimServiceContext defaultDeviceSetWithError:] returned nil (Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedFailureReason=Failed to subscribe to notifications from CoreSimulatorService., NSLocalizedDescription=Failed to initialize simulator device set., NSUnderlyingError=0x7523b73ae0 {Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}}}). Simulator device support disabled.
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'StageCue' in project 'StageCue' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 37b5ec8f629626a4f3a51b26a2a8ce64
+Build description path: /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/XCBuildData/37b5ec8f629626a4f3a51b26a2a8ce64.xcbuilddata
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/CompilationCache.noindex
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/CompilationCache.noindex
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/PrecompiledHeaders
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/PrecompiledHeaders
+
+CreateBuildDirectory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/EagerLinkingTBDs/Release
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    builtin-create-build-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/EagerLinkingTBDs/Release
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue-db098705fd7f788b091094e7cc652689-VFS/all-product-headers.yaml
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/StageCue.xcodeproj
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue-db098705fd7f788b091094e7cc652689-VFS/all-product-headers.yaml
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.DependencyStaticMetadataFileList (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-non-framework-target-headers.hmap (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.DependencyMetadataFileList (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-target-headers.hmap (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.hmap (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.hmap
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-generated-files.hmap (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-generated-files.hmap
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-own-target-headers.hmap (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-project-headers.hmap (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-project-headers.hmap
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_const_extract_protocols.json (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftConstValuesFileList (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftFileList (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftFileList
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.LinkFileList (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.LinkFileList
+
+WriteAuxiliaryFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-OutputFileMap.json (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    write-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-OutputFileMap.json
+
+MkDir /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    /bin/mkdir -p /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app
+
+MkDir /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    /bin/mkdir -p /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents
+
+MkDir /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    /bin/mkdir -p /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS
+
+ProcessInfoPlistFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Info.plist /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/Info.plist (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-infoPlistUtility /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/PkgInfo -expandbuildsettings -platform macosx -o /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Info.plist
+
+SwiftDriver StageCue normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name StageCue -O @/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftFileList -disable-sandbox -enable-upcoming-feature StrictConcurrency -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos14.0 -g -module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex -Xfrontend -serialize-debugging-options -swift-version 5 -I /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -F /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex -sdk-module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_const_extract_protocols.json -Xcc -iquote -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-generated-files.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-own-target-headers.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-target-headers.hmap -Xcc -iquote -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-project-headers.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/include -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources-normal/arm64 -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources/arm64 -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-Swift.h -working-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1 -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/ptrcheck-3TM7NX1WHKUM2AVO6M9SY82JA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/DeveloperToolsSupport-3S0URBZ839JKADXYNXWW7Z610.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_float-CUR8YOLEDL3LD1KSXSFO8ZT09.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_SwiftConcurrencyShims-6HGG8JFI6JFWFJWKYDTHVLMKW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_stddef-6QTD0AS9PLTSND6IU8797MLWS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_stdarg-1HHR7QFBU3KCQ8O0UYEFVPGJG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_AvailabilityInternal-49LGXEZN06YY0BPJRL3TQW45S.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_stdbool-DLMTSG8L09QOC6GXQ6RASZ79T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/SwiftShims-3WP84TC3JMBWIDN5ES7H15KZW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/ptrauth-9X556YO2QM93JGPJD0OFTDVKA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_DarwinFoundation1-6MLGTLHV7NRUNSRA4XIMUW4W5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_limits-F0PY6UHV43ZLJABOHI9WHGZTO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_DarwinFoundation2-BC8AG23IOYXLU62H6EN5QZXIM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_tgmath-C7P5L1E5HAKP10LUWTV8PBRXX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/string_h-C4T38HKS47QE9YGWPI8SOY68A.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/sys_types-6VO084HSC9U0O8USORBZBB923.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_stdint-1WC7NH6G6525N4OUOQ2VDGZWY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_stdatomic-1BUZCN2EF58ZO6GLVLUJFCIQG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/libDER-5IQPDBBKVS0PVQ0LO8N7AB848.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_intrinsics-55997YNQZH8IMKXM5648GAU86.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_DarwinFoundation3-C2X1FJWJAB5NIEVSKZQYON6KN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/_Builtin_inttypes-CPEW3FE1LWB5GCP49H1948DG8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Darwin-DP6HQJXEDK8H7I02DVKAGZCMI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/simd-5F0V99ZQB159JXX56UDB92UPS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CUPS-BICJ1Y021N27CLEE7JO91P2KV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/MachO-7OIZ6LB089725MP063MJ58DD9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/launch-E7KAX2AZAHGVSDDHZNYRDP1D4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/libkern-EKO0V1AYPBWG1M0LZBYNSUP7Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Spatial-E74K7TOAE3W11XGZGTT9P2SQH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/ObjectiveC-DENIT67G07BX8C3L7H9YWIVX1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/os_object-33S9W7L8K42TDRX5FG40M3F6B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/os_workgroup-2BOTOSXW13XKSIYR6HO61ZREP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Dispatch-43H107MUTTNAKIRQKCE46WEQ2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreFoundation-5JOX86U3S138QGRBQD52CXAEU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/XPC-BA3YVMK1X376P7LY7BYIOZ0XA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/os-8NME6AWDLWBABFB8R6X5NQE2B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreAudioTypes-78X7WLKXY7CNEP6LL3PY4PR1C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CFNetwork-LDMFU73NAN1YVAW7Y3FUXLS6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/IOKit-9TJ0SHGF09A30DX4PK5VOH38P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/ColorSync-9AYCSL3AD91BKMBQQMI9VMJ94.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Security-5XJBNZECOKCFULV7HUYWFUC6M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/DiskArbitration-1EJT0MAJ2M80D9ETHS2XP91FW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreGraphics-CWDQUAU98BKXSK84KLYTP87GI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreServices-92M27MGF06Y4W35UF2TGFJBS2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreText-706G6LPQGJQBKG4AV8ZRYV4M5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/ImageIO-DB4F49Q1I6QLRJYCU3E8IAL9L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Foundation-9FMXDD6TZPT4DV4J3A8TYXPZK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreMIDI-5TH4ZOVDJ5DLVZF2866GYVY96.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/OSLog-7I5UNATZ5L31G4R0DFNRQOIL7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/LocalAuthentication-PSKVNXEURHBHT8EFVCU0KNBR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreData-ENI43CBBZ924QSTA321C9ER5Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreTransferable-52JJ7E4ZPVDYL36RWWGLF2RRD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/UniformTypeIdentifiers-A32AYNDI2B828S8NEWNMEYAY7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreAudio-D0OFJKPV15RIA39MQ0OUXRX9Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Accessibility-CGWNHKFR1AD2WWAGQAR4N3SZJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/DataDetection-4SV99ETWHXA3KLXKD7KUPRX3E.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Symbols-64AY9GZYGFMMD7280CMWN0ZUL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/IOSurface-AL7T5796WXUOVVURXRSAXG4DI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/ApplicationServices-BO4CGFH8WYCL9S1K01KORAZ08.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/OpenGL-CW9YXHKEV1BN4SQ015P60JD6U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Metal-7CCWR3C2H4XHN2I6MGDZ1F01B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/Carbon-D5RSZ0W6WPFUW84B9DVLSWW9T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreVideo-DD79I4DDNHJILOEU00KZ9WMYU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/AudioToolbox-9OM2KR8EQ7LZJOF7ZJGIK0N4U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/QuartzCore-34CRSBJMLHXLLGRFRGS1OND4W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreMedia-13KPCGEZOQ02IC12TQ2MABCJB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/CoreImage-2JHBZTROELWLBHALCPLNVLOYJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/SwiftUICore-2O5CEFJMRHG6VTYIG1HW9Z1LF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/VideoToolbox-RYTA3RNOA3P3AFL88PJVYXGX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/AVFAudio-6V7P41PPPEVRT55B7ML3S3XFP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/MediaToolbox-T1EJY1XG9CAED4ILQFU6TK7B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/AppKit-BQPC3TB4N8S2RDLTVJ8BPWTN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/AVFoundation-48CC5A6F4LY7UHUZ9JUF6ZCA5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules/SwiftUI-3W41OCSWSWVH6FSLFCD2LECX4.pcm
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ StageCue (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    
+
+SwiftCompile normal arm64 Compiling\ MediaResolver.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/MediaResolver.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/MediaResolver.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile MediaResolver.swift
+
+SwiftCompile normal arm64 Compiling\ MediaManagement.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/MediaManagement.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/MediaManagement.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile MediaManagement.swift
+
+SwiftCompile normal arm64 Compiling\ MediaLibrary.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/MediaLibrary.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/MediaLibrary.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile MediaLibrary.swift
+
+SwiftCompile normal arm64 Compiling\ VideoOutput.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/VideoOutput.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/VideoOutput.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile VideoOutput.swift
+
+SwiftCompile normal arm64 Compiling\ ProjectStore.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ProjectStore.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ProjectStore.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile ProjectStore.swift
+
+SwiftCompile normal arm64 Compiling\ ShowModels.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowModels.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowModels.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile ShowModels.swift
+
+SwiftCompile normal arm64 Compiling\ ShowScheduler.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowScheduler.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowScheduler.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile ShowScheduler.swift
+
+/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowScheduler.swift:63:78: warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+ 61 |     var activeRuns: [GroupExecution] { runs.filter { $0.state == .running || $0.state == .paused } }
+ 62 |     @discardableResult func launch(_ group: CueGroup, ancestry: [UUID] = [], manualSnapshot: [String: Int]? = nil) -> UUID? {
+ 63 |         guard !ancestry.contains(group.id), ancestry.count < 32, runs.filter { [.running, .paused].contains($0.state) || $0.state == .error && $0.owned.contains { driver?.status($0) != .completed } }.count < 128 else { return nil }
+    |                                                                              `- warning: trailing closure in this context is confusable with the body of the statement; pass as a parenthesized argument to silence this warning
+ 64 |         // Keep a bounded history without evicting active instances.
+ 65 |         if runs.count >= 512 { runs.removeAll { run in
+SwiftCompile normal arm64 Compiling\ SequenceEngine.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/SequenceEngine.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/SequenceEngine.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile SequenceEngine.swift
+
+SwiftCompile normal arm64 Compiling\ StageCueApp.swift,\ AudioEngine.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/StageCueApp.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/AudioEngine.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/StageCueApp.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile StageCueApp.swift
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/AudioEngine.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile AudioEngine.swift
+
+SwiftCompile normal arm64 Compiling\ ShowControlViews.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowControlViews.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/ShowControlViews.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile ShowControlViews.swift
+
+SwiftCompile normal arm64 Compiling\ Models.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/Models.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/Models.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile Models.swift
+
+SwiftCompile normal arm64 Compiling\ VideoEngine.swift /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/VideoEngine.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftCompile normal arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/Sources/StageCue/VideoEngine.swift (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-SwiftPerFileCompile VideoEngine.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling ProjectStore.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for StageCue (in target 'StageCue' from project 'StageCue')
+
+SwiftDriver\ Compilation\ Requirements StageCue normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name StageCue -O @/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftFileList -disable-sandbox -enable-upcoming-feature StrictConcurrency -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos14.0 -g -module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex -Xfrontend -serialize-debugging-options -swift-version 5 -I /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -F /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex -sdk-module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_const_extract_protocols.json -Xcc -iquote -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-generated-files.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-own-target-headers.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-target-headers.hmap -Xcc -iquote -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-project-headers.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/include -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources-normal/arm64 -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources/arm64 -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-Swift.h -working-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1 -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources/StageCue-Swift.h /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-Swift.h (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-swiftHeaderTool -arch arm64 /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-Swift.h -o /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources/StageCue-Swift.h
+
+Copy /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/arm64-apple-macos.swiftmodule /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftmodule (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftmodule /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/arm64-apple-macos.swiftmodule
+
+Copy /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/arm64-apple-macos.swiftdoc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftdoc (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftdoc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/arm64-apple-macos.swiftdoc
+
+Copy /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/arm64-apple-macos.abi.json /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.abi.json (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.abi.json /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/arm64-apple-macos.abi.json
+
+Copy /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftsourceinfo (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -strip-unsigned-binaries -strip-deterministic -strip-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -resolve-src-symlinks -rename /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftsourceinfo /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling SequenceEngine.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling VideoOutput.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling MediaManagement.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling Models.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling MediaResolver.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling MediaLibrary.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ShowModels.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ShowScheduler.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling VideoEngine.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ShowControlViews.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriverJobDiscovery normal arm64 Compiling StageCueApp.swift, AudioEngine.swift (in target 'StageCue' from project 'StageCue')
+
+SwiftDriver\ Compilation StageCue normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name StageCue -O @/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftFileList -disable-sandbox -enable-upcoming-feature StrictConcurrency -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos14.0 -g -module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex -Xfrontend -serialize-debugging-options -swift-version 5 -I /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -F /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex -sdk-module-cache-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_const_extract_protocols.json -Xcc -iquote -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-generated-files.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-own-target-headers.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-all-target-headers.hmap -Xcc -iquote -Xcc /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue-project-headers.hmap -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/include -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources-normal/arm64 -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources/arm64 -Xcc -I/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue-Swift.h -working-directory /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1 -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS/StageCue normal (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos14.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/EagerLinkingTBDs/Release -L/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -F/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/EagerLinkingTBDs/Release -F/Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release -filelist /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -object_path_lto -Xlinker /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_lto.o -Xlinker -dependency_info -Xlinker /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.swiftmodule -o /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS/StageCue
+
+CopySwiftLibs /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS/StageCue --scan-folder /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Frameworks --scan-folder /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/PlugIns --scan-folder /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Library/SystemExtensions --scan-folder /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name StageCue --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A266a --platform-family macOS --deployment-target 14.0 --bundle-identifier local.StageCue.StageCue --output /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/Resources --target-triple arm64-apple-macos14.0 --binary-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS/StageCue --dependency-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue_dependency_info.dat --stringsdata-file /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftFileList --metadata-file-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.DependencyMetadataFileList --static-metadata-file-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/StageCue.DependencyStaticMetadataFileList --swift-const-vals-list /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/StageCue.build/Release/StageCue.build/Objects-normal/arm64/StageCue.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-26 08:13:51.603 appintentsmetadataprocessor[1932:21309956] Starting appintentsmetadataprocessor export
+2026-10-26 08:13:51.605 appintentsmetadataprocessor[1932:21309956] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+GenerateDSYMFile /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app.dSYM /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS/StageCue (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Library/Frameworks/Python.framework/Versions/3.14/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Dolby/Dolby\ Reference\ Player.app/Contents/MacOS:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/genewilliams/.codex/tmp/arg0-macos/codex-arg0GOMALt:/Users/genewilliams/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Users/genewilliams/.local/bin:/Users/genewilliams/.lmstudio/bin:/Users/genewilliams/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app/Contents/MacOS/StageCue -o /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app.dSYM
+
+RegisterExecutionPolicyException /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-RegisterExecutionPolicyException /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app
+
+Validate /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-validationUtility /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app -no-validate-extension -infoplist-subpath Contents/Info.plist
+
+RegisterWithLaunchServices /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    builtin-lsregisterurl --record-path /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/XCBuildData/registered-launchservices.txt -- /System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister -f -R -trusted /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app
+
+Touch /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app (in target 'StageCue' from project 'StageCue')
+    cd /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1
+    /usr/bin/touch -c /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Products/Release/StageCue.app
+
+PruneExplicitPrecompiledModules /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/genewilliams/Documents/Codex/Dev/StageCue-0.1/work/Video05CBuild/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+

@@ -1,4 +1,6 @@
-# StageCue 0.5B
+# StageCue 0.5C
+
+The [0.5C video loop milestone](Docs/VIDEO_LOOPS_0.5C.md) retains 30 Hz output and uses native queue looping within the existing two transition slots. Atmospheric and motion-sensitive clips are measured separately.
 
 The [0.5B audio responsiveness milestone](Docs/AUDIO_TRIGGER_0.5B.md) coalesces runtime presentation notifications without delaying engine state or changing project persistence. Short WAV render latency improved from about 90 to 52 ms median in matched native profiling; no PCM cache or streaming engine was added.
 

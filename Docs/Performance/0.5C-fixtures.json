@@ -1,0 +1,42 @@
+{
+  "atmosphere-4s.mp4": {
+    "sha256": "62599c487e3013986782ae6532909a6a12d0cf9fa29559c9aa0c36c04425a518",
+    "bytes": 286994,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "H264",
+    "seconds": 4,
+    "embeddedAudio": false
+  },
+  "motion-4s.mp4": {
+    "sha256": "6bedb4f117f14dbc316cad86533f7979a76f8402e8243b70fa1e274612005c28",
+    "bytes": 28513,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "H264",
+    "seconds": 4,
+    "embeddedAudio": false
+  },
+  "motion-32s.mp4": {
+    "sha256": "5365a7737b8ccca0b307c875257e59b0942a65f146e125de52f9cc99c3e5b9af",
+    "bytes": 158194,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "H264",
+    "seconds": 32,
+    "embeddedAudio": false
+  },
+  "motion-soundtrack.mp4": {
+    "sha256": "aadf3e5b0ce55fabec0d05a585983216952ca10a0f116523063ba3161b2103be",
+    "bytes": 43277,
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "codec": "H264",
+    "seconds": 4,
+    "embeddedAudio": true
+  }
+}
