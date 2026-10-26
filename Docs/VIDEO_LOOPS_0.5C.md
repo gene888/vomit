@@ -37,7 +37,35 @@ Final five-second memory samples across cases were approximately **202–212 MiB
 
 Baseline seek completion wall time was approximately **8–12 ms median**, with observed tails up to **54.89 ms**. The native queue has **no application seek/reset at a loop boundary**. Its observed MainActor replica-output selection work was approximately **0.01 ms median**, at most about **0.02 ms**. This is synchronous selection cost, not the duration of AVFoundation's internal preparation, and not directly comparable to seek wall time. Native internal decoder preparation is opaque. Queue item changes are observed on StageCue's next 30 Hz poll, not timestamped at an internal hardware boundary.
 
-The small seek probe and first queue probe are preserved alongside the complete before/after matrix in `Docs/Performance/0.5C-*`. All runs used exit status 0. The supplemental single-clip three-minute soak has **not completed**: its profiling helper stalled while loading the test bundle before measured playback started; restarting it was subsequently blocked by the Mac locking. Old results were renamed to prevent treating the previous run as a fresh soak. The completed matched matrices cover over four minutes each across the six cases. Continuous three-minute operation on one cue and final standalone app launch remain pending. No timings from a stalled startup are included in the tables.
+The small seek probe and first queue probe are preserved alongside the complete before/after matrix in `Docs/Performance/0.5C-*`. All completed measurement runs used exit status 0. The profiling helper initially stalled before loading its benchmark bundle, then recovered and completed a fresh 180-second moving-bar soak. Only the measured three-minute playback window is included, not the startup wait. The Mac was subsequently confirmed unlocked and the packaged 0.5C app launched successfully; a second continuous soak confirms behavior after unlocking. Neither stalled-startup nor stale result files are counted as successful measurements.
+
+## Continuous loop validation
+
+The recovered run (`0.5C-queue-soak-recovered`) completed **180.004 seconds / 45 wraps**, with four simultaneous soundboard audio loops and recurring six-action Cue Groups/page changes. Its canvas boundary-neighborhood gaps were **34.00 / 53.35 / 66.88 ms** (median/P95/max); exact-wrap gaps were **33.30 / 43.48 / 66.88 ms**. Overall canvas delivery was **29.09 fps**, and CPU was **51.81% of one core**. All 5,236 distinct decoded pictures reached the instrumented software canvas; there were zero nil/missing picture updates and no audio/video errors.
+
+All 36 five-second memory samples retained **three replica items and three outputs**, with fixed soundtrack level. Footprint began at **197.55 MiB** and ended at **199.19 MiB**; the transient observed range was **196.75–305.74 MiB**, so this is not a claim of constant allocation size. After stop, replicas and outputs were zero and footprint was **106.92 MiB**. Sample spacing never exceeded **5.02 seconds**, and there was no sleep-length gap in the measured window. A finite soak establishes bounded observed behavior, not a general leak proof. The source has no soundtrack; the separate AAC matrix and regression test cover embedded-track operation.
+
+The confirmation run after unlocking (`0.5C-queue-soak`, 16:59:57 UTC) completed **180.013 seconds / 45 wraps**, again with four audio loops, groups and page changes. Brief native UI inspection occurred during this run. Results:
+
+| Metric | Unlocked confirmation |
+|---|---:|
+| Canvas boundary-neighborhood median / P95 / maximum | **44.82 / 66.70 / 79.86 ms** |
+| Decoded boundary-neighborhood median / P95 / maximum | 34.02 / 66.68 / 66.83 ms |
+| Exact-wrap canvas median / P95 / maximum | 33.24 / 66.70 / 79.86 ms |
+| Overall software-canvas delivery | 29.20 fps |
+| CPU (% of one core) | 53.38 |
+| Decoded pictures / distinct canvas assignments | 5,257 / 5,256 |
+| Missing/nil canvas updates; audio/video errors | 0; none |
+| Replica items / outputs in every sample | 3 / 3 |
+| Items / outputs after stop | 0 / 0 |
+| Footprint, first / final timed sample | 198.00 / 209.05 MiB |
+| Observed transient footprint range | 196.86–307.16 MiB |
+| Footprint / resident after stop | 108.94 / 202.53 MiB |
+
+The largest memory-sample interval was 5.024 seconds, with no sleep-length pause during the timed window. Both soaks used the same code and fixtures. Their differing tails and UI-to-canvas delays demonstrate scheduling/visibility sensitivity; **do not use the more favorable recovered run to promise a 34 ms maximum or perfectly steady output**. The unlocked run is the final confirmation. One decoded picture lacked a distinct recorded canvas assignment in its timed capture; no nil frame was substituted. Native queue looping substantially improves reset behavior, but occasional frame holds/skips under UI/automation load remain, including a 116.54 ms maximum interval away from the measured boundary neighborhoods. Physical projector acceptance and the “no perceptible hesitation” goal cannot be declared conclusively satisfied by these software measurements.
+
+The packaged application launch check is retained in `Docs/Performance/0.5C-queue-full/launch-check.md`. The full 118-test suite and optimized build remain unchanged; only verification data/documentation were added after the reviewed build. Physical projector delivery, hot-plug and soundtrack listening remain unverified.
+
 
 ## Selected strategy
 
